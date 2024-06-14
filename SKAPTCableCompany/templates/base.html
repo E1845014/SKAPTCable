@@ -1,0 +1,17 @@
+{% load static %}
+<html lang="en">
+  <head>
+    <title>SKAPT Cable</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+  </head>
+  <body>
+    <div class="columns">
+      <div class="column is-half is-offset-one-quarter">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </body>
+</html>
