@@ -1,6 +1,9 @@
 from django.http import HttpResponse
 from django.template import loader
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import BadRequest
+from django.shortcuts import redirect
 
 from .forms import LoginForm
 
@@ -18,12 +21,21 @@ def index(request):
             )
             if user is not None:
                 login(request, user)
-                return
+                return redirect("/home")
             errors.append("Wrong Username or Password")
         errors.append("Invalid Parameters")
     else:
         form = LoginForm()
     return HttpResponse(template.render({"form": form}, request))
+
+
+@login_required
+def home(request):
+    template = loader.get_template("home.html")
+    if request.method == "GET":
+        return HttpResponse(template.render({}, request))
+    else:
+        raise BadRequest
 
 
 # Create your views here.
