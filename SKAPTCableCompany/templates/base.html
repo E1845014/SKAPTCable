@@ -11,8 +11,12 @@
     {% if user_is_authenticated %}
     <nav>
       <div class="columns is-size-1 has-background-primary" style="margin: 20px; border-radius: 10px;">
-        <div class="column"><a href="/home">Home</a></div>
-        <div class="column is-2 is-offset-4"><a href="/logout">Logout</a></div>
+        <div class="column"><a href="/home" class="has-text-success-dark">Home</a></div>
+        <div class="column"><a href="/Customers" class="has-text-success-dark">Customers</a></div>
+        <div class="column"><a href="/Employees" class="has-text-success-dark">Employees</a></div>
+        <div class="column"><a href="/Areas" class="has-text-success-dark">Areas</a></div>
+        <div class="column"><a href="/Payments" class="has-text-success-dark">Payments</a></div>
+        <div class="column is-2 is-offset-2"><a href="/logout" class="has-text-danger-dark">Logout</a></div>
       </div>
     </nav>
     {% endif %}
