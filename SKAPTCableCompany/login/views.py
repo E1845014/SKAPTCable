@@ -4,7 +4,6 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import BadRequest
 from django.shortcuts import redirect
-
 from .forms import LoginForm
 
 
@@ -25,6 +24,8 @@ def index(request: HttpRequest):
             errors.append("Wrong Username or Password")
         errors.append("Invalid Parameters")
     else:
+        if request.user.is_authenticated == True:
+            return redirect("/home")
         form = LoginForm()
     return HttpResponse(template.render({"form": form}, request))
 
@@ -40,7 +41,6 @@ def home(request: HttpRequest):
 
 @login_required
 def logout_user(request: HttpRequest):
-    user = request.user
     logout(request)
     return redirect("/")
 
