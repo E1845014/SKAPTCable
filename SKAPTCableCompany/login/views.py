@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 from django.template import loader
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -8,7 +8,7 @@ from django.shortcuts import redirect
 from .forms import LoginForm
 
 
-def index(request):
+def index(request: HttpRequest):
     template = loader.get_template("index.html")
     errors = []
     if request.method == "POST":
@@ -30,12 +30,19 @@ def index(request):
 
 
 @login_required
-def home(request):
+def home(request: HttpRequest):
     template = loader.get_template("home.html")
     if request.method == "GET":
         return HttpResponse(template.render({}, request))
     else:
         raise BadRequest
+
+
+@login_required
+def logout_user(request: HttpRequest):
+    user = request.user
+    logout(request)
+    return redirect("/")
 
 
 # Create your views here.

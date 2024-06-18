@@ -8,6 +8,15 @@
     />
   </head>
   <body>
+    {% if user_is_authenticated %}
+    <nav>
+      <div class="columns is-size-1 has-background-primary" style="margin: 20px; border-radius: 10px;">
+        <div class="column"><a href="/home">Home</a></div>
+        <div class="column is-2 is-offset-4"><a href="/logout">Logout</a></div>
+      </div>
+    </nav>
+    {% endif %}
+
     <div class="columns">
       <div class="column is-half is-offset-one-quarter">
         {% block content %}{% endblock %}
