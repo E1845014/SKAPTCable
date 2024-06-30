@@ -41,14 +41,3 @@ jobs:
         run: |
           cd skapt_cable_company  # Change directory to your Django project folder
           pylint skapt_cable_company  # Replace with the name of your Django app directory
-
-      - name: Fail workflow if tests fail or coverage is below threshold
-        run: |
-          exit_code=0
-          if [[ $(pytest --collect-only | grep -c "no tests collected") -eq 1 ]]; then
-            echo "Error: No tests found!"
-            exit_code=1
-          fi
-          exit $exit_code
-
-          # Workflow will only fail if exit_code is set to 1

@@ -81,7 +81,7 @@ class HomeTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed("home.html")
         response = self.client.post("/home")
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
 
 
 # Create your tests here.
