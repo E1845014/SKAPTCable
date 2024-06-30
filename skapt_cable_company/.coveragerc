@@ -1,3 +1,2 @@
 [run]
-omit = manage.py
-omit = skapt_cable_company/settings.py
+omit = manage.py, skapt_cable_company/settings.py
