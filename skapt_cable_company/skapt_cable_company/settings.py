@@ -49,7 +49,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "SKAPTCableCompany.urls"
+ROOT_URLCONF = "skapt_cable_company.urls"
 
 TEMPLATES = [
     {
@@ -67,7 +67,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "SKAPTCableCompany.wsgi.application"
+WSGI_APPLICATION = "skapt_cable_company.wsgi.application"
 
 
 # Database
