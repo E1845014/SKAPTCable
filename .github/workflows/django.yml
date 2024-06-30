@@ -27,20 +27,20 @@ jobs:
 
       - name: Run migrations
         run: |
-          cd SKAPTCableCompany  # Change directory to your Django project folder
+          cd skapt_cable_company  # Change directory to your Django project folder
           python manage.py migrate
 
       - name: Run tests with coverage
         run: |
-          cd SKAPTCableCompany  # Change directory to your Django project folder
+          cd skapt_cable_company  # Change directory to your Django project folder
           coverage run manage.py test
           coverage report
           coverage html -d coverage_html --skip-covered --skip-empty
 
       - name: Run Pylint
         run: |
-          cd SKAPTCableCompany  # Change directory to your Django project folder
-          pylint SKAPTCableCompany  # Replace with the name of your Django app directory
+          cd skapt_cable_company  # Change directory to your Django project folder
+          pylint skapt_cable_company  # Replace with the name of your Django app directory
 
       - name: Fail workflow if tests fail or coverage is below threshold
         run: |
