@@ -1,3 +1,7 @@
+"""
+Module to contain all View Controller Codes
+"""
+
 from django.http import HttpResponse, HttpRequest
 from django.template import loader
 from django.contrib.auth import login, logout, authenticate
@@ -8,6 +12,9 @@ from .forms import LoginForm
 
 
 def index(request: HttpRequest):
+    """
+    Login Page View Controller
+    """
     template = loader.get_template("index.html")
     errors = []
     if request.method == "POST":
@@ -43,6 +50,9 @@ def index(request: HttpRequest):
 
 @login_required
 def home(request: HttpRequest):
+    """
+    Home Page View Controller
+    """
     template = loader.get_template("home.html")
     if request.method == "GET":
         return HttpResponse(template.render({}, request))
@@ -51,6 +61,9 @@ def home(request: HttpRequest):
 
 @login_required
 def logout_user(request: HttpRequest):
+    """
+    Logout Controller
+    """
     logout(request)
     return redirect("/")
 
