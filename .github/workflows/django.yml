@@ -1,0 +1,58 @@
+name: CI/CD with Django Tests, Pylint, and Coverage
+
+on:
+  push:
+    branches: [ main ]  # Run on pushes to non-main branches
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test_and_coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python environment
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9.13'  # Update with your desired Python version
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pylint
+          pip install pylint-django
+          pip install coverage
+
+      - name: Run migrations
+        run: python manage.py migrate
+
+      - name: Run tests with coverage
+        run: |
+          coverage run -m pytest
+          coverage report -m --fail-under
+
+      - name: Show Coverage
+        run: |
+          coverage report
+          coverage html -d coverage_html --skip-covered --skip-empty
+
+      - name: Run Pylint
+        run: |
+          pylint your_app_name  # Replace with the name of your Django app directory
+
+      - name: Fail workflow if tests fail or coverage is below threshold
+        run: |
+          exit_code=0
+          if [[ $(pytest --collect-only | grep -c "no tests collected") -eq 1 ]]; then
+            echo "Error: No tests found!"
+            exit_code=1
+          fi
+          if [[ $(coverage report -m | grep -c "TOTAL.*100%") -eq 0 ]]; then
+            echo "Error: Code coverage below 100%!"
+            exit_code=1
+          fi
+          exit $exit_code
+
+          # Workflow will only fail if exit_code is set to 1
