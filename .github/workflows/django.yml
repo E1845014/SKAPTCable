@@ -33,8 +33,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           cd SKAPTCableCompany  # Change directory to your Django project folder
-          coverage run -m django
-          python manage.py test
+          coverage run manage.py test
           coverage report
           coverage html -d coverage_html --skip-covered --skip-empty
 
