@@ -1,0 +1,2 @@
+[run]
+omit = manage.py, skapt_cable_company/settings.py
