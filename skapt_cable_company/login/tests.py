@@ -2,6 +2,8 @@
 Module for all the Login Related Test Cases
 """
 
+# pylint: disable=imported-auth-user
+
 from django.test import TestCase
 from django.contrib.auth.models import User
 
@@ -78,6 +80,10 @@ class LoginTestCase(TestCase):
 
 
 class LogoutTestCase(TestCase):
+    """
+    Test Cases for testing the Logout functionality
+    """
+
     def setUp(self):
         """
         Runs on Test Case Start up
@@ -108,6 +114,10 @@ class LogoutTestCase(TestCase):
 
 
 class HomeTestCase(TestCase):
+    """
+    Test Cases for testing the Home Page and their functionality
+    """
+
     def setUp(self):
         """
         Runs on Test Case Start up
