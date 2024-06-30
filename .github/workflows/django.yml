@@ -34,7 +34,6 @@ jobs:
         run: |
           cd skapt_cable_company  # Change directory to your Django project folder
           coverage run manage.py test
-          coverage report
           coverage report -m --fail-under 100
           coverage html -d coverage_html --skip-covered --skip-empty
 
