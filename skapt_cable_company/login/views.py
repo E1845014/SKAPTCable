@@ -21,12 +21,11 @@ def index(request: HttpRequest):
             if user is not None:
                 login(request, user)
                 return redirect("/home")
-            else:
-                errors.append("Wrong Username or Password")
+            errors.append("Wrong Username or Password")
         else:
             errors.append("Invalid Parameters")
     else:
-        if request.user.is_authenticated == True:
+        if request.user.is_authenticated is True:
             return redirect("/home")
         form = LoginForm()
     return HttpResponse(
@@ -47,8 +46,7 @@ def home(request: HttpRequest):
     template = loader.get_template("home.html")
     if request.method == "GET":
         return HttpResponse(template.render({}, request))
-    else:
-        raise BadRequest
+    raise BadRequest
 
 
 @login_required
