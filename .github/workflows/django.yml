@@ -35,6 +35,7 @@ jobs:
           cd skapt_cable_company  # Change directory to your Django project folder
           coverage run manage.py test
           coverage report
+          coverage report -m --fail-under 100
           coverage html -d coverage_html --skip-covered --skip-empty
 
       - name: Run Pylint
@@ -47,10 +48,6 @@ jobs:
           exit_code=0
           if [[ $(pytest --collect-only | grep -c "no tests collected") -eq 1 ]]; then
             echo "Error: No tests found!"
-            exit_code=1
-          fi
-          if [[ $(coverage report -m | grep -c "TOTAL.*100%") -eq 0 ]]; then
-            echo "Error: Code coverage below 100%!"
             exit_code=1
           fi
           exit $exit_code
