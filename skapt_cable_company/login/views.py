@@ -21,13 +21,25 @@ def index(request: HttpRequest):
             if user is not None:
                 login(request, user)
                 return redirect("/home")
-            errors.append("Wrong Username or Password")
-        errors.append("Invalid Parameters")
+            else:
+                errors.append("Wrong Username or Password")
+        else:
+            errors.append("Invalid Parameters")
     else:
         if request.user.is_authenticated == True:
             return redirect("/home")
         form = LoginForm()
-    return HttpResponse(template.render({"form": form}, request))
+    return HttpResponse(
+        template.render(
+            {
+                "form": form,
+                "notifications": [
+                    {"message": error, "class_name": " is-danger"} for error in errors
+                ],
+            },
+            request,
+        )
+    )
 
 
 @login_required

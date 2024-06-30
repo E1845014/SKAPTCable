@@ -1,0 +1,12 @@
+<div class="notification {{class_name}}">
+  {{ message }}
+</div>
+
+<script>
+  document.querySelectorAll(".delete").forEach((closeButton) => {
+    closeButton.addEventListener("click", function () {
+      const notification = this.parentNode;
+      notification.classList.add("hidden");
+    });
+  });
+</script>

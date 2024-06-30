@@ -28,6 +28,26 @@ class LoginTestCase(TestCase):
         self.assertEqual(response.status_code, 302)  ## Redirects
         self.assertTemplateUsed("home.html")
 
+    def test_login_cant_login_with_wrong_cred(self):
+        response = self.client.post(
+            "/", {"username": self.user.username, "password": f"{self.raw_password}123"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed("index.html")
+        self.assertIn(
+            {"message": "Wrong Username or Password", "class_name": " is-danger"},
+            response.context["notifications"],
+        )
+
+    def test_login_missing_data(self):
+        response = self.client.post("/", {"username": self.user.username})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed("index.html")
+        self.assertIn(
+            {"message": "Invalid Parameters", "class_name": " is-danger"},
+            response.context["notifications"],
+        )
+
 
 class LogoutTestCase(TestCase):
     def setUp(self):
