@@ -1,7 +1,14 @@
+"""
+Module for all Login App Related Forms
+"""
+
 from django import forms
 
 
 class LoginForm(forms.Form):
+    """
+    Class For Login Form
+    """
 
     username = forms.CharField(label="Username", max_length=100)
     password = forms.CharField(widget=forms.PasswordInput)
