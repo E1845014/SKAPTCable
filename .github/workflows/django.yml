@@ -26,21 +26,26 @@ jobs:
           pip install coverage
 
       - name: Run migrations
-        run: python manage.py migrate
+        run: |
+          cd SKAPTCableCompany  # Change directory to your Django project folder
+          python manage.py migrate
 
       - name: Run tests with coverage
         run: |
+          cd SKAPTCableCompany  # Change directory to your Django project folder
           coverage run -m pytest
           coverage report -m --fail-under
 
       - name: Show Coverage
         run: |
+          cd SKAPTCableCompany  # Change directory to your Django project folder
           coverage report
           coverage html -d coverage_html --skip-covered --skip-empty
 
       - name: Run Pylint
         run: |
-          pylint your_app_name  # Replace with the name of your Django app directory
+          cd SKAPTCableCompany  # Change directory to your Django project folder
+          pylint SKAPTCableCompany  # Replace with the name of your Django app directory
 
       - name: Fail workflow if tests fail or coverage is below threshold
         run: |
