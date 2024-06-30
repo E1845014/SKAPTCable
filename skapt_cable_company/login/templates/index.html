@@ -1,0 +1,30 @@
+{% extends "base.html" %} {% block content %}
+<div class="block">
+  <h1 class="is-size-1 has-text-centered">Login Page</h1>
+</div>
+<div class="block">
+  <div class="box">
+    <form action="" method="post">
+      <div class="block">{% csrf_token %} {{ form }}</div>
+      <div class="block">
+        <div class="columns">
+          <div class="column is-half is-offset-one-quarter">
+            <input
+              type="submit"
+              value="Submit"
+              class="button is-fullwidth is-primary"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="block">
+        {% for notification in notifications %}
+            {% with message=notification.message class_name=notification.class_name %}
+                {% include 'notification.html' %} 
+            {% endwith %}
+        {% endfor %}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
