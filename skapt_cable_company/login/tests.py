@@ -68,4 +68,20 @@ class LogoutTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
 
 
+class HomeTestCase(TestCase):
+    def setUp(self):
+        self.raw_password = "top_secret"
+        self.user = User.objects.create_user(
+            username="jacob", email="jacob@…", password=self.raw_password
+        )
+
+    def test_only_support_get_request(self):
+        self.client.login(username=self.user.username, password=self.raw_password)
+        response = self.client.get("/home")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed("home.html")
+        response = self.client.post("/home")
+        self.assertEqual(response.status_code, 400)
+
+
 # Create your tests here.
