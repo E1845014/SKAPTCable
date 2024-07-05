@@ -5,6 +5,7 @@ Module to contain all Common Models
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.validators import RegexValidator
 
 
 class Employee(models.Model):
@@ -13,7 +14,16 @@ class Employee(models.Model):
     """
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    phone_number = models.CharField(max_length=10)
+    phone_number = models.CharField(
+        max_length=10,
+        validators=[
+            RegexValidator(
+                regex=r"07\d\d\d\d\d\d\d\d",
+                message="Enter Valid Phone Number",
+                code="Invalid Phone Number",
+            )
+        ],
+    )
     is_admin = models.BooleanField(default=False)
 
     def is_accessible(self, user: User):
