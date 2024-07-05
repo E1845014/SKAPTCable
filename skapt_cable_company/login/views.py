@@ -1,5 +1,5 @@
 """
-Module to contain all View Controller Codes
+Module to contain all Login App View Controller Codes
 """
 
 from django.http import HttpResponse, HttpRequest
