@@ -4,7 +4,6 @@ Module to contain all Employees App View Controller Codes
 
 from django.http import HttpResponse, HttpRequest
 from django.template import loader
-from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import BadRequest, PermissionDenied
 from django.shortcuts import redirect
@@ -19,9 +18,10 @@ def index(request: HttpRequest):
     """
 
     template = loader.get_template("employees.html")
+    print(request.user.is_authenticated)
     if request.method == "GET":
         if request.user.is_staff:  # type: ignore
             employees = Employee.objects.all()
-            return HttpResponse(template.render({"employees": employees}))
+            return HttpResponse(template.render({"employees": employees}, request))
         raise PermissionDenied
     raise BadRequest
