@@ -63,7 +63,6 @@ def add_employee(request: HttpRequest):
             employee.save()
             return redirect(f"/employees/{new_user.username}")
         errors.append("Invalid Input Data")
-
     else:
         raise BadRequest
     return HttpResponse(

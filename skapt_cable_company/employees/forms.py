@@ -12,10 +12,17 @@ class EmployeeForm(ModelForm):
     """
 
     class Meta:
+        """
+        Meta Data for Employee Form
+        """
+
         model = Employee
         exclude = ["user"]
 
     def __init__(self, *args, **kwargs):
+        """
+        Form Initialization
+        """
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             if field.widget.input_type == "text":
