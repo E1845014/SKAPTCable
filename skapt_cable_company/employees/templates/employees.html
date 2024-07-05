@@ -1,7 +1,20 @@
 {% extends "base.html" %} {% block content %}
 <div class="block">
   <h1 class="is-size-1 has-text-centered">Employees Page</h1>
-  <table class="table">
+  <div class="columns">
+    <div class="column is-2 is-offset-10">
+      <a href="Employees/add">
+        <button
+          class="button is-fullwidth is-primary"
+          type="button"
+          value="Add Employee"
+        >
+          Add Employee
+        </button>
+      </a>
+    </div>
+  </div>
+  <table class="table is-fullwidth">
     <thead>
       <tr>
         <th>Name</th>
