@@ -80,3 +80,8 @@ def add_employee(request: HttpRequest):
             request,
         )
     )
+
+
+@login_required
+def employee(request: HttpRequest, username: str):
+    raise PermissionDenied
