@@ -1,0 +1,10 @@
+{% extends "base.html" %} {% block content %}
+<div class="block">
+  <h1 class="is-size-1 has-text-centered">{{ employee.user.first_name }}</h1>
+
+  <form action="" method="post">
+    <div class="block">{% csrf_token %} {{ user_form }}</div>
+    <div class="block">{% csrf_token %} {{ employee_form }}</div>
+  </form>
+</div>
+{% endblock %}

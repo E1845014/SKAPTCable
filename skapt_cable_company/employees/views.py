@@ -10,7 +10,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.models import User
 
 from common.models import Employee
-from common.form import UserCreateForm
+from common.form import UserBaseForm
 
 from .forms import EmployeeForm
 
@@ -43,10 +43,10 @@ def add_employee(request: HttpRequest):
     template = loader.get_template("add_employees.html")
     errors = []
     if request.method == "GET":
-        user_form = UserCreateForm()
+        user_form = UserBaseForm()
         employee_form = EmployeeForm()
     elif request.method == "POST":
-        user_form = UserCreateForm(request.POST)
+        user_form = UserBaseForm(request.POST)
         employee_form = EmployeeForm(request.POST)
         if user_form.is_valid() and employee_form.is_valid():
             user: User = user_form.save(commit=False)
@@ -84,4 +84,23 @@ def add_employee(request: HttpRequest):
 
 @login_required
 def employee(request: HttpRequest, username: str):
-    raise PermissionDenied
+    """
+    Employee Page View Controller
+    """
+
+    template = loader.get_template("employee.html")
+    employee = Employee.objects.get(user__username=username)
+    user_form = UserBaseForm(instance=employee.user)
+    employee_form = EmployeeForm(instance=employee)
+    user_form.disable_fields()
+    employee_form.disable_fields()
+    return HttpResponse(
+        template.render(
+            {
+                "employee_form": employee_form,
+                "user_form": user_form,
+                "employee": employee,
+            },
+            request,
+        )
+    )

@@ -32,7 +32,7 @@
         data-url="{% url 'View Employee' employee.user.username %}"
         class="clickable-row"
       >
-        <td>{{ employee.user.first_name}}</td>
+        <td>{{ employee.user.first_name }}</td>
         {% if employee.is_admin %}
         <td>Admin</td>
         {% else %}
