@@ -87,20 +87,21 @@ def employee(request: HttpRequest, username: str):
     """
     Employee Page View Controller
     """
-
     template = loader.get_template("employee.html")
     employee = Employee.objects.get(user__username=username)
-    user_form = UserBaseForm(instance=employee.user)
-    employee_form = EmployeeForm(instance=employee)
-    user_form.disable_fields()
-    employee_form.disable_fields()
-    return HttpResponse(
-        template.render(
-            {
-                "employee_form": employee_form,
-                "user_form": user_form,
-                "employee": employee,
-            },
-            request,
+    if(employee.is_accessible(request.user)):
+        user_form = UserBaseForm(instance=employee.user)
+        employee_form = EmployeeForm(instance=employee)
+        user_form.disable_fields()
+        employee_form.disable_fields()
+        return HttpResponse(
+            template.render(
+                {
+                    "employee_form": employee_form,
+                    "user_form": user_form,
+                    "employee": employee,
+                },
+                request,
+            )
         )
-    )
+    raise PermissionDenied
