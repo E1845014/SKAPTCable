@@ -3,7 +3,7 @@
   <h1 class="is-size-1 has-text-centered">Employees Page</h1>
   <div class="columns">
     <div class="column is-2 is-offset-10">
-      <a href="Employees/add">
+      <a href="employees/add">
         <button
           class="button is-fullwidth is-primary"
           type="button"
@@ -14,7 +14,7 @@
       </a>
     </div>
   </div>
-  <table class="table is-fullwidth">
+  <table class="table is-fullwidth is-striped is-hoverable">
     <thead>
       <tr>
         <th>Name</th>
@@ -29,7 +29,17 @@
     <tbody>
       {% for employee in employees %}
       <tr>
-        <td>{{ employee.user.firstName}}</td>
+        <td>{{ employee.user.first_name}}</td>
+        {% if employee.is_admin %}
+        <td>Admin</td>
+        {% else %}
+        <td>Employee</td>
+        {% endif %}
+        <td>{{ employee.phone_number}}</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
       </tr>
       {% endfor %}
     </tbody>

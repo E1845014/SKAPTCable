@@ -24,7 +24,7 @@ def index(request: HttpRequest):
     template = loader.get_template("employees.html")
     if request.method == "GET":
         if request.user.is_staff:  # type: ignore
-            employees = Employee.objects.all()
+            employees = Employee.objects.all().select_related("user")
             return HttpResponse(template.render({"employees": employees}, request))
         raise PermissionDenied
     raise BadRequest
@@ -35,10 +35,11 @@ def add_employee(request: HttpRequest):
     """
     Add Employee
     """
-    try:
-        request_employee = Employee.objects.get(user=request.user)
-    except ObjectDoesNotExist:
-        raise PermissionDenied
+    if not request.user.is_superuser:  # type: ignore
+        try:
+            request_employee = Employee.objects.get(user=request.user)
+        except ObjectDoesNotExist:
+            raise PermissionDenied
     template = loader.get_template("add_employees.html")
     errors = []
     if request.method == "GET":
@@ -58,8 +59,10 @@ def add_employee(request: HttpRequest):
             new_user.save()
             employee.user = new_user
             if employee.is_admin:
-                if not request_employee.is_admin:
-                    employee.is_admin = False
+                request_employee = None
+                if not request.user.is_superuser:  # type: ignore
+                    if not request_employee.is_admin:  # type: ignore
+                        employee.is_admin = False
             employee.save()
             return redirect(f"/employees/{new_user.username}")
         errors.append("Invalid Input Data")
