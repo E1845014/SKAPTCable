@@ -6,5 +6,8 @@
     <div class="block">{% csrf_token %} {{ user_form }}</div>
     <div class="block">{% csrf_token %} {{ employee_form }}</div>
   </form>
+  <a href="{% url 'Update Employee' employee.user.username %}"
+    ><button class="button is-primary">Update</button></a
+  >
 </div>
 {% endblock %}

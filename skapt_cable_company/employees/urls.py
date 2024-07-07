@@ -10,4 +10,5 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("add", views.add_employee, name="add Employee"),
     path("<str:username>", views.employee, name="View Employee"),
+    path("<str:username>/update", views.update_employee, name="Update Employee"),
 ]
