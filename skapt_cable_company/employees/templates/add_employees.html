@@ -2,8 +2,12 @@
 <div class="block">
   <h1 class="is-size-1 has-text-centered">Add New Employees</h1>
   <form action="" method="post">
-    <div class="block">{% csrf_token %} {{ user_form }}</div>
-    <div class="block">{% csrf_token %} {{ employee_form }}</div>
+    {% with form=user_form %}
+      {% include 'form.html' %}
+    {% endwith %}
+    {% with form=employee_form %}
+      {% include 'form.html' %}
+    {% endwith %}
     <div class="block">
       <div class="columns">
         <div class="column is-half is-offset-one-quarter">

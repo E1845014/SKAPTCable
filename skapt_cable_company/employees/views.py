@@ -134,11 +134,7 @@ def update_employee(request: HttpRequest, username: str):
                     new_user.save()
                     employee.save()
                     return redirect(f"/employees/{new_user.username}")
-                errors.append("Phone Number already exists")
-            for _, error in user_form.errors.values():
-                errors.append(error)
-            for _, error in employee_form.errors.values():
-                errors.append(error)
+                employee_form.add_error("phone_number", "Phone Number Already Exists")
         return HttpResponse(
             template.render(
                 {
