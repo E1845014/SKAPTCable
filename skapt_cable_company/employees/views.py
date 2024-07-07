@@ -20,14 +20,11 @@ def index(request: HttpRequest):
     """
     Employees List Page View Controller
     """
-
     template = loader.get_template("employees.html")
-    if request.method == "GET":
-        if request.user.is_staff:  # type: ignore
-            employees = Employee.objects.all().select_related("user")
-            return HttpResponse(template.render({"employees": employees}, request))
-        raise PermissionDenied
-    raise BadRequest
+    if request.user.is_staff:  # type: ignore
+        employees = Employee.objects.all().select_related("user")
+        return HttpResponse(template.render({"employees": employees}, request))
+    raise PermissionDenied
 
 
 @login_required
@@ -56,6 +53,7 @@ def add_employee(request: HttpRequest):
             )
             new_user.first_name = user.first_name
             new_user.last_name = user.last_name
+            new_user.is_staff = True
             new_user.save()
             employee.user = new_user
             if employee.is_admin:
