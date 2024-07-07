@@ -13,9 +13,9 @@ from typing import List
 from common.models import Employee
 
 
-class EmployeesTestCase(TestCase):
+class EmployeeBaseTestCase(TestCase):
     """
-    Test Cases for testing Employees List Page and their functionality
+    Base Test Functionalities for Employee App Testings
     """
 
     def setUp(self):
@@ -61,6 +61,12 @@ class EmployeesTestCase(TestCase):
         return self.client.login(
             username=employee.user.username, password=self.raw_password
         )
+
+
+class EmployeesTestCase(EmployeeBaseTestCase):
+    """
+    Test Cases for testing Employees List Page and their functionality
+    """
 
     def test_page_renders_for_employees(self):
         """
