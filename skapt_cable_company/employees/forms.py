@@ -36,3 +36,6 @@ class EmployeeForm(ModelForm):
                 field.widget.attrs["readonly"] = True
                 field.widget.attrs["style"] = "cursor: default;"
                 field.disabled = True
+
+    def save(self, commit=True) -> Employee:
+        return super().save(commit)

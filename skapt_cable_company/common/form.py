@@ -35,3 +35,6 @@ class UserBaseForm(ModelForm):
                 field.widget.attrs["readonly"] = True
                 field.widget.attrs["style"] = "cursor: default;"
                 field.disabled = True
+
+    def save(self, commit=True, *args, **kwargs) -> User:
+        return super().save(commit)

@@ -114,15 +114,41 @@ def update_employee(request: HttpRequest, username: str):
     """
     template = loader.get_template("update_employee.html")
     employee = Employee.objects.get(user__username=username)
+    errors = []
     if employee.is_accessible(request.user):
-        user_form = UserBaseForm(instance=employee.user)
-        employee_form = EmployeeForm(instance=employee)
+        if request.method == "GET":
+            user_form = UserBaseForm(instance=employee.user)
+            employee_form = EmployeeForm(instance=employee)
+        elif request.method == "POST":
+            user_form = UserBaseForm(request.POST, instance=employee.user)
+            employee_form = EmployeeForm(request.POST, instance=employee)
+            if user_form.is_valid() and employee_form.is_valid():
+                new_user = user_form.save(commit=False)
+                employee = employee_form.save(commit=False)
+                if (
+                    not Employee.objects.filter(phone_number=employee.phone_number)
+                    .exclude(user=employee.user)
+                    .exists()
+                ):
+                    new_user.username = employee.phone_number
+                    new_user.save()
+                    employee.save()
+                    return redirect(f"/employees/{new_user.username}")
+                errors.append("Phone Number already exists")
+            for _, error in user_form.errors.values():
+                errors.append(error)
+            for _, error in employee_form.errors.values():
+                errors.append(error)
         return HttpResponse(
             template.render(
                 {
                     "employee_form": employee_form,
                     "user_form": user_form,
                     "employee": employee,
+                    "notifications": [
+                        {"message": error, "class_name": " is-danger"}
+                        for error in errors
+                    ],
                 },
                 request,
             )
