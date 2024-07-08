@@ -97,6 +97,14 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
     Test Cases for testing Add new Employee Functionality and UI
     """
 
+    def setUp(self):
+        """
+        Setup Add Employee Testings
+        """
+        self.expected_user_form_fields = ["first_name", "last_name", "email"]
+        self.expected_employee_form_fields = ["phone_number", "is_admin"]
+        return super().setUp()
+
     def test_page_renders_for_employees(self):
         """
         Test if the page only loads for employees and super admins
@@ -127,12 +135,38 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         response = self.client.get("/employees/add")
         self.assertIn("user_form", response.context)
         user_form: Form = response.context["user_form"]
-        expected_user_form_fields = ["first_name", "last_name", "email"]
-        for expected_user_form_field in expected_user_form_fields:
+
+        for expected_user_form_field in self.expected_user_form_fields:
             self.assertIn(expected_user_form_field, user_form.fields)
         self.assertIn("employee_form", response.context)
         employee_form: Form = response.context["employee_form"]
-        expected_employee_form_fields = ["phone_number", "is_admin"]
-        for expected_employee_form_field in expected_employee_form_fields:
+
+        for expected_employee_form_field in self.expected_employee_form_fields:
             self.assertIn(expected_employee_form_field, employee_form.fields)
         self.assertTemplateUsed("add_employees.html")
+
+    def test_form_submission(self):
+        """
+        Test the form submission on correct variables
+        """
+        employee = self.generate_employees(1)[0]
+        self.login_as_employee(employee)
+        request_object = {}
+        new_employee_phone_number = "0771234458"
+        for field in (
+            self.expected_employee_form_fields + self.expected_user_form_fields
+        ):
+            if field == "email":
+                request_object[field] = "email@email.com"
+            elif field == "phone_number":
+                request_object[field] = "0771234458"
+            else:
+                request_object[field] = field
+        response = self.client.post("/employees/add", request_object)
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertTrue(len(new_employee_query) > 0)
+        new_employee = new_employee_query[0]
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f"/employees/{new_employee.user.username}")

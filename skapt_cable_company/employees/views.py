@@ -57,7 +57,6 @@ def add_employee(request: HttpRequest):
             new_user.save()
             employee.user = new_user
             if employee.is_admin:
-                request_employee = None
                 if not request.user.is_superuser:  # type: ignore
                     if not request_employee.is_admin:  # type: ignore
                         employee.is_admin = False
