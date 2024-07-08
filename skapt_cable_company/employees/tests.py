@@ -6,6 +6,7 @@ Module for all the Employees Related Test Cases
 
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.forms import Form
 
 from time import time
 from typing import List
@@ -89,3 +90,49 @@ class EmployeesTestCase(EmployeeBaseTestCase):
         self.login_as_employee(employees[0])
         response = self.client.get("/employees/")
         self.assertEqual(len(response.context["employees"]), len(employees))
+
+
+class AddEmployeeTestCase(EmployeeBaseTestCase):
+    """
+    Test Cases for testing Add new Employee Functionality and UI
+    """
+
+    def test_page_renders_for_employees(self):
+        """
+        Test if the page only loads for employees and super admins
+        """
+        employee = self.generate_employees(1)[0]
+        non_employee_user = User.objects.create_user(
+            "username", "email@mail.co", self.raw_password
+        )
+        self.login_as_employee(employee)
+        response = self.client.get("/employees/add")
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
+        self.client.login(
+            username=non_employee_user.username, passsword=self.raw_password
+        )
+        response = self.client.get("/employees/add")
+        self.assertEqual(response.status_code, 302)
+        self.client.login(username=self.super_user.username, password=self.raw_password)
+        response = self.client.get("/employees/add")
+        self.assertEqual(response.status_code, 200)
+
+    def test_form_fields(self):
+        """
+        Test the fields passed in the form
+        """
+        employee = self.generate_employees(1)[0]
+        self.login_as_employee(employee)
+        response = self.client.get("/employees/add")
+        self.assertIn("user_form", response.context)
+        user_form: Form = response.context["user_form"]
+        expected_user_form_fields = ["first_name", "last_name", "email"]
+        for expected_user_form_field in expected_user_form_fields:
+            self.assertIn(expected_user_form_field, user_form.fields)
+        self.assertIn("employee_form", response.context)
+        employee_form: Form = response.context["employee_form"]
+        expected_employee_form_fields = ["phone_number", "is_admin"]
+        for expected_employee_form_field in expected_employee_form_fields:
+            self.assertIn(expected_employee_form_field, employee_form.fields)
+        self.assertTemplateUsed("add_employees.html")
