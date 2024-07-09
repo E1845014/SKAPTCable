@@ -28,14 +28,18 @@ class Employee(models.Model):
     )
     is_admin = models.BooleanField(default=False)
 
-    def is_accessible(self, user: Union[User, AbstractBaseUser, AnonymousUser]):
+    def is_accessible(self, user: Union[User, AbstractBaseUser, AnonymousUser, object]):
         """
         Method to check if the Employee can be accessible by the user
         """
         if isinstance(user, AnonymousUser):
             return False
         if isinstance(user, User):
-            return self.user == user or user.is_staff or user.is_superuser
+            return self.user == user or user.is_superuser
+        elif isinstance(user, AbstractBaseUser):
+            return self.user == user
+        else:
+            return user.is_admin or (self.is_accessible(user.user))  # type: ignore
 
     def get_areas(self):
         """

@@ -43,8 +43,8 @@ class EmployeeBaseTestCase(TestCase):
         employees: List[Employee] = []
         for i in range(n):
             user = User.objects.create_user(
-                username=f"{time()}{i}",
-                email=f"{time()}@{i}.com",
+                username=f"{int(time())}{i}",
+                email=f"{int(time())}@{i}xz.com",
                 password=self.raw_password,
             )
             user.is_staff = True
@@ -61,6 +61,14 @@ class EmployeeBaseTestCase(TestCase):
         """
         return self.client.login(
             username=employee.user.username, password=self.raw_password
+        )
+
+    def login_as_superuser(self):
+        """
+        Login Client as super user
+        """
+        return self.client.login(
+            username=self.super_user.username, password=self.raw_password
         )
 
 
@@ -122,7 +130,7 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         )
         response = self.client.get("/employees/add")
         self.assertEqual(response.status_code, 302)
-        self.client.login(username=self.super_user.username, password=self.raw_password)
+        self.login_as_superuser()
         response = self.client.get("/employees/add")
         self.assertEqual(response.status_code, 200)
 
@@ -170,3 +178,237 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         new_employee = new_employee_query[0]
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, f"/employees/{new_employee.user.username}")
+
+
+class ViewEmployeeTestCase(EmployeeBaseTestCase):
+    """
+    Test cases for view Employee Page view controller
+    """
+
+    def test_page_renders(self):
+        """
+        Test if the page renders and using correct template
+        """
+        employees = self.generate_employees()
+        self.login_as_superuser()
+        response = self.client.get(f"/employees/{employees[0].user.username}")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed("employee.html")
+
+    def test_self_page_renders(self):
+        """
+        Test if the page renders for employees to view their profile
+        """
+        employees = self.generate_employees()
+        self.login_as_employee(employees[0])
+        response = self.client.get(f"/employees/{employees[0].user.username}")
+        self.assertEqual(response.status_code, 200)
+
+    def test_admin_page_renders(self):
+        """
+        Test if the page renders for admins to view other employees
+        """
+        employees = self.generate_employees()
+        employees[0].is_admin = True
+        employees[0].save()
+        self.login_as_employee(employees[0])
+        response = self.client.get(f"/employees/{employees[1].user.username}")
+        self.assertEqual(response.status_code, 200)
+
+    def test_non_admin_other_page_not_renders(self):
+        """
+        Test if the page not renders for non-admins to view other employees
+        """
+        employees = self.generate_employees()
+        self.login_as_employee(employees[0])
+        response = self.client.get(f"/employees/{employees[1].user.username}")
+        self.assertEqual(response.status_code, 403)
+
+    def test_data_fields(self):
+        """
+        Test whether expected datas are passed
+        """
+        expected_user_form_fields = ["first_name", "last_name", "email"]
+        expected_employee_form_fields = ["phone_number", "is_admin"]
+
+        employees = self.generate_employees()
+        self.login_as_employee(employees[0])
+        response = self.client.get(f"/employees/{employees[0].user.username}")
+        user_form: Form = response.context["user_form"]
+
+        for expected_user_form_field in expected_user_form_fields:
+            self.assertIn(expected_user_form_field, user_form.fields)
+        self.assertIn("employee_form", response.context)
+        employee_form: Form = response.context["employee_form"]
+
+        for expected_employee_form_field in expected_employee_form_fields:
+            self.assertIn(expected_employee_form_field, employee_form.fields)
+
+
+class UpdateEmployeeTestCase(EmployeeBaseTestCase):
+    """
+    Testcase for Update Employee UI and Functionality
+    """
+
+    def test_page_renders(self):
+        employees = self.generate_employees()
+        self.login_as_superuser()
+        response = self.client.get(f"/employees/{employees[0].user.username}/update")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed("update_employee.html")
+
+    def test_has_correct_fields(self):
+        """
+        Test whether expected input fields are passed
+        """
+        expected_user_form_fields = ["first_name", "last_name", "email"]
+        expected_employee_form_fields = ["phone_number", "is_admin"]
+
+        employees = self.generate_employees()
+        self.login_as_employee(employees[0])
+        response = self.client.get(f"/employees/{employees[0].user.username}/update")
+        user_form: Form = response.context["user_form"]
+
+        for expected_user_form_field in expected_user_form_fields:
+            self.assertIn(expected_user_form_field, user_form.fields)
+        self.assertIn("employee_form", response.context)
+        employee_form: Form = response.context["employee_form"]
+
+        for expected_employee_form_field in expected_employee_form_fields:
+            self.assertIn(expected_employee_form_field, employee_form.fields)
+
+    def test_update_employee_as_super_user(self):
+        employee = self.generate_employees(1)[0]
+        self.login_as_superuser()
+        response = self.client.get(f"/employees/{employee.user.username}/update")
+        request_object = {}
+        new_employee_phone_number = "0771234458"
+        user_form: Form = response.context["user_form"]
+        employee_form: Form = response.context["employee_form"]
+        request_object = {**user_form.initial, **employee_form.initial}
+        request_object["phone_number"] = new_employee_phone_number
+        response = self.client.post(
+            f"/employees/{employee.user.username}/update", request_object
+        )
+        self.assertEqual(response.status_code, 302)
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertTrue(len(new_employee_query) > 0)
+        self.assertRedirects(
+            response, f"/employees/{new_employee_query[0].user.username}"
+        )
+
+    def test_update_employee_as_admin(self):
+        employees = self.generate_employees()
+        employee = employees[0]
+        employee.is_admin = True
+        employee.save()
+        self.login_as_employee(employee)
+        response = self.client.get(f"/employees/{employees[1].user.username}/update")
+        request_object = {}
+        new_employee_phone_number = "0771234458"
+        user_form: Form = response.context["user_form"]
+        employee_form: Form = response.context["employee_form"]
+        request_object = {**user_form.initial, **employee_form.initial}
+        request_object["phone_number"] = new_employee_phone_number
+        response = self.client.post(
+            f"/employees/{employees[1].user.username}/update", request_object
+        )
+        self.assertEqual(response.status_code, 302)
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertTrue(len(new_employee_query) > 0)
+        self.assertRedirects(
+            response, f"/employees/{new_employee_query[0].user.username}"
+        )
+
+    def test_update_employee_themself(self):
+        employees = self.generate_employees()
+        employee = employees[0]
+        self.login_as_employee(employee)
+        response = self.client.get(f"/employees/{employee.user.username}/update")
+        request_object = {}
+        new_employee_phone_number = "0771234458"
+        user_form: Form = response.context["user_form"]
+        employee_form: Form = response.context["employee_form"]
+        request_object = {**user_form.initial, **employee_form.initial}
+        request_object["phone_number"] = new_employee_phone_number
+        response = self.client.post(
+            f"/employees/{employee.user.username}/update", request_object
+        )
+        self.assertEqual(response.status_code, 302)
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertTrue(len(new_employee_query) > 0)
+        self.assertRedirects(
+            response, f"/employees/{new_employee_query[0].user.username}"
+        )
+
+    def test_non_admin_employee_not_update_other_employee(self):
+        employees = self.generate_employees()
+        self.login_as_employee(employees[1])
+        response = self.client.get(f"/employees/{employees[1].user.username}/update")
+        request_object = {}
+        new_employee_phone_number = "0771234458"
+        user_form: Form = response.context["user_form"]
+        employee_form: Form = response.context["employee_form"]
+        request_object = {**user_form.initial, **employee_form.initial}
+        request_object["phone_number"] = new_employee_phone_number
+        self.login_as_employee(employees[0])
+        response = self.client.post(
+            f"/employees/{employees[1].user.username}/update", request_object
+        )
+        self.assertEqual(response.status_code, 403)
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertTrue(len(new_employee_query) == 0)
+
+    def test_invalid_data(self):
+        employee = self.generate_employees(1)[0]
+        self.login_as_superuser()
+        response = self.client.get(f"/employees/{employee.user.username}/update")
+        request_object = {}
+        new_employee_phone_number = "0652223568"  ## Invalid Phone Number
+        user_form: Form = response.context["user_form"]
+        employee_form: Form = response.context["employee_form"]
+        request_object = {**user_form.initial, **employee_form.initial}
+        request_object["phone_number"] = new_employee_phone_number
+        response = self.client.post(
+            f"/employees/{employee.user.username}/update", request_object
+        )
+        employee_form: Form = response.context["employee_form"]
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed("update_employee.html")
+        self.assertFalse(employee_form.is_valid())
+        self.assertIn("Enter Valid Phone Number", employee_form.errors["phone_number"])
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertTrue(len(new_employee_query) == 0)
+
+    def test_duplicate_phone_number(self):
+        employees = self.generate_employees()
+        employee = employees[0]
+        self.login_as_superuser()
+        response = self.client.get(f"/employees/{employee.user.username}/update")
+        request_object = {}
+        user_form: Form = response.context["user_form"]
+        employee_form: Form = response.context["employee_form"]
+        request_object = {**user_form.initial, **employee_form.initial}
+        request_object["phone_number"] = employees[1].phone_number
+        response = self.client.post(
+            f"/employees/{employee.user.username}/update", request_object
+        )
+        employee_form: Form = response.context["employee_form"]
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed("update_employee.html")
+        self.assertFalse(employee_form.is_valid())
+        self.assertIn("Phone Number Already Exists", employee_form.errors["phone_number"])
+        new_employee_query = Employee.objects.filter(
+            phone_number=employees[1].phone_number
+        )
+        self.assertTrue(len(new_employee_query) == 1)

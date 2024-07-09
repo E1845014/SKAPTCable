@@ -86,7 +86,13 @@ def employee(request: HttpRequest, username: str):
     """
     template = loader.get_template("employee.html")
     employee = Employee.objects.get(user__username=username)
-    if employee.is_accessible(request.user):
+    request_employee = request.user
+    if not request_employee.is_superuser:  # type: ignore
+        try:
+            request_employee = Employee.objects.get(user=request.user)
+        except ObjectDoesNotExist:
+            raise PermissionDenied
+    if employee.is_accessible(request_employee):
         user_form = UserBaseForm(instance=employee.user)
         employee_form = EmployeeForm(instance=employee)
         user_form.disable_fields()
@@ -111,8 +117,14 @@ def update_employee(request: HttpRequest, username: str):
     """
     template = loader.get_template("update_employee.html")
     employee = Employee.objects.get(user__username=username)
+    request_employee = request.user
+    if not request_employee.is_superuser:  # type: ignore
+        try:
+            request_employee = Employee.objects.get(user=request.user)
+        except ObjectDoesNotExist:
+            raise PermissionDenied
     errors = []
-    if employee.is_accessible(request.user):
+    if employee.is_accessible(request_employee):
         if request.method == "GET":
             user_form = UserBaseForm(instance=employee.user)
             employee_form = EmployeeForm(instance=employee)
