@@ -158,6 +158,8 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         Test the form submission on correct variables
         """
         employee = self.generate_employees(1)[0]
+        employee.is_admin = True
+        employee.save()
         self.login_as_employee(employee)
         request_object = {}
         new_employee_phone_number = "0771234458"
