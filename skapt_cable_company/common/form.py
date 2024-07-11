@@ -10,6 +10,20 @@ from django.forms import ModelForm
 from django.contrib.auth.models import User
 
 
+def disable_fields(form: ModelForm, fields: Union[None, List[str]] = None):
+    """
+    Disable Form Fields
+    """
+    if fields is None:
+        fields = []
+    for field_name, field in form.fields.items():
+        if fields == [] or field_name in fields:
+            field.widget.attrs["readonly"] = True
+            field.widget.attrs["style"] = "cursor: default;"
+            field.disabled = True
+    return form.fields
+
+
 class UserBaseForm(ModelForm):
     """
     Form for creating new User
@@ -35,16 +49,10 @@ class UserBaseForm(ModelForm):
         """
         Disable All Fields
         """
-        if fields is None:
-            fields = []
-        for field_name, field in self.fields.items():
-            if fields == [] or field_name in fields:
-                field.widget.attrs["readonly"] = True
-                field.widget.attrs["style"] = "cursor: default;"
-                field.disabled = True
+        self.fields = disable_fields(self, fields=fields)
 
     def save(self, commit=True) -> User:
         """
-        Save
+        Save User Form
         """
         return super().save(commit)

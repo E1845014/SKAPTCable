@@ -3,8 +3,11 @@ Module for all Employee App Related Forms
 """
 
 from typing import List, Union
+
 from django.forms import ModelForm
+
 from common.models import Employee
+from common.form import disable_fields
 
 
 class EmployeeForm(ModelForm):
@@ -34,16 +37,10 @@ class EmployeeForm(ModelForm):
         """
         Disable given Fields
         """
-        if fields is None:
-            fields = []
-        for field_name, field in self.fields.items():
-            if fields == [] or field_name in fields:
-                field.widget.attrs["readonly"] = True
-                field.widget.attrs["style"] = "cursor: default;"
-                field.disabled = True
+        self.fields = disable_fields(self, fields)
 
     def save(self, commit=True) -> Employee:
         """
-        Override Save Fields
+        Save Employee Form
         """
         return super().save(commit)

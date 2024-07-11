@@ -83,7 +83,7 @@ def add_employee(request: HttpRequest):
 
 
 @login_required
-def employee(request: HttpRequest, username: str):
+def view_employee(request: HttpRequest, username: str):
     """
     Employee Page View Controller
     """
@@ -93,8 +93,8 @@ def employee(request: HttpRequest, username: str):
     if not request_employee.is_superuser:  # type: ignore
         try:
             request_employee = Employee.objects.get(user=request.user)
-        except ObjectDoesNotExist:
-            raise PermissionDenied
+        except ObjectDoesNotExist as exc:
+            raise PermissionDenied from exc
     if employee.is_accessible(request_employee):
         user_form = UserBaseForm(instance=employee.user)
         employee_form = EmployeeForm(instance=employee)
@@ -124,8 +124,8 @@ def update_employee(request: HttpRequest, username: str):
     if not request_employee.is_superuser:  # type: ignore
         try:
             request_employee = Employee.objects.get(user=request.user)
-        except ObjectDoesNotExist:
-            raise PermissionDenied
+        except ObjectDoesNotExist as exc:
+            raise PermissionDenied from exc
     errors = []
     if employee.is_accessible(request_employee):
         if request.method == "GET":
@@ -143,9 +143,7 @@ def update_employee(request: HttpRequest, username: str):
                     .exists()
                 ):
                     new_user.username = employee.phone_number
-                    if employee.is_admin:
-                        if not (request.user.is_superuser or request_employee.is_admin):  # type: ignore
-                            employee.is_admin = False
+                    employee.is_admin = employee.is_admin and (request.user.is_superuser or request_employee.is_admin)  # type: ignore
                     new_user.save()
                     employee.save()
                     return redirect(f"/employees/{new_user.username}")
