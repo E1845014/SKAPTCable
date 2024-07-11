@@ -2,6 +2,8 @@
 Module to contain all Employees App View Controller Codes
 """
 
+# pylint: disable=imported-auth-user
+
 from django.http import HttpResponse, HttpRequest
 from django.template import loader
 from django.contrib.auth.decorators import login_required
@@ -35,8 +37,8 @@ def add_employee(request: HttpRequest):
     if not request.user.is_superuser:  # type: ignore
         try:
             request_employee = Employee.objects.get(user=request.user)
-        except ObjectDoesNotExist:
-            raise PermissionDenied
+        except ObjectDoesNotExist as exc:
+            raise PermissionDenied from exc
     template = loader.get_template("add_employees.html")
     errors = []
     if request.method == "GET":
@@ -56,8 +58,9 @@ def add_employee(request: HttpRequest):
             new_user.save()
             employee.user = new_user
             if employee.is_admin:
-                if not (request.user.is_superuser or request_employee.is_admin):  # type: ignore
-                    employee.is_admin = False
+                if not request.user.is_superuser:  # type: ignore
+                    if not request_employee.is_admin:
+                        employee.is_admin = False
             employee.save()
             if request_employee.is_admin or request.user.is_superuser:  # type: ignore
                 return redirect(f"/employees/{new_user.username}")
