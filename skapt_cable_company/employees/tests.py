@@ -47,7 +47,6 @@ class EmployeeBaseTestCase(TestCase):
                 email=f"{int(time())}@{i}xz.com",
                 password=self.raw_password,
             )
-            user.is_staff = True
             user.save()
             employee = Employee.objects.create(
                 user=user, phone_number=self.get_random_phone_number()
@@ -89,6 +88,17 @@ class EmployeesTestCase(EmployeeBaseTestCase):
         self.client.logout()
         response = self.client.get("/employees/")
         self.assertNotEqual(response.status_code, 200)
+
+    def test_page_not_renders_for_non_employees(self):
+        """
+        Test if the employee page not renders for non-employees
+        """
+        user = User.objects.create_user(
+            "username", "email@email.email", self.raw_password
+        )
+        self.client.login(username=user.username, password=self.raw_password)
+        response = self.client.get("/employees/")
+        self.assertEqual(response.status_code, 403)
 
     def test_shows_all_employees(self):
         """
@@ -162,14 +172,14 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         employee.save()
         self.login_as_employee(employee)
         request_object = {}
-        new_employee_phone_number = "0771234458"
+        new_employee_phone_number = self.get_random_phone_number()
         for field in (
             self.expected_employee_form_fields + self.expected_user_form_fields
         ):
             if field == "email":
                 request_object[field] = "email@email.com"
             elif field == "phone_number":
-                request_object[field] = "0771234458"
+                request_object[field] = new_employee_phone_number
             else:
                 request_object[field] = field
         response = self.client.post("/employees/add", request_object)
@@ -180,6 +190,59 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         new_employee = new_employee_query[0]
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, f"/employees/{new_employee.user.username}")
+
+    def test_form_submission_as_non_employee(self):
+        """
+        Test the form submission on correct variables
+        """
+        user = User.objects.create_user(
+            "username", "email@email.email", self.raw_password
+        )
+        self.client.login(username=user.username, password=self.raw_password)
+        request_object = {}
+        new_employee_phone_number = self.get_random_phone_number()
+        for field in (
+            self.expected_employee_form_fields + self.expected_user_form_fields
+        ):
+            if field == "email":
+                request_object[field] = "email@email.com"
+            elif field == "phone_number":
+                request_object[field] = new_employee_phone_number
+            else:
+                request_object[field] = field
+        response = self.client.post("/employees/add", request_object)
+        self.assertEqual(response.status_code, 403)
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertTrue(len(new_employee_query) == 0)
+
+    def test_make_super_admin_by_non_admin_employee(self):
+        """
+        Test whether non admin employee cannot make someone as admin
+        """
+        employee = self.generate_employees(1)[0]
+        self.login_as_employee(employee)
+        request_object = {}
+        new_employee_phone_number = self.get_random_phone_number()
+        for field in (
+            self.expected_employee_form_fields + self.expected_user_form_fields
+        ):
+            if field == "email":
+                request_object[field] = "email@email.com"
+            elif field == "phone_number":
+                request_object[field] = new_employee_phone_number
+            else:
+                request_object[field] = field
+        request_object["is_admin"] = True
+        response = self.client.post("/employees/add", request_object)
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertTrue(len(new_employee_query) > 0)
+        new_employee = new_employee_query[0]
+        self.assertFalse(new_employee.is_admin)
+        self.assertEqual(response.status_code, 302)
 
 
 class ViewEmployeeTestCase(EmployeeBaseTestCase):
@@ -245,6 +308,18 @@ class ViewEmployeeTestCase(EmployeeBaseTestCase):
 
         for expected_employee_form_field in expected_employee_form_fields:
             self.assertIn(expected_employee_form_field, employee_form.fields)
+
+    def test_not_exist_employee(self):
+        """
+        Test whether page handles not existing employee search
+        """
+        employees = self.generate_employees()
+        self.login_as_employee(employees[0])
+        unexist_phone_number = self.get_random_phone_number()
+        while len(Employee.objects.filter(phone_number=unexist_phone_number)) != 0:
+            unexist_phone_number = self.get_random_phone_number()
+        response = self.client.get(f"/employees/{unexist_phone_number}")
+        self.assertEqual(response.status_code, 404)
 
 
 class UpdateEmployeeTestCase(EmployeeBaseTestCase):
@@ -409,7 +484,9 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed("update_employee.html")
         self.assertFalse(employee_form.is_valid())
-        self.assertIn("Phone Number Already Exists", employee_form.errors["phone_number"])
+        self.assertIn(
+            "Phone Number Already Exists", employee_form.errors["phone_number"]
+        )
         new_employee_query = Employee.objects.filter(
             phone_number=employees[1].phone_number
         )

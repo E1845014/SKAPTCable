@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpRequest
 from django.template import loader
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import BadRequest, PermissionDenied, ObjectDoesNotExist
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import User
 
 from common.models import Employee
@@ -21,7 +21,7 @@ def index(request: HttpRequest):
     Employees List Page View Controller
     """
     template = loader.get_template("employees.html")
-    if request.user.is_staff:  # type: ignore
+    if Employee.objects.filter(user = request.user).exists():
         employees = Employee.objects.all().select_related("user")
         return HttpResponse(template.render({"employees": employees}, request))
     raise PermissionDenied
@@ -53,15 +53,15 @@ def add_employee(request: HttpRequest):
             )
             new_user.first_name = user.first_name
             new_user.last_name = user.last_name
-            new_user.is_staff = True
             new_user.save()
             employee.user = new_user
             if employee.is_admin:
-                if not request.user.is_superuser:  # type: ignore
-                    if not request_employee.is_admin:  # type: ignore
-                        employee.is_admin = False
+                if not (request.user.is_superuser or request_employee.is_admin):  # type: ignore
+                    employee.is_admin = False
             employee.save()
-            return redirect(f"/employees/{new_user.username}")
+            if request_employee.is_admin or request.user.is_superuser:  # type: ignore
+                return redirect(f"/employees/{new_user.username}")
+            return redirect("/employees")
         errors.append("Invalid Input Data")
     else:
         raise BadRequest
@@ -85,7 +85,7 @@ def employee(request: HttpRequest, username: str):
     Employee Page View Controller
     """
     template = loader.get_template("employee.html")
-    employee = Employee.objects.get(user__username=username)
+    employee = get_object_or_404(Employee, user__username=username)
     request_employee = request.user
     if not request_employee.is_superuser:  # type: ignore
         try:
@@ -116,7 +116,7 @@ def update_employee(request: HttpRequest, username: str):
     Update Employee Page View Controller
     """
     template = loader.get_template("update_employee.html")
-    employee = Employee.objects.get(user__username=username)
+    employee = get_object_or_404(Employee, user__username=username)
     request_employee = request.user
     if not request_employee.is_superuser:  # type: ignore
         try:

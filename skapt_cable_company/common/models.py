@@ -32,29 +32,7 @@ class Employee(models.Model):
         """
         Method to check if the Employee can be accessible by the user
         """
-        if isinstance(user, AnonymousUser):
-            return False
         if isinstance(user, User):
             return self.user == user or user.is_superuser
-        elif isinstance(user, AbstractBaseUser):
-            return self.user == user
         else:
             return user.is_admin or (self.is_accessible(user.user))  # type: ignore
-
-    def get_areas(self):
-        """
-        Get Areas under control
-        """
-        return []
-
-    def get_my_customers(self):
-        """
-        Get Customers under Areas
-        """
-        return []
-
-    def get_collected_payments(self):
-        """
-        Get Payments Collected by the Employee
-        """
-        return []
