@@ -612,7 +612,6 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         """
         employees = self.generate_employees()
         employee = employees[0]
-        employee.save()
         self.login_as_employee(employee)
         response = self.client.get(f"/employees/{employees[0].user.username}/update")
         request_object = {}
@@ -621,6 +620,7 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         employee_form: Form = response.context["employee_form"]
         request_object = {**user_form.initial, **employee_form.initial}
         request_object["phone_number"] = new_employee_phone_number
+        request_object["is_admin"] = True
         response = self.client.post(
             f"/employees/{employees[1].user.username}/update", request_object
         )
@@ -628,6 +628,6 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
             phone_number=new_employee_phone_number
         )
         self.assertTrue(len(new_employee_query) == 0)
-        old_employee = Employee.objects.filter(phone_number = employee.phone_number)[0]
+        old_employee = Employee.objects.filter(phone_number=employee.phone_number)[0]
         self.assertFalse(old_employee.is_admin)
         self.assertEqual(response.status_code, 403)
