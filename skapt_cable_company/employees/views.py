@@ -140,6 +140,9 @@ def update_employee(request: HttpRequest, username: str):
                     .exists()
                 ):
                     new_user.username = employee.phone_number
+                    if employee.is_admin:
+                        if not (request.user.is_superuser or request_employee.is_admin):  # type: ignore
+                            employee.is_admin = False
                     new_user.save()
                     employee.save()
                     return redirect(f"/employees/{new_user.username}")

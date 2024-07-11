@@ -244,6 +244,15 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         self.assertFalse(new_employee.is_admin)
         self.assertEqual(response.status_code, 302)
 
+    def test_wrong_request_type(self):
+        """
+        Test whether other request types are supported
+        """
+        employee = self.generate_employees(1)[0]
+        self.login_as_employee(employee)
+        response = self.client.put("/employees/add")
+        self.assertEqual(response.status_code, 400)
+
 
 class ViewEmployeeTestCase(EmployeeBaseTestCase):
     """
@@ -289,6 +298,18 @@ class ViewEmployeeTestCase(EmployeeBaseTestCase):
         response = self.client.get(f"/employees/{employees[1].user.username}")
         self.assertEqual(response.status_code, 403)
 
+    def test_non_employee_page_not_renders(self):
+        """
+        Test if the page not renders for non-employees for any employee
+        """
+        employees = self.generate_employees()
+        new_user = User.objects.create_user(
+            "username", "email@email.com", self.raw_password
+        )
+        self.client.login(username=new_user.username, password=self.raw_password)
+        response = self.client.get(f"/employees/{employees[1].user.username}")
+        self.assertEqual(response.status_code, 403)
+
     def test_data_fields(self):
         """
         Test whether expected datas are passed
@@ -326,11 +347,26 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
     """
 
     def test_page_renders(self):
+        """
+        Test if the page renders
+        """
         employees = self.generate_employees()
         self.login_as_superuser()
         response = self.client.get(f"/employees/{employees[0].user.username}/update")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed("update_employee.html")
+
+    def test_non_employee_page_not_renders(self):
+        """
+        Test if the page not renders for non-employees for any employee
+        """
+        employees = self.generate_employees()
+        new_user = User.objects.create_user(
+            "username", "email@email.com", self.raw_password
+        )
+        self.client.login(username=new_user.username, password=self.raw_password)
+        response = self.client.get(f"/employees/{employees[1].user.username}")
+        self.assertEqual(response.status_code, 403)
 
     def test_has_correct_fields(self):
         """
@@ -353,6 +389,9 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
             self.assertIn(expected_employee_form_field, employee_form.fields)
 
     def test_update_employee_as_super_user(self):
+        """
+        Test whether super user can update employee
+        """
         employee = self.generate_employees(1)[0]
         self.login_as_superuser()
         response = self.client.get(f"/employees/{employee.user.username}/update")
@@ -375,6 +414,9 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         )
 
     def test_update_employee_as_admin(self):
+        """
+        Test whether Admin Employee can update employee
+        """
         employees = self.generate_employees()
         employee = employees[0]
         employee.is_admin = True
@@ -400,6 +442,9 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         )
 
     def test_update_employee_themself(self):
+        """
+        Test whether employee can update themself
+        """
         employees = self.generate_employees()
         employee = employees[0]
         self.login_as_employee(employee)
@@ -423,6 +468,9 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         )
 
     def test_non_admin_employee_not_update_other_employee(self):
+        """
+        Test whether non-admin Employees can't update other employees
+        """
         employees = self.generate_employees()
         self.login_as_employee(employees[1])
         response = self.client.get(f"/employees/{employees[1].user.username}/update")
@@ -443,6 +491,9 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         self.assertTrue(len(new_employee_query) == 0)
 
     def test_invalid_data(self):
+        """
+        Test whether invalid data is handled
+        """
         employee = self.generate_employees(1)[0]
         self.login_as_superuser()
         response = self.client.get(f"/employees/{employee.user.username}/update")
@@ -466,6 +517,9 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         self.assertTrue(len(new_employee_query) == 0)
 
     def test_duplicate_phone_number(self):
+        """
+        Test whether duplicate phone number is handled
+        """
         employees = self.generate_employees()
         employee = employees[0]
         self.login_as_superuser()
@@ -489,3 +543,30 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
             phone_number=employees[1].phone_number
         )
         self.assertTrue(len(new_employee_query) == 1)
+
+    def test_make_super_admin_by_non_admin_employee(self):
+        """
+        Test whether non admin employee cannot make someone as admin
+        """
+        employees = self.generate_employees()
+        employee = employees[0]
+        employee.is_admin = True
+        employee.save()
+        self.login_as_employee(employee)
+        response = self.client.get(f"/employees/{employees[1].user.username}/update")
+        request_object = {}
+        new_employee_phone_number = "0771234458"
+        user_form: Form = response.context["user_form"]
+        employee_form: Form = response.context["employee_form"]
+        request_object = {**user_form.initial, **employee_form.initial}
+        request_object["phone_number"] = new_employee_phone_number
+        response = self.client.post(
+            f"/employees/{employees[1].user.username}/update", request_object
+        )
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertTrue(len(new_employee_query) > 0)
+        new_employee = new_employee_query[0]
+        self.assertFalse(new_employee.is_admin)
+        self.assertEqual(response.status_code, 302)
