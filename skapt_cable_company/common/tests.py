@@ -1,3 +1,9 @@
+"""
+Module for all Common Models Tests
+"""
+
+# pylint: disable=imported-auth-user
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 
@@ -10,6 +16,9 @@ class EmployeeTestCase(TestCase):
     """
 
     def test_str(self):
+        """
+        Test Employee Models String
+        """
         user = User.objects.create_user("username", "email@email.com", "password")
         user.first_name = "first_name"
         user.last_name = "last_name"
