@@ -253,6 +253,32 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         response = self.client.put("/employees/add")
         self.assertEqual(response.status_code, 400)
 
+    def test_errored_form_submission(self):
+        """
+        Test the form submission on correct variables
+        """
+        employee = self.generate_employees(1)[0]
+        employee.is_admin = True
+        employee.save()
+        self.login_as_employee(employee)
+        request_object = {}
+        new_employee_phone_number = self.get_random_phone_number()
+        for field in (
+            self.expected_employee_form_fields + self.expected_user_form_fields
+        ):
+            if field == "email":
+                request_object[field] = "email"
+            elif field == "phone_number":
+                request_object[field] = new_employee_phone_number
+            else:
+                request_object[field] = field
+        response = self.client.post("/employees/add", request_object)
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertEqual(len(new_employee_query), 0)
+        self.assertEqual(response.status_code, 200)
+
 
 class ViewEmployeeTestCase(EmployeeBaseTestCase):
     """
@@ -490,6 +516,42 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         )
         self.assertTrue(len(new_employee_query) == 0)
 
+    def test_for_non_admins(self):
+        """
+        Test the form submission as non employee failing
+        """
+        user = User.objects.create_user(
+            "username", "email@email.email", self.raw_password
+        )
+        self.client.login(username=user.username, password=self.raw_password)
+
+        employees = self.generate_employees()
+
+        ## Test for Non Employee Page Renders
+        response = self.client.get(f"/employees/{employees[1].user.username}/update")
+        self.assertEqual(response.status_code, 403)
+
+        ## Retrieve user form details
+        self.login_as_employee(employees[1])
+        response = self.client.get(f"/employees/{employees[1].user.username}/update")
+        request_object = {}
+        new_employee_phone_number = "0771234458"
+        user_form: Form = response.context["user_form"]
+        employee_form: Form = response.context["employee_form"]
+        request_object = {**user_form.initial, **employee_form.initial}
+        request_object["phone_number"] = new_employee_phone_number
+
+        ## Test for Non Employee Form Submission
+        self.client.login(username=user.username, password=self.raw_password)
+        response = self.client.post(
+            f"/employees/{employees[1].user.username}/update", request_object
+        )
+        self.assertEqual(response.status_code, 403)
+        new_employee_query = Employee.objects.filter(
+            phone_number=new_employee_phone_number
+        )
+        self.assertTrue(len(new_employee_query) == 0)
+
     def test_invalid_data(self):
         """
         Test whether invalid data is handled
@@ -550,10 +612,9 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         """
         employees = self.generate_employees()
         employee = employees[0]
-        employee.is_admin = True
         employee.save()
         self.login_as_employee(employee)
-        response = self.client.get(f"/employees/{employees[1].user.username}/update")
+        response = self.client.get(f"/employees/{employees[0].user.username}/update")
         request_object = {}
         new_employee_phone_number = "0771234458"
         user_form: Form = response.context["user_form"]
@@ -566,7 +627,7 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         new_employee_query = Employee.objects.filter(
             phone_number=new_employee_phone_number
         )
-        self.assertTrue(len(new_employee_query) > 0)
-        new_employee = new_employee_query[0]
-        self.assertFalse(new_employee.is_admin)
-        self.assertEqual(response.status_code, 302)
+        self.assertTrue(len(new_employee_query) == 0)
+        old_employee = Employee.objects.filter(phone_number = employee.phone_number)[0]
+        self.assertFalse(old_employee.is_admin)
+        self.assertEqual(response.status_code, 403)
