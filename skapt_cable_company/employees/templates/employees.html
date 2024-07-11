@@ -1,0 +1,51 @@
+{% extends "base.html" %} {% block content %}
+<div class="block">
+  <h1 class="is-size-1 has-text-centered">Employees Page</h1>
+  <div class="columns">
+    <div class="column is-2 is-offset-10">
+      <a href="/employees/add">
+        <button
+          class="button is-fullwidth is-primary"
+          type="button"
+          value="Add Employee"
+        >
+          Add Employee
+        </button>
+      </a>
+    </div>
+  </div>
+  <table class="table is-fullwidth is-striped is-hoverable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Admin</th>
+        <th>Phone Number</th>
+        <th>Customers</th>
+        <th>Areas</th>
+        <th>Collected Payment Counts</th>
+        <th>Generated Payment Counts</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for employee in employees %}
+      <tr
+        data-url="{% url 'View Employee' employee.user.username %}"
+        class="clickable-row"
+      >
+        <td>{{ employee.user.first_name }}</td>
+        {% if employee.is_admin %}
+        <td>Admin</td>
+        {% else %}
+        <td>Employee</td>
+        {% endif %}
+        <td>{{ employee.phone_number}}</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

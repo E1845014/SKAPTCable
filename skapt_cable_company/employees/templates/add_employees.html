@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block content %}
+<div class="block">
+  <h1 class="is-size-1 has-text-centered">Add New Employees</h1>
+  <form action="" method="post">
+    {% with form=user_form %}
+      {% include 'form.html' %}
+    {% endwith %}
+    {% with form=employee_form %}
+      {% include 'form.html' %}
+    {% endwith %}
+    <div class="block">
+      <div class="columns">
+        <div class="column is-half is-offset-one-quarter">
+          <input
+            type="submit"
+            value="Submit"
+            class="button is-fullwidth is-primary"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="block">
+        {% for notification in notifications %}
+            {% with message=notification.message class_name=notification.class_name %}
+                {% include 'notification.html' %}
+            {% endwith %}
+        {% endfor %}
+    </div>
+  </form>
+</div>
+{% endblock %}

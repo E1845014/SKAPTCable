@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "login.apps.LoginConfig",
+    "common.apps.CommonConfig",
+    "employees.apps.EmployeesConfig",
 ]
 
 MIDDLEWARE = [
@@ -65,7 +67,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "login.context_processors.user_logged_in"
+                "login.context_processors.user_logged_in",
             ],
         },
     },
