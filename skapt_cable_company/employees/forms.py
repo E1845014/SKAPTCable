@@ -18,7 +18,7 @@ class EmployeeForm(ModelForm):
         """
 
         model = Employee
-        exclude = ["user"]
+        fields = ["phone_number", "is_admin"]
 
     def __init__(self, *args, **kwargs):
         """
