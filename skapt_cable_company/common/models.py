@@ -28,6 +28,9 @@ class Employee(models.Model):
     )
     is_admin = models.BooleanField(default=False)
 
+    def __str__(self) -> str:
+        return f"{str(self.user)} {self.user.first_name} {self.user.last_name}"
+
     def is_accessible(self, user: Union[User, AbstractBaseUser, AnonymousUser, object]):
         """
         Method to check if the Employee can be accessible by the user

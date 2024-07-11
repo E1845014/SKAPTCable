@@ -316,8 +316,6 @@ class ViewEmployeeTestCase(EmployeeBaseTestCase):
         employees = self.generate_employees()
         self.login_as_employee(employees[0])
         unexist_phone_number = self.get_random_phone_number()
-        while len(Employee.objects.filter(phone_number=unexist_phone_number)) != 0:
-            unexist_phone_number = self.get_random_phone_number()
         response = self.client.get(f"/employees/{unexist_phone_number}")
         self.assertEqual(response.status_code, 404)
 
