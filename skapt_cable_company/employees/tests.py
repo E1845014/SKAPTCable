@@ -4,12 +4,13 @@ Module for all the Employees Related Test Cases
 
 # pylint: disable=imported-auth-user
 
+from time import time
+from typing import List
+
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.forms import Form
 
-from time import time
-from typing import List
 
 from common.models import Employee
 
