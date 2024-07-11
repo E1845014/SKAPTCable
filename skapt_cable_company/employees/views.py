@@ -21,7 +21,7 @@ def index(request: HttpRequest):
     Employees List Page View Controller
     """
     template = loader.get_template("employees.html")
-    if Employee.objects.filter(user = request.user).exists():
+    if Employee.objects.filter(user=request.user).exists():
         employees = Employee.objects.all().select_related("user")
         return HttpResponse(template.render({"employees": employees}, request))
     raise PermissionDenied
