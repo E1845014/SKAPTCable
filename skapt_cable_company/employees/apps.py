@@ -1,4 +1,4 @@
-"""App Configuration for Login App"""
+"""App Configuration for Employees App"""
 
 from django.apps import AppConfig
 
