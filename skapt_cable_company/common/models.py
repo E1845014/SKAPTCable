@@ -39,3 +39,25 @@ class Employee(models.Model):
         if isinstance(user, User):
             return self.user == user or user.is_superuser
         return user.is_admin or (self.is_accessible(user.user))  # type: ignore
+
+    @property
+    def areas(self):
+        """
+        Get All Areas
+        """
+        return Area.objects.filter(agent=self)
+
+
+class Area(models.Model):
+
+    name = models.CharField()
+    agent = models.ForeignKey(Employee, on_delete=models.RESTRICT)
+
+    def __str__(self) -> str:
+        return self.name
+
+    def is_accessible(self, user: Union[User, AbstractBaseUser, AnonymousUser, object]):
+        """
+        Method to check if the Employee can be accessible by the user
+        """
+        return self.agent.is_accessible(user)
