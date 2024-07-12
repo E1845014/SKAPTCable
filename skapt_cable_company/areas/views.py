@@ -11,6 +11,8 @@ from django.contrib.auth.models import User
 
 from common.models import Employee, Area
 
+from .forms import AreaForm
+
 
 @login_required
 def index(request: HttpRequest):
@@ -22,3 +24,43 @@ def index(request: HttpRequest):
         areas = Area.objects.all().select_related("agent").select_related("agent__user")
         return HttpResponse(template.render({"areas": areas}, request))
     raise PermissionDenied
+
+
+@login_required
+def add_area(request: HttpRequest):
+    """
+    Add Area
+    """
+    if not request.user.is_superuser:  # type: ignore
+        try:
+            request_employee = Employee.objects.get(user=request.user)
+        except ObjectDoesNotExist as exc:
+            raise PermissionDenied from exc
+        if not request_employee.is_admin:
+            raise PermissionDenied
+    template = loader.get_template("add_areas.html")
+    errors = []
+    if request.method == "GET":
+        area_form = AreaForm()
+    elif request.method == "POST":
+        area_form = AreaForm(request.POST)
+        if area_form.is_valid:
+            area = area_form.save(False)
+            if Employee.objects.filter(pk=area.agent.pk).exists():
+                area.save()
+                return redirect(f"/areas/{area.pk}")
+            area_form.add_error("agent", "Agent Does not Exist")
+        errors.append("Invalid Input Data")
+    else:
+        raise BadRequest
+    return HttpResponse(
+        template.render(
+            {
+                "area_form": area_form,
+                "notifications": [
+                    {"message": error, "class_name": " is-danger"} for error in errors
+                ],
+            },
+            request,
+        )
+    )
