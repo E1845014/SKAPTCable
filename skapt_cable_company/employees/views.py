@@ -10,8 +10,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import BadRequest, PermissionDenied, ObjectDoesNotExist
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import User
+from django.db.models import Count
 
-from common.models import Employee
+from common.models import Employee, Area
 from common.form import UserBaseForm
 
 from .forms import EmployeeForm
@@ -23,8 +24,12 @@ def index(request: HttpRequest):
     Employees List Page View Controller
     """
     template = loader.get_template("employees.html")
-    if Employee.objects.filter(user=request.user).exists():
-        employees = Employee.objects.all().select_related("user")
+    if Employee.objects.filter(user=request.user).exists() or request.user.is_superuser:  # type: ignore
+        employees = (
+            Employee.objects.all()
+            .select_related("user")
+            .annotate(area_count=Count("area"))
+        )
         return HttpResponse(template.render({"employees": employees}, request))
     raise PermissionDenied
 

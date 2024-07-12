@@ -47,6 +47,10 @@ class Employee(models.Model):
         """
         return Area.objects.filter(agent=self)
 
+    @property
+    def name(self):
+        return self.user.first_name
+
 
 class Area(models.Model):
 
