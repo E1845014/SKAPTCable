@@ -10,6 +10,9 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import User
 
 from common.models import Employee, Area
+from common.form import UserBaseForm
+
+from employees.forms import EmployeeForm
 
 from .forms import AreaForm
 
@@ -64,3 +67,35 @@ def add_area(request: HttpRequest):
             request,
         )
     )
+
+
+@login_required
+def view_area(request: HttpRequest, area_id: int):
+    """
+    Area Page View Controller
+    """
+    template = loader.get_template("area.html")
+    area = get_object_or_404(Area, pk=area_id)
+    request_employee = request.user
+    if not request_employee.is_superuser:  # type: ignore
+        try:
+            request_employee = Employee.objects.get(user=request.user)
+        except ObjectDoesNotExist as exc:
+            raise PermissionDenied from exc
+    if area.agent.is_accessible(request_employee):
+        area_form = AreaForm(instance=area)
+        employee_form = EmployeeForm(instance=area.agent)
+        user_form = UserBaseForm(instance=area.agent.user)
+        area_form.disable_fields()
+        return HttpResponse(
+            template.render(
+                {
+                    "area_form": area_form,
+                    "employee_form": employee_form,
+                    "user_form": user_form,
+                    "area": area,
+                },
+                request,
+            )
+        )
+    raise PermissionDenied

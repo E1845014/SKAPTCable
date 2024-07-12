@@ -26,7 +26,7 @@
     <tbody>
       {% for area in areas %}
       <tr
-        data-url=""
+        data-url="{% url 'View Area' area.pk %}"
         class="clickable-row"
       >
         <td>{{ area.name }}</td>

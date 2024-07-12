@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% block content %}
+<div class="block">
+  <h1 class="is-size-1 has-text-centered">{{ area.name }}</h1>
+
+  <form action="" method="post">
+    {% with form=area_form %}
+    {% include 'form.html' %}
+    {% endwith %}
+  </form>
+  <a href="{% url 'Update Employee' area.pk %}"
+    ><button class="button is-primary">Update</button></a
+  >
+  <div class="block" style="padding-top: 20px;">
+    <div class="panel is-info">
+      <p class="panel-heading">Agent</p>
+        {% with form=user_form %}
+        {% include 'form.html' %}
+        {% endwith %}
+        {% with form=employee_form %}
+        {% include 'form.html' %}
+        {% endwith %}
+    </div>
+  </div>
+</div>
+{% endblock %}
