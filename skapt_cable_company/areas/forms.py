@@ -29,7 +29,6 @@ class AreaForm(ModelForm):
         """
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            print(field.widget.input_type)
             if field.widget.input_type == "text":
                 field.widget.attrs["class"] = "input is-rounded"
             elif field.widget.input_type == "select":

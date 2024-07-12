@@ -86,6 +86,8 @@ def view_area(request: HttpRequest, area_id: int):
         area_form = AreaForm(instance=area)
         employee_form = EmployeeForm(instance=area.agent)
         user_form = UserBaseForm(instance=area.agent.user)
+        employee_form.disable_fields()
+        user_form.disable_fields()
         area_form.disable_fields()
         return HttpResponse(
             template.render(
@@ -95,6 +97,43 @@ def view_area(request: HttpRequest, area_id: int):
                     "user_form": user_form,
                     "area": area,
                 },
+                request,
+            )
+        )
+    raise PermissionDenied
+
+
+@login_required
+def update_area(request: HttpRequest, area_id: int):
+    """
+    Update Area Page View Controller
+    """
+    print(request.method)
+    template = loader.get_template("update_area.html")
+    area = get_object_or_404(Area, pk=area_id)
+    request_employee = request.user
+    if not request_employee.is_superuser:  # type: ignore
+        try:
+            request_employee = Employee.objects.get(user=request.user)
+        except ObjectDoesNotExist as exc:
+            raise PermissionDenied from exc
+    if area.agent.is_accessible(request_employee):
+        if request.method == "GET":
+            area_form = AreaForm(instance=area)
+        elif request.method == "POST":
+            area_form = AreaForm(request.POST, instance=area)
+            print(area_form.is_valid)
+            if area_form.is_valid():
+                area = area_form.save(False)
+                if Employee.objects.filter(pk=area.agent.pk).exists():
+                    area.save()
+                    return redirect(f"/areas/{area.pk}")
+                area_form.add_error("agent", "Agent Does not Exist")
+        else:
+            raise BadRequest
+        return HttpResponse(
+            template.render(
+                {"area_form": area_form, "area": area},
                 request,
             )
         )
