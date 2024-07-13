@@ -54,7 +54,7 @@ class Employee(models.Model):
 
 class Area(models.Model):
 
-    name = models.CharField()
+    name = models.CharField(max_length=50)
     agent = models.ForeignKey(Employee, on_delete=models.RESTRICT)
 
     def __str__(self) -> str:
