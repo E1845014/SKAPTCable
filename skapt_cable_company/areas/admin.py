@@ -4,4 +4,6 @@ Module for Area App Admin Pannel Integration
 
 from django.contrib import admin
 
-# Register your models here.
+from common.models import Area
+
+admin.site.register(Area)
