@@ -75,18 +75,23 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         Test if the page only loads for employees and super admins
         """
         employee = self.generate_employees(1)[0]
-        non_employee_user = User.objects.create_user(
-            "username", "email@mail.co", self.raw_password
-        )
+
         self.login_as_employee(employee)
         response = self.client.get("/employees/add")
         self.assertEqual(response.status_code, 200)
         self.client.logout()
+
+    def test_page_not_renders_for_non_employee(self):
+        non_employee_user = User.objects.create_user(
+            "username", "email@mail.co", self.raw_password
+        )
         self.client.login(
             username=non_employee_user.username, passsword=self.raw_password
         )
         response = self.client.get("/employees/add")
         self.assertEqual(response.status_code, 302)
+
+    def test_page_renders_form_superuser(self):
         self.login_as_superuser()
         response = self.client.get("/employees/add")
         self.assertEqual(response.status_code, 200)
