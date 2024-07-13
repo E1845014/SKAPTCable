@@ -7,7 +7,6 @@ from django.http import HttpResponse, HttpRequest
 from django.template import loader
 from django.core.exceptions import BadRequest, PermissionDenied, ObjectDoesNotExist
 from django.shortcuts import redirect, get_object_or_404
-from django.contrib.auth.models import User
 
 from common.models import Employee, Area
 from common.form import UserBaseForm
