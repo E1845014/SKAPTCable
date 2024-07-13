@@ -4,72 +4,18 @@ Module for all the Employees Related Test Cases
 
 # pylint: disable=imported-auth-user
 
-from time import time
-from typing import List
-
-from django.test import TestCase
 from django.contrib.auth.models import User
 from django.forms import Form
 
 
 from common.models import Employee
+from common.tests import BaseTestCase
 
 
-class EmployeeBaseTestCase(TestCase):
+class EmployeeBaseTestCase(BaseTestCase):
     """
     Base Test Functionalities for Employee App Testings
     """
-
-    def setUp(self):
-        """
-        Runs on Test Case Start up
-
-        Contains Base Data needed for testing
-        """
-        self.raw_password = "top_secret"
-        self.super_user = User.objects.create_superuser(
-            username="jacob", email="jacob@…", password=self.raw_password
-        )
-
-    def get_random_phone_number(self):
-        """
-        Generate Random Phone Number within the Regex Validation
-        """
-        return f"07{str(int(time()*100))[-8:]}"
-
-    def generate_employees(self, n=5):
-        """
-        Generate n Number of Employees
-        """
-        employees: List[Employee] = []
-        for i in range(n):
-            user = User.objects.create_user(
-                username=f"{int(time())}{i}",
-                email=f"{int(time())}@{i}xz.com",
-                password=self.raw_password,
-            )
-            user.save()
-            employee = Employee.objects.create(
-                user=user, phone_number=self.get_random_phone_number()
-            )
-            employees.append(employee)
-        return employees
-
-    def login_as_employee(self, employee: Employee):
-        """
-        Login Client as an employee
-        """
-        return self.client.login(
-            username=employee.user.username, password=self.raw_password
-        )
-
-    def login_as_superuser(self):
-        """
-        Login Client as super user
-        """
-        return self.client.login(
-            username=self.super_user.username, password=self.raw_password
-        )
 
 
 class EmployeesTestCase(EmployeeBaseTestCase):
