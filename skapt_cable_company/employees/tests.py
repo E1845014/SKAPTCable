@@ -305,6 +305,7 @@ class ViewEmployeeTestCase(EmployeeBaseTestCase):
         employees = self.generate_employees()
         self.login_as_employee(employees[0])
         response = self.client.get(f"/employees/{employees[0].user.username}")
+        self.assertIn("user_form", response.context)
         user_form: Form = response.context["user_form"]
 
         for expected_user_form_field in expected_user_form_fields:
@@ -475,7 +476,7 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         )
         self.assertTrue(len(new_employee_query) == 0)
 
-    def test_for_non_admins(self):
+    def test_for_non_employee(self):
         """
         Test the form submission as non employee failing
         """
