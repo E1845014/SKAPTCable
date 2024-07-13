@@ -46,7 +46,7 @@ def add_area(request: HttpRequest):
         area_form = AreaForm()
     elif request.method == "POST":
         area_form = AreaForm(request.POST)
-        if area_form.is_valid:
+        if area_form.is_valid():
             area = area_form.save(False)
             if Employee.objects.filter(pk=area.agent.pk).exists():
                 area.save()
@@ -107,7 +107,6 @@ def update_area(request: HttpRequest, area_id: int):
     """
     Update Area Page View Controller
     """
-    print(request.method)
     template = loader.get_template("update_area.html")
     area = get_object_or_404(Area, pk=area_id)
     request_employee = request.user
@@ -121,7 +120,6 @@ def update_area(request: HttpRequest, area_id: int):
             area_form = AreaForm(instance=area)
         elif request.method == "POST":
             area_form = AreaForm(request.POST, instance=area)
-            print(area_form.is_valid)
             if area_form.is_valid():
                 area = area_form.save(False)
                 if Employee.objects.filter(pk=area.agent.pk).exists():

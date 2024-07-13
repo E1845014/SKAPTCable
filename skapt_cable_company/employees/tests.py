@@ -88,11 +88,12 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         non_employee_user = User.objects.create_user(
             "username", "email@mail.co", self.raw_password
         )
+        non_employee_user.save()
         self.client.login(
-            username=non_employee_user.username, passsword=self.raw_password
+            username=non_employee_user.username, password=self.raw_password
         )
         response = self.client.get("/employees/add")
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 403)
 
     def test_page_renders_form_superuser(self):
         """
@@ -213,7 +214,7 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
 
     def test_errored_form_submission(self):
         """
-        Test the form submission on correct variables
+        Test the form submission on incorrect variables
         """
         employee = self.generate_employees(1)[0]
         employee.is_admin = True

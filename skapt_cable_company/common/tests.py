@@ -97,10 +97,13 @@ class BaseTestCase(TestCase):
             )
         return areas
 
-    def login_as_employee(self, employee: Employee):
+    def login_as_employee(self, employee: Employee, make_admin=False):
         """
         Login Client as an employee
         """
+        if make_admin:
+            employee.is_admin = True
+            employee.save()
         return self.client.login(
             username=employee.user.username, password=self.raw_password
         )
