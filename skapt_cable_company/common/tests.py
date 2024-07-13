@@ -27,5 +27,5 @@ class EmployeeTestCase(TestCase):
         employee = Employee.objects.create(user=user, phone_number="0777777777")
         self.assertEqual(
             str(employee),
-            f"{str(user)} {user.first_name} {user.last_name}",
+            f"{user.first_name} {user.last_name}",
         )
