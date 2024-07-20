@@ -155,7 +155,7 @@ class AddAreaTestCase(AreaBaseTestCase):
                 request_object[field] = field
         response = self.client.post(self.url, request_object)
         self.assertEqual(response.status_code, 302)
-        new_area_query = Area.objects.filter(agent=employees[1])
+        new_area_query = Area.objects.filter(name="name")
 
         self.assertTrue(len(new_area_query) > 0)
         new_area = new_area_query[0]
