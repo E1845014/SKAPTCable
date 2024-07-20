@@ -127,9 +127,7 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         Test the form submission on correct variables
         """
         employee = self.generate_employees(1)[0]
-        employee.is_admin = True
-        employee.save()
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         request_object = {}
         new_employee_phone_number = self.get_random_phone_number()
         for field in (
@@ -217,9 +215,7 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         Test the form submission on incorrect variables
         """
         employee = self.generate_employees(1)[0]
-        employee.is_admin = True
-        employee.save()
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         request_object = {}
         new_employee_phone_number = self.get_random_phone_number()
         for field in (
@@ -268,9 +264,7 @@ class ViewEmployeeTestCase(EmployeeBaseTestCase):
         Test if the page renders for admins to view other employees
         """
         employees = self.generate_employees()
-        employees[0].is_admin = True
-        employees[0].save()
-        self.login_as_employee(employees[0])
+        self.login_as_employee(employees[0], True)
         response = self.client.get(f"/employees/{employees[1].user.username}")
         self.assertEqual(response.status_code, 200)
 
@@ -405,9 +399,7 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         """
         employees = self.generate_employees()
         employee = employees[0]
-        employee.is_admin = True
-        employee.save()
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         response = self.client.get(f"/employees/{employees[1].user.username}/update")
         request_object = {}
         new_employee_phone_number = "0771234458"
