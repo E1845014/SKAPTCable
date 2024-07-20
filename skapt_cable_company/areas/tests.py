@@ -143,9 +143,7 @@ class AddAreaTestCase(AreaBaseTestCase):
         """
         employees = self.generate_employees()
         employee = employees[0]
-        employee.is_admin = True
-        employee.save()
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         get_response = self.client.get(self.url)
         area_form: Form = get_response.context["area_form"]
         agent_choices = area_form.fields["agent"].choices
@@ -192,7 +190,7 @@ class AddAreaTestCase(AreaBaseTestCase):
         Test whether other request types are supported
         """
         employee = self.generate_employees(1)[0]
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         response = self.client.put(self.url)
         self.assertEqual(response.status_code, 400)
 
@@ -202,9 +200,7 @@ class AddAreaTestCase(AreaBaseTestCase):
         """
         employees = self.generate_employees()
         employee = employees[0]
-        employee.is_admin = True
-        employee.save()
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         request_object = {}
         for field in self.expected_form_fields:
             if field == "agent":
@@ -463,6 +459,6 @@ class UpdateAreaTestCase(AreaBaseTestCase):
 
         area_form: Form = response.context["area_form"]
         self.assertFalse(area_form.is_valid())
-        
+
         new_area_query = Area.objects.filter(name=new_area_name)
         self.assertEqual(len(new_area_query), 0)
