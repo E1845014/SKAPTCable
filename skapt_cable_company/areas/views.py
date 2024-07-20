@@ -47,11 +47,8 @@ def add_area(request: HttpRequest):
     elif request.method == "POST":
         area_form = AreaForm(request.POST)
         if area_form.is_valid():
-            area = area_form.save(False)
-            if Employee.objects.filter(pk=area.agent.pk).exists():
-                area.save()
-                return redirect(f"/areas/{area.pk}")
-            area_form.add_error("agent", "Agent Does not Exist")
+            area = area_form.save()
+            return redirect(f"/areas/{area.pk}")
         errors.append("Invalid Input Data")
     else:
         raise BadRequest
@@ -121,11 +118,8 @@ def update_area(request: HttpRequest, area_id: int):
         elif request.method == "POST":
             area_form = AreaForm(request.POST, instance=area)
             if area_form.is_valid():
-                area = area_form.save(False)
-                if Employee.objects.filter(pk=area.agent.pk).exists():
-                    area.save()
-                    return redirect(f"/areas/{area.pk}")
-                area_form.add_error("agent", "Agent Does not Exist")
+                area = area_form.save()
+                return redirect(f"/areas/{area.pk}")
         else:
             raise BadRequest
         return HttpResponse(
