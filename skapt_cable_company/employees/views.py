@@ -15,7 +15,7 @@ from django.db.models import Count
 from common.models import Employee
 from common.form import UserBaseForm
 
-from .models import get_employee_or_super_admin, get_admin_employee
+from .models import get_employee_or_super_admin, get_employee
 from .forms import EmployeeForm
 
 
@@ -41,7 +41,7 @@ def add_employee(request: HttpRequest):
     Add Employee
     """
     if not request.user.is_superuser:  # type: ignore
-        request_employee = get_admin_employee(request)
+        request_employee = get_employee(request)
     template = loader.get_template("add_employees.html")
     errors = []
     if request.method == "GET":

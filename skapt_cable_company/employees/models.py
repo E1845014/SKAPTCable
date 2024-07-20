@@ -19,10 +19,13 @@ def get_employee_or_super_admin(request: HttpRequest):
 
 
 def get_admin_employee(request: HttpRequest):
-    try:
-        request_employee = Employee.objects.get(user=request.user)
-    except ObjectDoesNotExist as exc:
-        raise PermissionDenied from exc
+    request_employee = get_employee(request)
     if not request_employee.is_admin:
         raise PermissionDenied
     return request_employee
+
+def get_employee(request: HttpRequest):
+    try:
+        return Employee.objects.get(user=request.user)
+    except ObjectDoesNotExist as exc:
+        raise PermissionDenied from exc

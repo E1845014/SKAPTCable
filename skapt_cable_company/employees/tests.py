@@ -102,7 +102,7 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         Test the fields passed in the form
         """
         employee = self.generate_employees(1)[0]
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         response = self.client.get("/employees/add")
         self.assertIn("user_form", response.context)
         user_form: Form = response.context["user_form"]
