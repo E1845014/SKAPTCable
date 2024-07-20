@@ -462,3 +462,15 @@ class UpdateAreaTestCase(AreaBaseTestCase):
 
         new_area_query = Area.objects.filter(name=new_area_name)
         self.assertEqual(len(new_area_query), 0)
+
+    def test_wrong_request_type(self):
+        """
+        Test whether other request types are supported
+        """
+        employees = self.generate_employees()
+        areas = self.generate_areas(employees=employees)
+        request_object = self.get_initial_values(areas[0])
+        new_area_name = self.get_random_string()
+        request_object["name"] = new_area_name
+        response = self.client.put(self.get_url(areas[0]), request_object)
+        self.assertEqual(response.status_code, 400)
