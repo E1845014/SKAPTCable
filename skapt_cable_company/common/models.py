@@ -41,7 +41,7 @@ class Employee(models.Model):
         if isinstance(user, User):
             return self.user == user or user.is_superuser
         if isinstance(user, Customer):
-            return user.get_agent() == self.user
+            return user.get_agent() == self
         return user.is_admin or (self.is_accessible(user.user))  # type: ignore
 
 
@@ -91,7 +91,7 @@ class Customer(models.Model):
     area = models.ForeignKey(Area, on_delete=models.RESTRICT)
 
     def __str__(self):
-        return self.user
+        return str(self.user)
 
     def get_agent(self):
         """
