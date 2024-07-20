@@ -12,7 +12,7 @@ from common.models import Employee, Area
 from common.form import UserBaseForm
 
 from employees.forms import EmployeeForm
-from employees.models import get_employee_or_super_admin
+from employees.models import get_employee_or_super_admin, get_admin_employee
 
 from .forms import AreaForm
 
@@ -35,12 +35,7 @@ def add_area(request: HttpRequest):
     Add Area
     """
     if not request.user.is_superuser:  # type: ignore
-        try:
-            request_employee = Employee.objects.get(user=request.user)
-        except ObjectDoesNotExist as exc:
-            raise PermissionDenied from exc
-        if not request_employee.is_admin:
-            raise PermissionDenied
+        request_employee = get_admin_employee(request)
     template = loader.get_template("add_areas.html")
     errors = []
     if request.method == "GET":
