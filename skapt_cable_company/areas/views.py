@@ -35,7 +35,7 @@ def add_area(request: HttpRequest):
     Add Area
     """
     if not request.user.is_superuser:  # type: ignore
-        request_employee = get_admin_employee(request)
+        get_admin_employee(request)
     template = loader.get_template("add_areas.html")
     errors = []
     if request.method == "GET":
@@ -45,7 +45,6 @@ def add_area(request: HttpRequest):
         if area_form.is_valid():
             area = area_form.save()
             return redirect(f"/areas/{area.pk}")
-        errors.append("Invalid Input Data")
     else:
         raise BadRequest
     return HttpResponse(

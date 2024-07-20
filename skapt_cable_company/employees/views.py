@@ -68,7 +68,6 @@ def add_employee(request: HttpRequest):
             if request_employee.is_admin or request.user.is_superuser:  # type: ignore
                 return redirect(f"/employees/{new_user.username}")
             return redirect("/employees")
-        errors.append("Invalid Input Data")
     else:
         raise BadRequest
     return HttpResponse(
