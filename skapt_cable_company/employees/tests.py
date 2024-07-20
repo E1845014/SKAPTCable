@@ -4,72 +4,18 @@ Module for all the Employees Related Test Cases
 
 # pylint: disable=imported-auth-user
 
-from time import time
-from typing import List
-
-from django.test import TestCase
 from django.contrib.auth.models import User
 from django.forms import Form
 
 
 from common.models import Employee
+from common.tests import BaseTestCase
 
 
-class EmployeeBaseTestCase(TestCase):
+class EmployeeBaseTestCase(BaseTestCase):
     """
     Base Test Functionalities for Employee App Testings
     """
-
-    def setUp(self):
-        """
-        Runs on Test Case Start up
-
-        Contains Base Data needed for testing
-        """
-        self.raw_password = "top_secret"
-        self.super_user = User.objects.create_superuser(
-            username="jacob", email="jacob@…", password=self.raw_password
-        )
-
-    def get_random_phone_number(self):
-        """
-        Generate Random Phone Number within the Regex Validation
-        """
-        return f"07{str(int(time()*100))[-8:]}"
-
-    def generate_employees(self, n=5):
-        """
-        Generate n Number of Employees
-        """
-        employees: List[Employee] = []
-        for i in range(n):
-            user = User.objects.create_user(
-                username=f"{int(time())}{i}",
-                email=f"{int(time())}@{i}xz.com",
-                password=self.raw_password,
-            )
-            user.save()
-            employee = Employee.objects.create(
-                user=user, phone_number=self.get_random_phone_number()
-            )
-            employees.append(employee)
-        return employees
-
-    def login_as_employee(self, employee: Employee):
-        """
-        Login Client as an employee
-        """
-        return self.client.login(
-            username=employee.user.username, password=self.raw_password
-        )
-
-    def login_as_superuser(self):
-        """
-        Login Client as super user
-        """
-        return self.client.login(
-            username=self.super_user.username, password=self.raw_password
-        )
 
 
 class EmployeesTestCase(EmployeeBaseTestCase):
@@ -126,21 +72,33 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
 
     def test_page_renders_for_employees(self):
         """
-        Test if the page only loads for employees and super admins
+        Test if the page only loads for employees
         """
         employee = self.generate_employees(1)[0]
-        non_employee_user = User.objects.create_user(
-            "username", "email@mail.co", self.raw_password
-        )
+
         self.login_as_employee(employee)
         response = self.client.get("/employees/add")
         self.assertEqual(response.status_code, 200)
         self.client.logout()
+
+    def test_page_not_renders_for_non_employee(self):
+        """
+        Test if the page not loads for non employees
+        """
+        non_employee_user = User.objects.create_user(
+            "username", "email@mail.co", self.raw_password
+        )
+        non_employee_user.save()
         self.client.login(
-            username=non_employee_user.username, passsword=self.raw_password
+            username=non_employee_user.username, password=self.raw_password
         )
         response = self.client.get("/employees/add")
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 403)
+
+    def test_page_renders_form_superuser(self):
+        """
+        Test if the page only loads for super user
+        """
         self.login_as_superuser()
         response = self.client.get("/employees/add")
         self.assertEqual(response.status_code, 200)
@@ -169,9 +127,7 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         Test the form submission on correct variables
         """
         employee = self.generate_employees(1)[0]
-        employee.is_admin = True
-        employee.save()
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         request_object = {}
         new_employee_phone_number = self.get_random_phone_number()
         for field in (
@@ -256,12 +212,10 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
 
     def test_errored_form_submission(self):
         """
-        Test the form submission on correct variables
+        Test the form submission on incorrect variables
         """
         employee = self.generate_employees(1)[0]
-        employee.is_admin = True
-        employee.save()
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         request_object = {}
         new_employee_phone_number = self.get_random_phone_number()
         for field in (
@@ -310,9 +264,7 @@ class ViewEmployeeTestCase(EmployeeBaseTestCase):
         Test if the page renders for admins to view other employees
         """
         employees = self.generate_employees()
-        employees[0].is_admin = True
-        employees[0].save()
-        self.login_as_employee(employees[0])
+        self.login_as_employee(employees[0], True)
         response = self.client.get(f"/employees/{employees[1].user.username}")
         self.assertEqual(response.status_code, 200)
 
@@ -347,6 +299,7 @@ class ViewEmployeeTestCase(EmployeeBaseTestCase):
         employees = self.generate_employees()
         self.login_as_employee(employees[0])
         response = self.client.get(f"/employees/{employees[0].user.username}")
+        self.assertIn("user_form", response.context)
         user_form: Form = response.context["user_form"]
 
         for expected_user_form_field in expected_user_form_fields:
@@ -446,9 +399,7 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         """
         employees = self.generate_employees()
         employee = employees[0]
-        employee.is_admin = True
-        employee.save()
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         response = self.client.get(f"/employees/{employees[1].user.username}/update")
         request_object = {}
         new_employee_phone_number = "0771234458"
@@ -517,7 +468,7 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         )
         self.assertTrue(len(new_employee_query) == 0)
 
-    def test_for_non_admins(self):
+    def test_for_non_employee(self):
         """
         Test the form submission as non employee failing
         """
@@ -600,7 +551,8 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         self.assertTemplateUsed("update_employee.html")
         self.assertFalse(employee_form.is_valid())
         self.assertIn(
-            "Phone Number Already Exists", employee_form.errors["phone_number"]
+            "Employee with this Phone number already exists.",
+            employee_form.errors["phone_number"],
         )
         new_employee_query = Employee.objects.filter(
             phone_number=employees[1].phone_number
