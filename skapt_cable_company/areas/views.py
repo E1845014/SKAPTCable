@@ -12,6 +12,7 @@ from common.models import Employee, Area
 from common.form import UserBaseForm
 
 from employees.forms import EmployeeForm
+from employees.models import get_employee_or_super_admin
 
 from .forms import AreaForm
 
@@ -106,12 +107,7 @@ def update_area(request: HttpRequest, area_id: int):
     """
     template = loader.get_template("update_area.html")
     area = get_object_or_404(Area, pk=area_id)
-    request_employee = request.user
-    if not request_employee.is_superuser:  # type: ignore
-        try:
-            request_employee = Employee.objects.get(user=request.user)
-        except ObjectDoesNotExist as exc:
-            raise PermissionDenied from exc
+    request_employee = get_employee_or_super_admin(request)
     if area.agent.is_accessible(request_employee):
         if request.method == "GET":
             area_form = AreaForm(instance=area)

@@ -15,6 +15,7 @@ from django.db.models import Count
 from common.models import Employee
 from common.form import UserBaseForm
 
+from .models import get_employee_or_super_admin
 from .forms import EmployeeForm
 
 
@@ -125,12 +126,7 @@ def update_employee(request: HttpRequest, username: str):
     """
     template = loader.get_template("update_employee.html")
     employee = get_object_or_404(Employee, user__username=username)
-    request_employee = request.user
-    if not request_employee.is_superuser:  # type: ignore
-        try:
-            request_employee = Employee.objects.get(user=request.user)
-        except ObjectDoesNotExist as exc:
-            raise PermissionDenied from exc
+    request_employee = get_employee_or_super_admin(request)
     errors = []
     if employee.is_accessible(request_employee):
         if request.method == "GET":
