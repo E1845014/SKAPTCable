@@ -142,17 +142,11 @@ def update_employee(request: HttpRequest, username: str):
             if user_form.is_valid() and employee_form.is_valid():
                 new_user = user_form.save(commit=False)
                 employee = employee_form.save(commit=False)
-                if (
-                    not Employee.objects.filter(phone_number=employee.phone_number)
-                    .exclude(user=employee.user)
-                    .exists()
-                ):
-                    new_user.username = employee.phone_number
-                    employee.is_admin = employee.is_admin and (request.user.is_superuser or request_employee.is_admin)  # type: ignore
-                    new_user.save()
-                    employee.save()
-                    return redirect(f"/employees/{new_user.username}")
-                employee_form.add_error("phone_number", "Phone Number Already Exists")
+                new_user.username = employee.phone_number
+                employee.is_admin = employee.is_admin and (request.user.is_superuser or request_employee.is_admin)  # type: ignore
+                new_user.save()
+                employee.save()
+                return redirect(f"/employees/{new_user.username}")
         return HttpResponse(
             template.render(
                 {
