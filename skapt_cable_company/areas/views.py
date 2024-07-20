@@ -73,12 +73,7 @@ def view_area(request: HttpRequest, area_id: int):
     """
     template = loader.get_template("area.html")
     area = get_object_or_404(Area, pk=area_id)
-    request_employee = request.user
-    if not request_employee.is_superuser:  # type: ignore
-        try:
-            request_employee = Employee.objects.get(user=request.user)
-        except ObjectDoesNotExist as exc:
-            raise PermissionDenied from exc
+    request_employee = get_employee_or_super_admin(request)
     if area.agent.is_accessible(request_employee):
         area_form = AreaForm(instance=area)
         employee_form = EmployeeForm(instance=area.agent)
