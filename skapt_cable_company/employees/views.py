@@ -12,7 +12,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.db.models import Count
 
-from common.models import Employee, Area
+from common.models import Employee
 from common.form import UserBaseForm
 
 from .forms import EmployeeForm

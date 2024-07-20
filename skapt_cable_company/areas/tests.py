@@ -2,15 +2,13 @@
 Module for all Area Tests
 """
 
-from time import time
-from typing import List
+# pylint: disable=imported-auth-user
 
-from django.test import TestCase
 from django.contrib.auth.models import User
 from django.forms import Form
 
 
-from common.models import Employee, Area
+from common.models import Area
 from common.tests import BaseTestCase
 
 from .forms import AreaForm
@@ -311,12 +309,21 @@ class UpdateAreaTestCase(AreaBaseTestCase):
     """
 
     def get_url(self, area: Area):
+        """
+        Generate Update Area URL for a given area
+        """
         return f"/areas/{area.pk}/update"
 
     def generate_response(self, area: Area):
+        """
+        Generate Update Area GET Response for a given area
+        """
         return self.client.get(self.get_url(area))
 
     def get_initial_values(self, area: Area):
+        """
+        Generate Initial Values of an Area that has to be used in the Update POST Request
+        """
         self.login_as_employee(area.agent)
         response = self.generate_response(area)
         area_form: Form = response.context["area_form"]

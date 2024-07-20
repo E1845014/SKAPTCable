@@ -4,7 +4,7 @@ Module for all Areas App Related Forms
 
 from typing import List, Union
 
-from django.forms import ModelForm, ChoiceField
+from django.forms import ModelForm
 
 from common.models import Area
 from common.form import disable_fields
@@ -34,7 +34,6 @@ class AreaForm(ModelForm):
             elif field.widget.input_type == "select":
                 field.widget.attrs["class"] = "input is-rounded is-info"
                 field.widget.required = True
-
 
     def disable_fields(self, fields: Union[None, List[str]] = None):
         """
