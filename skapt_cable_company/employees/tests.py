@@ -600,7 +600,8 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         self.assertTemplateUsed("update_employee.html")
         self.assertFalse(employee_form.is_valid())
         self.assertIn(
-            "Phone Number Already Exists", employee_form.errors["phone_number"]
+            "Employee with this Phone number already exists.",
+            employee_form.errors["phone_number"],
         )
         new_employee_query = Employee.objects.filter(
             phone_number=employees[1].phone_number
