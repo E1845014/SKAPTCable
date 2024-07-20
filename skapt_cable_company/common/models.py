@@ -46,6 +46,9 @@ class Employee(models.Model):
 
 
 class Area(models.Model):
+    """
+    Class for Area Model
+    """
 
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
