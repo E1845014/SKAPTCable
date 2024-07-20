@@ -178,6 +178,13 @@ class EmployeeTestCase(BaseTestCase):
             f"{user.first_name} {user.last_name}",
         )
 
+    def test_accessible_by_customer(self):
+        """
+        Test Employee's accessiblity by a customer
+        """
+        customer = self.generate_customers(1)[0]
+        self.assertTrue(customer.get_agent().is_accessible(customer))
+
 
 class AreaTestCase(BaseTestCase):
     """
