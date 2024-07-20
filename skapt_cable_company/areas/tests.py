@@ -102,13 +102,7 @@ class AddAreaTestCase(AreaBaseTestCase):
         """
         Test if the page not loads for non employees
         """
-        non_employee_user = User.objects.create_user(
-            "username", "email@mail.co", self.raw_password
-        )
-        non_employee_user.save()
-        self.client.login(
-            username=non_employee_user.username, password=self.raw_password
-        )
+        self.login_as_non_employee()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 
