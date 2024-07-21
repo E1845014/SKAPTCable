@@ -106,6 +106,7 @@ class Area(models.Model):
             return user.is_superuser
         if isinstance(user, Employee):
             return user.is_admin or user == self.agent
+        return False
 
     @property
     def customers(self):
@@ -169,20 +170,20 @@ class Customer(models.Model):
         if isinstance(user, Employee):
             return user.is_admin or self.get_agent() == user
         return self.is_accessible(user.user)  # type: ignore
-    
+
     @property
     def agent(self):
         """
         Get Agent
         """
         return self.area.agent
-    
+
     @property
     def payments(self):
         """
         Get Payments
         """
-        return Payment.objects.filter(customer = self)
+        return Payment.objects.filter(customer=self)
 
 
 class Payment(models.Model):
