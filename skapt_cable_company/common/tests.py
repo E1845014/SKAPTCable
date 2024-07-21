@@ -270,10 +270,17 @@ class AreaTestCase(BaseTestCase):
 
     def test_editable_by_agent(self):
         """
-        Test Area Editability by superuser by the agent
+        Test Area Editability by the agent
         """
         area = self.generate_areas(1)[0]
         self.assertTrue(area.is_editable(area.agent))
+
+    def test_editable_by_customer(self):
+        """
+        Test Area editability by customer
+        """
+        customer = self.generate_customers(1)[0]
+        self.assertFalse(customer.area.is_editable(customer))
 
     def test_customers(self):
         """
