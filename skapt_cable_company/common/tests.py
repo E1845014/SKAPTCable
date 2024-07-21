@@ -158,6 +158,9 @@ class BaseTestCase(TestCase):
         )
 
     def login_as_non_employee(self):
+        """
+        Login Client as a non employee
+        """
         non_employee_user = User.objects.create_user(
             "username", "email@mail.co", self.raw_password
         )

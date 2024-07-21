@@ -5,7 +5,7 @@ Module to contain all Area App View Controller Codes
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest
 from django.template import loader
-from django.core.exceptions import BadRequest, PermissionDenied, ObjectDoesNotExist
+from django.core.exceptions import BadRequest, PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
 
 from common.models import Employee, Area
