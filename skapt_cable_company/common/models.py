@@ -58,6 +58,27 @@ class Employee(models.Model):
         """
         return self.user.get_short_name()
 
+    @property
+    def collected_payments(self):
+        """
+        Get Payments collected by this employee
+        """
+        return Payment.objects.filter(employee=self)
+
+    @property
+    def customers(self):
+        """
+        Get Customers managed by this employee
+        """
+        return Customer.objects.filter(area__agent=self)
+
+    @property
+    def customer_payments(self):
+        """
+        Get Payments of the employee managed area customers
+        """
+        return Payment.objects.filter(customer__area__agent=self)
+
 
 class Area(models.Model):
     """
@@ -73,9 +94,32 @@ class Area(models.Model):
 
     def is_accessible(self, user: Union[User, AbstractBaseUser, AnonymousUser, object]):
         """
-        Method to check if the Employee can be accessible by the user
+        Method to check if the Area can be accessible by the user
         """
         return self.agent.is_accessible(user)
+
+    def is_editable(self, user: Union[User, AbstractBaseUser, AnonymousUser, object]):
+        """
+        Method to check if the Area can be editable by the user
+        """
+        if isinstance(user, User):
+            return user.is_superuser
+        if isinstance(user, Employee):
+            return user.is_admin or user == self.agent
+
+    @property
+    def customers(self):
+        """
+        Get customers in this area
+        """
+        return Customer.objects.filter(area=self)
+
+    @property
+    def customer_payments(self):
+        """
+        Get Customer Payments in this area
+        """
+        return Payment.objects.filter(customer__area=self)
 
 
 class Customer(models.Model):
@@ -125,6 +169,20 @@ class Customer(models.Model):
         if isinstance(user, Employee):
             return user.is_admin or self.get_agent() == user
         return self.is_accessible(user.user)  # type: ignore
+    
+    @property
+    def agent(self):
+        """
+        Get Agent
+        """
+        return self.area.agent
+    
+    @property
+    def payments(self):
+        """
+        Get Payments
+        """
+        return Payment.objects.filter(customer = self)
 
 
 class Payment(models.Model):
