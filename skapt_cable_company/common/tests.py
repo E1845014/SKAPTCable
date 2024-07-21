@@ -196,6 +196,50 @@ class EmployeeTestCase(BaseTestCase):
         customer = self.generate_customers(1)[0]
         self.assertTrue(customer.get_agent().is_accessible(customer))
 
+    def test_areas(self):
+        """
+        Test Areas populated
+        """
+        employee = self.generate_employees()[0]
+        areas = self.generate_areas(employees=[employee])
+        for area in employee.areas:
+            self.assertIn(area, areas)
+
+    def test_name(self):
+        """
+        Test Name of Employee
+        """
+        employee = self.generate_employees()[0]
+        self.assertEqual(employee.name, employee.user.get_short_name())
+
+    def test_collected_payments(self):
+        """
+        Test Payments Populated
+        """
+        payments = self.generate_payments()
+        employee = choice(payments).employee
+        for payment in Payment.objects.filter(employee=employee):
+            self.assertIn(payment, employee.collected_payments)
+
+    def test_customers(self):
+        """
+        Test Customer Populated
+        """
+        area = self.generate_areas(1)[0]
+        customers = self.generate_customers(areas=[area])
+        for customer in area.agent.customers:
+            self.assertIn(customer, customers)
+
+    def test_customer_payments(self):
+        """
+        Test Customer Payments Populated
+        """
+        area = self.generate_areas(1)[0]
+        customers = self.generate_customers(areas=[area])
+        payments = self.generate_payments(customers=customers)
+        for payment in area.agent.customer_payments:
+            self.assertIn(payment, payments)
+
 
 class AreaTestCase(BaseTestCase):
     """
@@ -215,6 +259,47 @@ class AreaTestCase(BaseTestCase):
         """
         area = self.generate_areas(1)[0]
         self.assertTrue(area.is_accessible(area.agent))
+
+    def test_editable_by_superuser(self):
+        """
+        Test Area Editability by superuser
+        """
+        superuser = User.objects.create_superuser("username", None, "password")
+        area = self.generate_areas(1)[0]
+        self.assertTrue(area.is_editable(superuser))
+
+    def test_editable_by_agent(self):
+        """
+        Test Area Editability by the agent
+        """
+        area = self.generate_areas(1)[0]
+        self.assertTrue(area.is_editable(area.agent))
+
+    def test_editable_by_customer(self):
+        """
+        Test Area editability by customer
+        """
+        customer = self.generate_customers(1)[0]
+        self.assertFalse(customer.area.is_editable(customer))
+
+    def test_customers(self):
+        """
+        Test Area Customers Populated
+        """
+        area = self.generate_areas(1)[0]
+        customers = self.generate_customers(areas=[area])
+        for customer in area.customers:
+            self.assertIn(customer, customers)
+
+    def test_customer_payments(self):
+        """
+        Test Area Customer Payments Populated
+        """
+        area = self.generate_areas(1)[0]
+        customers = self.generate_customers(areas=[area])
+        payments = self.generate_payments(customers=customers)
+        for payment in area.customer_payments:
+            self.assertIn(payment, payments)
 
 
 class CustomerTestCase(BaseTestCase):
@@ -242,6 +327,23 @@ class CustomerTestCase(BaseTestCase):
         """
         customer = self.generate_customers(1)[0]
         self.assertTrue(customer.is_accessible(customer.get_agent()))
+
+    def test_agent(self):
+        """
+        Test Customer Agent Populated
+        """
+        area = self.generate_areas(1)[0]
+        customer = self.generate_customers(1, [area])[0]
+        self.assertEqual(customer.agent, area.agent)
+
+    def test_payments(self):
+        """
+        Test Customer Payments Populated
+        """
+        customer = self.generate_customers(1)[0]
+        payments = self.generate_payments(customers=[customer])
+        for payment in customer.payments:
+            self.assertIn(payment, payments)
 
 
 class PaymentTestCase(BaseTestCase):
