@@ -7,13 +7,15 @@ Module to contain all Employees App View Controller Codes
 from django.http import HttpResponse, HttpRequest
 from django.template import loader
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import BadRequest, PermissionDenied, ObjectDoesNotExist
+from django.core.exceptions import BadRequest, PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import User
+from django.db.models import Count
 
 from common.models import Employee
 from common.form import UserBaseForm
 
+from .models import get_employee_or_super_admin, get_employee
 from .forms import EmployeeForm
 
 
@@ -23,8 +25,12 @@ def index(request: HttpRequest):
     Employees List Page View Controller
     """
     template = loader.get_template("employees.html")
-    if Employee.objects.filter(user=request.user).exists():
-        employees = Employee.objects.all().select_related("user")
+    if Employee.objects.filter(user=request.user).exists() or request.user.is_superuser:  # type: ignore
+        employees = (
+            Employee.objects.all()
+            .select_related("user")
+            .annotate(area_count=Count("area"))
+        )
         return HttpResponse(template.render({"employees": employees}, request))
     raise PermissionDenied
 
@@ -35,10 +41,7 @@ def add_employee(request: HttpRequest):
     Add Employee
     """
     if not request.user.is_superuser:  # type: ignore
-        try:
-            request_employee = Employee.objects.get(user=request.user)
-        except ObjectDoesNotExist as exc:
-            raise PermissionDenied from exc
+        request_employee = get_employee(request)
     template = loader.get_template("add_employees.html")
     errors = []
     if request.method == "GET":
@@ -65,7 +68,6 @@ def add_employee(request: HttpRequest):
             if request_employee.is_admin or request.user.is_superuser:  # type: ignore
                 return redirect(f"/employees/{new_user.username}")
             return redirect("/employees")
-        errors.append("Invalid Input Data")
     else:
         raise BadRequest
     return HttpResponse(
@@ -89,12 +91,7 @@ def view_employee(request: HttpRequest, username: str):
     """
     template = loader.get_template("employee.html")
     employee = get_object_or_404(Employee, user__username=username)
-    request_employee = request.user
-    if not request_employee.is_superuser:  # type: ignore
-        try:
-            request_employee = Employee.objects.get(user=request.user)
-        except ObjectDoesNotExist as exc:
-            raise PermissionDenied from exc
+    request_employee = get_employee_or_super_admin(request)
     if employee.is_accessible(request_employee):
         user_form = UserBaseForm(instance=employee.user)
         employee_form = EmployeeForm(instance=employee)
@@ -120,12 +117,7 @@ def update_employee(request: HttpRequest, username: str):
     """
     template = loader.get_template("update_employee.html")
     employee = get_object_or_404(Employee, user__username=username)
-    request_employee = request.user
-    if not request_employee.is_superuser:  # type: ignore
-        try:
-            request_employee = Employee.objects.get(user=request.user)
-        except ObjectDoesNotExist as exc:
-            raise PermissionDenied from exc
+    request_employee = get_employee_or_super_admin(request)
     errors = []
     if employee.is_accessible(request_employee):
         if request.method == "GET":

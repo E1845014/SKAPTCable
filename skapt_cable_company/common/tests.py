@@ -157,6 +157,17 @@ class BaseTestCase(TestCase):
             username=self.super_user.username, password=self.raw_password
         )
 
+    def login_as_non_employee(self):
+        """
+        Login Client as a non employee
+        """
+        non_employee_user = User.objects.create_user(
+            "username", "email@mail.co", self.raw_password
+        )
+        return self.client.login(
+            username=non_employee_user.username, password=self.raw_password
+        )
+
 
 class EmployeeTestCase(BaseTestCase):
     """
@@ -175,7 +186,7 @@ class EmployeeTestCase(BaseTestCase):
         employee = Employee.objects.create(user=user, phone_number="0777777777")
         self.assertEqual(
             str(employee),
-            f"{str(user)} {user.first_name} {user.last_name}",
+            f"{user.first_name} {user.last_name}",
         )
 
     def test_accessible_by_customer(self):

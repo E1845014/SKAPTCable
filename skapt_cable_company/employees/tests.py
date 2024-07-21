@@ -85,13 +85,7 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         """
         Test if the page not loads for non employees
         """
-        non_employee_user = User.objects.create_user(
-            "username", "email@mail.co", self.raw_password
-        )
-        non_employee_user.save()
-        self.client.login(
-            username=non_employee_user.username, password=self.raw_password
-        )
+        self.login_as_non_employee()
         response = self.client.get("/employees/add")
         self.assertEqual(response.status_code, 403)
 
@@ -108,7 +102,7 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         Test the fields passed in the form
         """
         employee = self.generate_employees(1)[0]
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         response = self.client.get("/employees/add")
         self.assertIn("user_form", response.context)
         user_form: Form = response.context["user_form"]
@@ -127,7 +121,9 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         Test the form submission on correct variables
         """
         employee = self.generate_employees(1)[0]
-        self.login_as_employee(employee, True)
+        employee.is_admin = True
+        employee.save()
+        self.login_as_employee(employee)
         request_object = {}
         new_employee_phone_number = self.get_random_phone_number()
         for field in (
@@ -215,7 +211,9 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         Test the form submission on incorrect variables
         """
         employee = self.generate_employees(1)[0]
-        self.login_as_employee(employee, True)
+        employee.is_admin = True
+        employee.save()
+        self.login_as_employee(employee)
         request_object = {}
         new_employee_phone_number = self.get_random_phone_number()
         for field in (
@@ -264,7 +262,9 @@ class ViewEmployeeTestCase(EmployeeBaseTestCase):
         Test if the page renders for admins to view other employees
         """
         employees = self.generate_employees()
-        self.login_as_employee(employees[0], True)
+        employees[0].is_admin = True
+        employees[0].save()
+        self.login_as_employee(employees[0])
         response = self.client.get(f"/employees/{employees[1].user.username}")
         self.assertEqual(response.status_code, 200)
 
@@ -399,7 +399,9 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         """
         employees = self.generate_employees()
         employee = employees[0]
-        self.login_as_employee(employee, True)
+        employee.is_admin = True
+        employee.save()
+        self.login_as_employee(employee)
         response = self.client.get(f"/employees/{employees[1].user.username}/update")
         request_object = {}
         new_employee_phone_number = "0771234458"

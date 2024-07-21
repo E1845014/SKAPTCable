@@ -32,7 +32,7 @@ class Employee(models.Model):
     is_admin = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return f"{str(self.user)} {self.user.first_name} {self.user.last_name}"
+        return f"{self.user.first_name} {self.user.last_name}"
 
     def is_accessible(self, user: Union[User, AbstractBaseUser, AnonymousUser, object]):
         """
@@ -43,6 +43,20 @@ class Employee(models.Model):
         if isinstance(user, Customer):
             return user.get_agent() == self
         return user.is_admin or (self.is_accessible(user.user))  # type: ignore
+
+    @property
+    def areas(self):
+        """
+        Get All Areas
+        """
+        return Area.objects.filter(agent=self)
+
+    @property
+    def name(self):
+        """
+        Get Employee Name
+        """
+        return self.user.get_short_name()
 
 
 class Area(models.Model):

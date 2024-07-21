@@ -1,0 +1,41 @@
+{% extends "base.html" %} {% block content %}
+<div class="block">
+  <h1 class="is-size-1 has-text-centered">Areas Page</h1>
+  <div class="columns">
+    <div class="column is-2 is-offset-10">
+      <a href="/areas/add">
+        <button
+          class="button is-fullwidth is-primary"
+          type="button"
+          value="Add Area"
+        >
+          Add Area
+        </button>
+      </a>
+    </div>
+  </div>
+  <table class="table is-fullwidth is-striped is-hoverable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Agent</th>
+        <th>Customer Counts</th>
+        <th>Payments Generated</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for area in areas %}
+      <tr
+        data-url="{% url 'View Area' area.pk %}"
+        class="clickable-row"
+      >
+        <td>{{ area.name }}</td>
+        <td>{{ area.agent.name }}</td>
+        <td>0</td>
+        <td>0</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

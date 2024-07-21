@@ -28,6 +28,7 @@ jobs:
       - name: Run migrations
         run: |
           cd skapt_cable_company  # Change directory to your Django project folder
+          python manage.py makemigrations
           python manage.py migrate
 
       - name: Run tests with coverage

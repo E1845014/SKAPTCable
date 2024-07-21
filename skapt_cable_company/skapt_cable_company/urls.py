@@ -6,5 +6,6 @@ from django.contrib import admin
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("employees/", include("employees.urls")),
+    path("areas/", include("areas.urls")),
     path("", include("login.urls")),
 ]

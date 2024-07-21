@@ -4,14 +4,24 @@
 
   <form action="" method="post">
     {% with form=user_form %}
-      {% include 'form.html' %}
+    {% include 'form.html' %}
     {% endwith %}
     {% with form=employee_form %}
-      {% include 'form.html' %}
+    {% include 'form.html' %}
     {% endwith %}
   </form>
   <a href="{% url 'Update Employee' employee.user.username %}"
     ><button class="button is-primary">Update</button></a
   >
+  <div class="block" style="padding-top: 20px;">
+    <div class="panel is-info">
+      <p class="panel-heading">Areas</p>
+    {% for area in employee.areas %}
+      <a class="panel-block">
+        {{ area.name }}
+      </a>
+    {% endfor %}
+    </div>
+  </div>
 </div>
 {% endblock %}
