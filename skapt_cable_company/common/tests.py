@@ -219,7 +219,7 @@ class EmployeeTestCase(BaseTestCase):
         payments = self.generate_payments()
         employee = choice(payments).employee
         for payment in Payment.objects.filter(employee=employee):
-            self.assertIn(payment, payments)
+            self.assertIn(payment, employee.collected_payments)
 
     def test_customers(self):
         """
