@@ -1,0 +1,60 @@
+{% extends "base.html" %} {% block content %}
+<div class="block">
+  <h1 class="is-size-1 has-text-centered">Customers Page</h1>
+  <div class="columns">
+    <div class="column is-2 is-offset-10">
+      <a href="/customers/add">
+        <button
+          class="button is-fullwidth is-primary"
+          type="button"
+          value="Add Area"
+        >
+          Add Customer
+        </button>
+      </a>
+    </div>
+  </div>
+  <table class="table is-fullwidth is-striped is-hoverable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone Number</th>
+        <th>Address</th>
+        <th>NIC No</th>
+        <th>Area</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for customer in customers %}
+      <tr
+        data-url="{% url 'View Area' area.pk %}"
+        class="clickable-row"
+      >
+        <td>{{ customer.name }}</td>
+        <td>{{ customer.phone_number }}</td>
+        <td>{{ customer.address }}</td>
+        <td>{{ customer.identity_no }}</td>
+        <td>{{ customer.area }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <nav class="pagination" role="navigation" aria-label="pagination">
+    {% if customers.has_previous %}
+      <a class="pagination-previous" href="?page={{ page.previous_page_number }}">Previous</a>
+    {% endif %}
+  
+    <ul class="pagination-list">
+      {% for page_num in paginator.page_range %}
+        <li {% if page_num == page.number %}class="active"{% endif %}>
+          <a href="?page={{ page_num }}">{{ page_num }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  
+    {% if customers.has_next %}
+      <a class="pagination-next" href="?page={{ page.next_page_number }}">Next</a>
+    {% endif %}
+  </nav>
+</div>
+{% endblock %}
