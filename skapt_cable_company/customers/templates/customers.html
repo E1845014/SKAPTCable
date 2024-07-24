@@ -27,10 +27,10 @@
     <tbody>
       {% for customer in customers %}
       <tr
-        data-url="{% url 'View Area' area.pk %}"
+        data-url="{% url 'View Customer' customer.pk %}"
         class="clickable-row"
       >
-        <td>{{ customer.name }}</td>
+        <td>{{ customer.user.first_name }}</td>
         <td>{{ customer.phone_number }}</td>
         <td>{{ customer.address }}</td>
         <td>{{ customer.identity_no }}</td>
