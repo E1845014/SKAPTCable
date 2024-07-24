@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth.models import User
 
-from common.models import Customer
+from common.models import Customer, Area
 from common.form import UserBaseForm
 
 from employees.models import get_employee_or_super_admin, get_admin_employee
@@ -85,6 +85,8 @@ def add_customer(request: HttpRequest):
     if request.method == "GET":
         customer_form = CustomerForm("ADD")
         user_form = UserBaseForm()
+        if Area.objects.all().count() == 0:
+            return redirect(f"/areas/add")
     elif request.method == "POST":
         user_form = UserBaseForm(request.POST)
         customer_form = CustomerForm("ADD", request.POST)

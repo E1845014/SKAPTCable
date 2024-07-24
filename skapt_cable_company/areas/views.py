@@ -39,6 +39,8 @@ def add_area(request: HttpRequest):
     template = loader.get_template("add_areas.html")
     errors = []
     if request.method == "GET":
+        if Employee.objects.all().count() == 0:
+            return redirect("/employees/add")
         area_form = AreaForm()
     elif request.method == "POST":
         area_form = AreaForm(request.POST)
