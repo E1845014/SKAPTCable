@@ -7,7 +7,13 @@ from typing import List, Union, Literal
 from django.forms import ModelForm
 
 from common.models import Customer
-from common.form import disable_fields
+from common.form import (
+    disable_fields,
+    SKAPTTextArea,
+    SKAPTTextInput,
+    SKAPTDateInput,
+    SKAPTChoiceInput,
+)
 
 
 class CustomerForm(ModelForm):
@@ -34,6 +40,15 @@ class CustomerForm(ModelForm):
             "connection_start_date",
             "area",
         ]
+        widgets = {
+            "phone_number": SKAPTTextInput(attrs={'type': 'number'}),
+            "address": SKAPTTextArea(),
+            "identity_no": SKAPTTextInput(),
+            "box_ca_number": SKAPTTextInput(),
+            "customer_number": SKAPTTextInput(),
+            "connection_start_date": SKAPTDateInput(),
+            "area": SKAPTChoiceInput(),
+        }
 
     def __init__(self, action: Literal["ADD", "UPDATE", "VIEW"], *args, **kwargs):
         """
@@ -43,9 +58,6 @@ class CustomerForm(ModelForm):
         if action == "ADD":
             del self.fields["customer_number"]
             del self.fields["under_repair"]
-        for field in self.fields.values():
-            if field.widget.input_type == "text":
-                field.widget.attrs["class"] = "input is-rounded"
 
     def disable_fields(self, fields: Union[None, List[str]] = None):
         """
