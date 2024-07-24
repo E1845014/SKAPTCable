@@ -9,10 +9,15 @@ from django.core.exceptions import BadRequest, PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.contrib.auth.models import User
 
 from common.models import Customer
+from common.form import UserBaseForm
 
 from employees.models import get_employee_or_super_admin, get_admin_employee
+
+from .forms import CustomerForm
+from .models import generate_customer_number
 
 
 @login_required
@@ -66,3 +71,43 @@ def index(request: HttpRequest):
             )
         )
     raise BadRequest
+
+
+@login_required
+def add_customer(request: HttpRequest):
+    """
+    Add Customer
+    """
+    employee = None
+    if not request.user.is_superuser:  # type: ignore
+        employee = get_admin_employee(request)
+    template = loader.get_template("add_customer.html")
+    if request.method == "GET":
+        customer_form = CustomerForm("ADD")
+        user_form = UserBaseForm()
+    elif request.method == "POST":
+        user_form = UserBaseForm(request.POST)
+        customer_form = CustomerForm("ADD", request.POST)
+        if user_form.is_valid() and customer_form.is_valid():
+            user = user_form.save(False)
+            customer = customer_form.save(False)
+            if employee is None or employee.is_admin or customer.area.agent == employee:
+                customer.customer_number = generate_customer_number(customer)
+                new_user = User.objects.create_user(
+                    customer.customer_number, user.email, customer.identity_no
+                )
+                new_user.first_name = user.first_name
+                new_user.last_name = user.last_name
+                new_user.save()
+                customer.user = new_user
+                customer.save()
+                return redirect(f"/customers/{new_user.username}")
+            raise PermissionDenied
+    else:
+        raise BadRequest
+    return HttpResponse(
+        template.render(
+            {"user_form": user_form, "customer_form": customer_form},
+            request,
+        )
+    )
