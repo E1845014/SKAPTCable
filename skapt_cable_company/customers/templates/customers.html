@@ -1,6 +1,15 @@
 {% extends "base.html" %} {% block content %}
 <div class="block">
   <h1 class="is-size-1 has-text-centered">Customers Page</h1>
+  <form method="get">
+    <input type="text" name="search_text" value="{{ request.GET.search_text }}" class="input"> 
+    <div class="columns" style="padding-top: 20px;">
+      <div class="column is-4 is-offset-4">
+        <button type="submit" class="button is-fullwidth is-info">Search</button>
+      </div>
+    </div>
+    
+</form>
   <div class="columns">
     <div class="column is-2 is-offset-10">
       <a href="/customers/add">
@@ -41,19 +50,19 @@
   </table>
   <nav class="pagination" role="navigation" aria-label="pagination">
     {% if customers.has_previous %}
-      <a class="pagination-previous" href="?page={{ page.previous_page_number }}">Previous</a>
+      <a class="pagination-previous" href="?page={{ customers.previous_page_number }}">Previous</a>
     {% endif %}
   
     <ul class="pagination-list">
       {% for page_num in paginator.page_range %}
-        <li {% if page_num == page.number %}class="active"{% endif %}>
-          <a href="?page={{ page_num }}">{{ page_num }}</a>
+        <li style="padding-right: 10px;">
+          <a href="?page={{ page_num }}"  {% if page_num == customers.number %}class="has-text-success"{% endif %}>{{ page_num }}</a>
         </li>
       {% endfor %}
     </ul>
   
     {% if customers.has_next %}
-      <a class="pagination-next" href="?page={{ page.next_page_number }}">Next</a>
+      <a class="pagination-next" href="?page={{ customers.next_page_number }}">Next</a>
     {% endif %}
   </nav>
 </div>

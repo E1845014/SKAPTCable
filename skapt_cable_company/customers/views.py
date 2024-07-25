@@ -32,7 +32,7 @@ def index(request: HttpRequest):
             size = int(size)
         else:
             size = 10
-        page_number = request.GET.get("page_number", "1")
+        page_number = request.GET.get("page", "1")
         if page_number.isnumeric():
             page_number = int(page_number)
         else:
@@ -51,7 +51,7 @@ def index(request: HttpRequest):
         else:
             customers = (
                 Customer.objects.filter(
-                    Q(customer_name__icontains=search_text)
+                    Q(customer_number__icontains=search_text)
                     | Q(identity_no__icontains=search_text)
                     | Q(user__first_name__icontains=search_text)
                     | Q(user__last_name__icontains=search_text)
@@ -105,7 +105,7 @@ def add_customer(request: HttpRequest):
                 new_user.save()
                 customer.user = new_user
                 customer.save()
-                return redirect(f"/customers/{new_user.username}")
+                return redirect(f"/customers/{new_user.pk}")
             raise PermissionDenied
     else:
         raise BadRequest
