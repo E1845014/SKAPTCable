@@ -166,7 +166,11 @@ class Customer(models.Model):
         Method to check if the Employee can be accessible by the user
         """
         if isinstance(user, User):
-            return self.user == user or user.is_superuser
+            return (
+                self.user == user
+                or user.is_superuser
+                or self.is_accessible(Employee.objects.filter(user=user)[0])
+            )
         if isinstance(user, Employee):
             return user.is_admin or self.get_agent() == user
         return self.is_accessible(user.user)  # type: ignore

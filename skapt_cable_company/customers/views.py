@@ -1,5 +1,5 @@
 """
-Module to contain all Area Customer View Controller Codes
+Module to contain all Customer View Controller Codes
 """
 
 from django.contrib.auth.decorators import login_required
@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth.models import User
 
-from common.models import Customer, Area
+from common.models import Customer, Area, Employee
 from common.form import UserBaseForm
 
 from employees.models import get_employee_or_super_admin, get_admin_employee
@@ -113,3 +113,28 @@ def add_customer(request: HttpRequest):
             request,
         )
     )
+
+
+@login_required
+def view_customer(request: HttpRequest, username: str):
+    """
+    Customer Page View Controller
+    """
+
+    template = loader.get_template("customer.html")
+    customer = get_object_or_404(Customer, pk=username)
+    if customer.is_accessible(request.user):
+        customer_form = CustomerForm("VIEW", instance=customer)
+        user_form = UserBaseForm(instance=customer.user)
+        user_form.disable_fields()
+        return HttpResponse(
+            template.render(
+                {
+                    "user_form": user_form,
+                    "customer_form": customer_form,
+                    "customer": customer,
+                },
+                request,
+            )
+        )
+    raise PermissionDenied

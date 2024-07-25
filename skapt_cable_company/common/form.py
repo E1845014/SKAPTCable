@@ -4,17 +4,13 @@ Module for all Common Shared Forms
 
 # pylint: disable=imported-auth-user
 
-from collections.abc import Callable
-from typing import Any, List, Sequence, Union
+from typing import Any, List, Union
 
-from django.db.models.manager import Manager
-from django.db.models.query import QuerySet
 from django.forms import (
     ModelForm,
     Textarea,
     TextInput,
     DateInput,
-    ModelChoiceField,
     Select,
 )
 from django.contrib.auth.models import User
@@ -30,7 +26,6 @@ def disable_fields(form: ModelForm, fields: Union[None, List[str]] = None):
         if fields == [] or field_name in fields:
             field.widget.attrs["readonly"] = True
             field.widget.attrs["style"] = "cursor: default;"
-            field.disabled = True
     return form.fields
 
 

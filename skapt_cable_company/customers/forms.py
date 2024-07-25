@@ -41,7 +41,7 @@ class CustomerForm(ModelForm):
             "area",
         ]
         widgets = {
-            "phone_number": SKAPTTextInput(attrs={'type': 'number'}),
+            "phone_number": SKAPTTextInput(attrs={"type": "number"}),
             "address": SKAPTTextArea(),
             "identity_no": SKAPTTextInput(),
             "box_ca_number": SKAPTTextInput(),
@@ -58,6 +58,11 @@ class CustomerForm(ModelForm):
         if action == "ADD":
             del self.fields["customer_number"]
             del self.fields["under_repair"]
+        elif action == "VIEW":
+            self.disable_fields()
+        else:
+            del self.fields["customer_number"]
+
 
     def disable_fields(self, fields: Union[None, List[str]] = None):
         """
