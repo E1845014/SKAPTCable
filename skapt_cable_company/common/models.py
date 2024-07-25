@@ -172,8 +172,16 @@ class Customer(models.Model):
                 or self.is_accessible(Employee.objects.filter(user=user)[0])
             )
         if isinstance(user, Employee):
-            return user.is_admin or self.get_agent() == user
+            return True
         return self.is_accessible(user.user)  # type: ignore
+    
+    def is_editable(self, user: Union[User, AbstractBaseUser, AnonymousUser, object]):
+        """
+        Method to check if the Employee can be Editable by the user
+        """
+        if isinstance(user, Employee):
+            return user.is_admin or self.get_agent() == user
+        return self.is_accessible(user)  # type: ignore
 
     @property
     def agent(self):

@@ -138,3 +138,43 @@ def view_customer(request: HttpRequest, username: str):
             )
         )
     raise PermissionDenied
+
+
+@login_required
+def update_customer(request: HttpRequest, username: str):
+    """
+    Update Customer Page View Controller
+    """
+    template = loader.get_template("update_customer.html")
+    customer = get_object_or_404(Customer, pk=username)
+    if customer.is_editable(request.user):
+        if request.method == "GET":
+            customer_form = CustomerForm("UPDATE", instance=customer)
+            user_form = UserBaseForm(instance=customer.user)
+        elif request.method == "POST":
+            customer_form = CustomerForm("UPDATE", request.POST, instance=customer)
+            user_form = UserBaseForm(request.POST, instance=customer.user)
+            if user_form.is_valid() and customer_form.is_valid():
+                new_user = user_form.save(False)
+                new_customer = customer_form.save(False)
+                if new_customer.area != customer.area:
+                    new_customer.customer_number = generate_customer_number(
+                        new_customer, True
+                    )
+                    new_user.username = new_customer.customer_number
+                new_user.save()
+                new_customer.save()
+                return redirect(f"/customers/{new_user.pk}")
+        else:
+            raise BadRequest
+        return HttpResponse(
+            template.render(
+                {
+                    "user_form": user_form,
+                    "customer_form": customer_form,
+                    "customer": customer,
+                },
+                request,
+            )
+        )
+    raise PermissionDenied
