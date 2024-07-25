@@ -42,6 +42,7 @@ def index(request: HttpRequest):
         if search_text is None:
             customers = (
                 Customer.objects.all()
+                .order_by("connection_start_date")
                 .select_related("user")
                 .select_related("area")
                 .select_related("area__agent")
@@ -55,6 +56,7 @@ def index(request: HttpRequest):
                     | Q(user__first_name__icontains=search_text)
                     | Q(user__last_name__icontains=search_text)
                 )
+                .order_by("connection_start_date")
                 .select_related("user")
                 .select_related("area")
                 .select_related("area__agent")
