@@ -46,7 +46,7 @@ class CustomersTestCase(CustomerBaseTestCase):
         response = self.client.get("/customers/")
         self.assertEqual(response.status_code, 403)
 
-    def test_shows_all_employees(self):
+    def test_shows_all_customers(self):
         """
         Test if all the employees are shown
         """
@@ -54,6 +54,64 @@ class CustomersTestCase(CustomerBaseTestCase):
         self.login_as_employee(customers[0].area.agent)
         response = self.client.get("/customers/")
         self.assertEqual(len(response.context["customers"]), len(customers))
+
+    def test_other_request_method(self):
+        """
+        Test if the customers page not renders for any other request than GET
+        """
+        employee = self.generate_employees(1)[0]
+        self.login_as_employee(employee)
+        response = self.client.post("/customers/")
+        self.assertNotEqual(response.status_code, 200)
+
+    def test_customer_size(self):
+        """
+        Test if can filter customers based on the size of the list
+        """
+        self.generate_customers()
+        employee = self.generate_employees(1)[0]
+        self.login_as_employee(employee)
+        request_size = 1
+        response = self.client.get("/customers/", {"size": request_size})
+        self.assertEqual(len(response.context["customers"]), request_size)
+
+    def test_page_number(self):
+        """
+        Test if can filter customers based on the page number
+        """
+        self.generate_customers(20)
+        employee = self.generate_employees(1)[0]
+        self.login_as_employee(employee)
+        page_number = 2
+        response = self.client.get("/customers/", {"page": page_number})
+        self.assertEqual(response.context["customers"].number, page_number)
+
+    def test_non_numeric_params(self):
+        """
+        Test if can filter customers with wrong queries
+        """
+        self.generate_customers()
+        employee = self.generate_employees(1)[0]
+        self.login_as_employee(employee)
+        request_size = self.get_random_string()
+        page_number = self.get_random_string()
+        response = self.client.get(
+            "/customers/", {"page": page_number, "size": request_size}
+        )
+        self.assertNotEqual(len(response.context["customers"]), request_size)
+        self.assertNotEqual(response.context["customers"].number, page_number)
+
+    def test_search_text(self):
+        """
+        Test if can filter customer with search text
+        """
+        customers = self.generate_customers()
+        employee = self.generate_employees(1)[0]
+        self.login_as_employee(employee)
+        response = self.client.get(
+            "/customers/", {"search_text": customers[0].identity_no}
+        )
+        self.assertEqual(response.context["customers"][0].pk, customers[0].pk)
 
 
 class AddCustomerTestCase(CustomerBaseTestCase):
