@@ -2,6 +2,8 @@
 Module to contain all Customer View Controller Codes
 """
 
+# pylint: disable=imported-auth-user
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest
 from django.template import loader
@@ -11,7 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth.models import User
 
-from common.models import Customer, Area, Employee
+from common.models import Customer, Area
 from common.form import UserBaseForm
 
 from employees.models import get_employee_or_super_admin, get_admin_employee
@@ -80,15 +82,14 @@ def add_customer(request: HttpRequest):
     """
     Add Customer
     """
-    employee = None
     if not request.user.is_superuser:  # type: ignore
-        employee = get_admin_employee(request)
+        get_admin_employee(request)
     template = loader.get_template("add_customer.html")
     if request.method == "GET":
         customer_form = CustomerForm("ADD")
         user_form = UserBaseForm()
         if Area.objects.all().count() == 0:
-            return redirect(f"/areas/add")
+            return redirect("/areas/add")
     elif request.method == "POST":
         user_form = UserBaseForm(request.POST)
         customer_form = CustomerForm("ADD", request.POST)
