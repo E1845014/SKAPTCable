@@ -51,6 +51,7 @@ def index(request: HttpRequest):
                 .select_related("area__agent__user")
             )
         else:
+            # pylint: disable=E1131,another-warning
             customers = (
                 Customer.objects.filter(
                     Q(customer_number__icontains=search_text)
@@ -64,6 +65,7 @@ def index(request: HttpRequest):
                 .select_related("area__agent")
                 .select_related("area__agent__user")
             )
+            # pylint: enable=E1131,another-warning
         p = Paginator(customers, size)
         return HttpResponse(
             template.render(
