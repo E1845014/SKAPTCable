@@ -30,6 +30,9 @@ def disable_fields(form: ModelForm, fields: Union[None, List[str]] = None):
 
 
 class SKAPTTextArea(Textarea):
+    """
+    Text Area Input
+    """
 
     def __init__(self, attrs: Union[dict[str, Any], None] = None, **kwargs) -> None:
         super().__init__(attrs, **kwargs)
@@ -37,6 +40,9 @@ class SKAPTTextArea(Textarea):
 
 
 class SKAPTTextInput(TextInput):
+    """
+    Text Input
+    """
 
     def __init__(self, attrs: Union[dict[str, Any], None] = None, **kwargs) -> None:
         super().__init__(attrs, **kwargs)
@@ -44,18 +50,21 @@ class SKAPTTextInput(TextInput):
 
 
 class SKAPTDateInput(DateInput):
+    """
+    Date Input
+    """
 
     def __init__(
-        self,
-        attrs: Union[dict[str, Any], None] = None,
-        format: Union[str, None] = None,
-        **kwargs
+        self, attrs: Union[dict[str, Any], None] = None, *args, **kwargs
     ) -> None:
-        super().__init__(attrs, format, **kwargs)
+        super().__init__(attrs, *args, **kwargs)
         self.attrs["class"] = "input is-rounded"
 
 
 class SKAPTChoiceInput(Select):
+    """
+    Choice Input
+    """
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
