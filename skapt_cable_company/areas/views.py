@@ -36,6 +36,7 @@ def add_area(request: HttpRequest):
     """
     if not request.user.is_superuser:  # type: ignore
         get_admin_employee(request)
+    
     template = loader.get_template("add_areas.html")
     errors = []
     if request.method == "GET":

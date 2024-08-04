@@ -108,8 +108,9 @@ class AddAreaTestCase(AreaBaseTestCase):
 
     def test_page_renders_form_superuser(self):
         """
-        Test if the page only loads for super user
+        Test if the page loads for super user
         """
+        self.generate_employees()
         self.login_as_superuser()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

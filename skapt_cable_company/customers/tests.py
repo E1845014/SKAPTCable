@@ -269,7 +269,7 @@ class AddCustomerTestCase(CustomerBaseTestCase):
         Test whether other request types are supported
         """
         employee = self.generate_employees(1)[0]
-        self.login_as_employee(employee)
+        self.login_as_employee(employee, True)
         response = self.client.put(self.url)
         self.assertEqual(response.status_code, 400)
 
@@ -575,7 +575,6 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
         self.assertFalse(new_customer_query.exists())
         self.assertEqual(response.status_code, 403)
 
-
     def test_invalid_data(self):
         """
         Test whether invalid data is handled
@@ -598,7 +597,7 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
         area_form: Form = response.context["customer_form"]
         self.assertFalse(area_form.is_valid())
 
-        new_area_query = Customer.objects.filter(phone_number = new_customer_phone_number)
+        new_area_query = Customer.objects.filter(phone_number=new_customer_phone_number)
         self.assertEqual(len(new_area_query), 0)
 
     def test_wrong_request_type(self):
@@ -610,7 +609,5 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
         user_form: Form = response.context["user_form"]
         customer_form: Form = response.context["customer_form"]
         request_object = {**user_form.initial, **customer_form.initial}
-        response = self.client.put(
-            f"/customers/{self.customer.pk}/update", request_object
-        )
+        response = self.client.put(self.url, request_object)
         self.assertEqual(response.status_code, 400)
