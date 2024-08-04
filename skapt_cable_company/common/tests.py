@@ -49,7 +49,8 @@ class BaseTestCase(TestCase):
         Generate n Number of Employees
         """
         employees: List[Employee] = []
-        for i in range(n):
+        initial_user_count = User.objects.count()
+        for i in range(initial_user_count, initial_user_count + n):
             user = User.objects.create_user(
                 username=f"employee_{int(time())}{i}",
                 email=f"employee_{int(time())}@{i}xz.com",
@@ -84,7 +85,8 @@ class BaseTestCase(TestCase):
         if areas is None:
             areas = self.generate_areas()
         customers: List[Customer] = []
-        for i in range(n):
+        initial_user_count = User.objects.count()
+        for i in range(initial_user_count, initial_user_count + n):
             user = User.objects.create_user(
                 username=f"customer_{int(time())}{i}",
                 email=f"customer_{int(time())}@{i}xz.com",
