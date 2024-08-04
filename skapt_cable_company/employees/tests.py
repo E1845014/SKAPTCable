@@ -89,7 +89,7 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
         response = self.client.get("/employees/add")
         self.assertEqual(response.status_code, 403)
 
-    def test_page_renders_form_superuser(self):
+    def test_page_renders_for_superuser(self):
         """
         Test if the page only loads for super user
         """
