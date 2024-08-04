@@ -54,10 +54,8 @@ class SKAPTDateInput(DateInput):
     Date Input
     """
 
-    def __init__(
-        self, attrs: Union[dict[str, Any], None] = None, *args, **kwargs
-    ) -> None:
-        super().__init__(attrs, *args, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.attrs["class"] = "input is-rounded"
 
 
