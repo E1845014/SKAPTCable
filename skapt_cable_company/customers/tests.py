@@ -150,22 +150,11 @@ class AddCustomerTestCase(CustomerBaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
-    def test_page_not_renders_for_non_admin_employees(self):
+    def test_page_not_renders(self):
         """
-        Test if the Add Customer page not loads for non admin employees
+        Test if the add Customer Page not renders for selected user groups
         """
-        employee = self.areas[0].agent
-        self.login_as_employee(employee)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_page_not_renders_for_non_employees(self):
-        """
-        Test if the Add Customer page not renders for non employees
-        """
-        self.login_as_non_employee()
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        self.helper_non_render_test(self.url, True, True)
 
     def test_page_renders_for_superuser(self):
         """

@@ -140,10 +140,14 @@ class BaseTestCase(TestCase):
             )
         return bills
 
-    def login_as_employee(self, employee: Employee, make_admin=False):
+    def login_as_employee(
+        self, employee: Union[Employee, None] = None, make_admin=False
+    ):
         """
         Login Client as an employee
         """
+        if employee is None:
+            employee = self.generate_employees(1)[0]
         if make_admin:
             employee.is_admin = True
             employee.save()
@@ -177,6 +181,21 @@ class BaseTestCase(TestCase):
         return self.client.login(
             username=non_employee_user.username, password=self.raw_password
         )
+
+    def helper_non_render_test(
+        self, url: str, non_employee: bool, non_admin_employee: bool
+    ):
+        """
+        Checks page renders for user types
+        """
+        if non_admin_employee:
+            self.login_as_employee()
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 403)
+        if non_employee:
+            self.login_as_non_employee()
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 403)
 
 
 class EmployeeTestCase(BaseTestCase):
