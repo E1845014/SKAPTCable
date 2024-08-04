@@ -152,7 +152,7 @@ class AddCustomerTestCase(CustomerBaseTestCase):
 
     def test_page_not_renders_for_non_admin_employees(self):
         """
-        Test if the page not loads for non admin employees
+        Test if the Add Customer page not loads for non admin employees
         """
         employee = self.areas[0].agent
         self.login_as_employee(employee)
@@ -161,7 +161,7 @@ class AddCustomerTestCase(CustomerBaseTestCase):
 
     def test_page_not_renders_for_non_employees(self):
         """
-        Test if the page not renders for non employees
+        Test if the Add Customer page not renders for non employees
         """
         self.login_as_non_employee()
         response = self.client.get(self.url)
@@ -169,7 +169,7 @@ class AddCustomerTestCase(CustomerBaseTestCase):
 
     def test_page_renders_for_superuser(self):
         """
-        Test if the page renders for super users
+        Test if the Add Customer page renders for super users
         """
         self.login_as_superuser()
         response = self.client.get(self.url)
