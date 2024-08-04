@@ -158,10 +158,10 @@ def update_customer(request: HttpRequest, username: str):
                 new_user = user_form.save(False)
                 new_customer = customer_form.save(False)
                 if request.POST["area"] != customer.area.pk:
-                    new_area = Area.objects.get(pk = request.POST["area"] )
+                    new_area = Area.objects.get(pk=request.POST["area"])
                     new_customer.area = new_area
                     new_customer.customer_number = generate_customer_number(
-                        new_customer, True
+                        new_customer
                     )
                     new_user.username = new_customer.customer_number
                 new_user.save()
