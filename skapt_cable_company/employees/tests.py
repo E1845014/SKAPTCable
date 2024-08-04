@@ -262,9 +262,7 @@ class ViewEmployeeTestCase(EmployeeBaseTestCase):
         Test if the page renders for admins to view other employees
         """
         employees = self.generate_employees()
-        employees[0].is_admin = True
-        employees[0].save()
-        self.login_as_employee(employees[0])
+        self.login_as_employee(employees[0],True)
         response = self.client.get(f"/employees/{employees[1].user.username}")
         self.assertEqual(response.status_code, 200)
 

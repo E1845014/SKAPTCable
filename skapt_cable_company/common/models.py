@@ -166,22 +166,24 @@ class Customer(models.Model):
         Method to check if the Employee can be accessible by the user
         """
         if isinstance(user, User):
+            employee_query = Employee.objects.filter(user=user).first()
             return (
                 self.user == user
                 or user.is_superuser
-                or self.is_accessible(Employee.objects.filter(user=user)[0])
+                or (employee_query is not None and self.is_accessible(employee_query))
             )
         if isinstance(user, Employee):
             return True
         return self.is_accessible(user.user)  # type: ignore
-    
+
     def is_editable(self, user: Union[User, AbstractBaseUser, AnonymousUser, object]):
         """
         Method to check if the Employee can be Editable by the user
         """
         if isinstance(user, Employee):
             return user.is_admin or self.get_agent() == user
-        return self.is_accessible(user)  # type: ignore
+        employee_query = Employee.objects.filter(user=user).first()
+        return user.is_superuser or (employee_query is not None and self.is_editable(employee_query))  # type: ignore
 
     @property
     def agent(self):

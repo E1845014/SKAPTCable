@@ -157,6 +157,14 @@ class BaseTestCase(TestCase):
             username=self.super_user.username, password=self.raw_password
         )
 
+    def login_as_customer(self, customer: Customer):
+        """
+        Login Client as customer
+        """
+        return self.client.login(
+            username=customer.user.username, password=self.raw_password
+        )
+
     def login_as_non_employee(self):
         """
         Login Client as a non employee
