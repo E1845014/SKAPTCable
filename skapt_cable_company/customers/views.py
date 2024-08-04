@@ -54,10 +54,10 @@ def index(request: HttpRequest):
             # pylint: disable=unsupported-binary-operation
             customers = (
                 Customer.objects.filter(
-                    Q(customer_number__icontains=search_text)
-                    | Q(identity_no__icontains=search_text)
-                    | Q(user__first_name__icontains=search_text)
-                    | Q(user__last_name__icontains=search_text)
+                    Q(customer_number__icontains=search_text) |
+                    Q(identity_no__icontains=search_text) |
+                    Q(user__first_name__icontains=search_text) |
+                    Q(user__last_name__icontains=search_text)
                 )
                 .order_by("connection_start_date")
                 .select_related("user")
