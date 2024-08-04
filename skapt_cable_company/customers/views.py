@@ -173,8 +173,8 @@ def update_customer(request: HttpRequest, username: str):
         return HttpResponse(
             template.render(
                 {
-                    "user_form": user_form,
                     "customer_form": customer_form,
+                    "user_form": user_form,
                     "customer": customer,
                 },
                 request,
