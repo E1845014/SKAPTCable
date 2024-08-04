@@ -95,18 +95,16 @@ def add_customer(request: HttpRequest):
         if user_form.is_valid() and customer_form.is_valid():
             user = user_form.save(False)
             customer = customer_form.save(False)
-            if employee is None or employee.is_admin or customer.area.agent == employee:
-                customer.customer_number = generate_customer_number(customer)
-                new_user = User.objects.create_user(
-                    customer.customer_number, user.email, customer.identity_no
-                )
-                new_user.first_name = user.first_name
-                new_user.last_name = user.last_name
-                new_user.save()
-                customer.user = new_user
-                customer.save()
-                return redirect(f"/customers/{new_user.pk}")
-            raise PermissionDenied
+            customer.customer_number = generate_customer_number(customer)
+            new_user = User.objects.create_user(
+                customer.customer_number, user.email, customer.identity_no
+            )
+            new_user.first_name = user.first_name
+            new_user.last_name = user.last_name
+            new_user.save()
+            customer.user = new_user
+            customer.save()
+            return redirect(f"/customers/{new_user.pk}")
     else:
         raise BadRequest
     return HttpResponse(
@@ -159,7 +157,9 @@ def update_customer(request: HttpRequest, username: str):
             if user_form.is_valid() and customer_form.is_valid():
                 new_user = user_form.save(False)
                 new_customer = customer_form.save(False)
-                if new_customer.area != customer.area:
+                if request.POST["area"] != customer.area.pk:
+                    new_area = Area.objects.get(pk = request.POST["area"] )
+                    new_customer.area = new_area
                     new_customer.customer_number = generate_customer_number(
                         new_customer, True
                     )

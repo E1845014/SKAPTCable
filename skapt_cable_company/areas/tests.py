@@ -103,7 +103,7 @@ class AddAreaTestCase(AreaBaseTestCase):
         Test if the page not loads for non employees
         """
         self.login_as_non_employee()
-        response = self.client.get(self.url)
+    response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 
     def test_page_renders_form_superuser(self):
@@ -114,6 +114,15 @@ class AddAreaTestCase(AreaBaseTestCase):
         self.login_as_superuser()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+
+    def test_page_redirects_when_no_employee(self):
+        """
+        Test if the page redirects when there is no employees
+        """
+        self.login_as_superuser()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
 
     def test_form_fields(self):
         """

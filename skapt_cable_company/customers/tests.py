@@ -9,7 +9,7 @@ from django.forms import Form
 from datetime import date
 
 from common.tests import BaseTestCase
-from common.models import Customer
+from common.models import Customer, Area
 
 
 class CustomerBaseTestCase(BaseTestCase):
@@ -170,6 +170,16 @@ class AddCustomerTestCase(CustomerBaseTestCase):
         self.login_as_superuser()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+
+    def test_redirects_when_no_area(self):
+        """
+        Test if the page redirects when there is no area
+        """
+        Area.objects.all().delete()
+        self.login_as_superuser()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        
 
     def test_form_fields(self):
         """
@@ -462,7 +472,7 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
         for expected_customer_form_field in self.expected_form_fields:
             self.assertIn(expected_customer_form_field, customer_form.fields)
 
-    def test_customer_as_super_user(self):
+    def test_update_customer_as_super_user(self):
         """
         Test whether super user can update customer
         """
@@ -474,6 +484,31 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
         customer_form: Form = response.context["customer_form"]
         request_object = {**user_form.initial, **customer_form.initial}
         request_object["phone_number"] = new_customer_phone_number
+        response = self.client.post(
+            f"/customers/{self.customer.pk}/update", request_object
+        )
+        new_customer_query = Customer.objects.filter(
+            phone_number=new_customer_phone_number
+        )
+        self.assertGreater(len(new_customer_query), 0)
+        new_customer = new_customer_query[0]
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, f"/customers/{new_customer.user.pk}")
+
+    def test_update_customer_area(self):
+        """
+        Test whether Employee can update customer area
+        """
+        self.login_as_employee(self.generate_employees(1)[0], True)
+        response = self.client.get(self.url)
+        request_object = {}
+        new_customer_phone_number = "0771234458"
+        user_form: Form = response.context["user_form"]
+        customer_form: Form = response.context["customer_form"]
+        area_choices = customer_form.fields["area"].choices
+        request_object = {**user_form.initial, **customer_form.initial}
+        request_object["phone_number"] = new_customer_phone_number
+        request_object["area"] = list(area_choices)[3][0]
         response = self.client.post(
             f"/customers/{self.customer.pk}/update", request_object
         )
