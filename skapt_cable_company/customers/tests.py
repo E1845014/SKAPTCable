@@ -4,9 +4,10 @@ Module to contain all Customers App View Controller Codes
 
 # pylint: disable=imported-auth-user
 
+from datetime import date
+
 from django.contrib.auth.models import User
 from django.forms import Form
-from datetime import date
 
 from common.tests import BaseTestCase
 from common.models import Customer, Area
@@ -116,6 +117,9 @@ class CustomersTestCase(CustomerBaseTestCase):
 
 
 class AddCustomerTestCase(CustomerBaseTestCase):
+    """
+    Test Cases for testing Add Customer functionalities
+    """
 
     def setUp(self):
         """
@@ -179,7 +183,6 @@ class AddCustomerTestCase(CustomerBaseTestCase):
         self.login_as_superuser()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
-        
 
     def test_form_fields(self):
         """
