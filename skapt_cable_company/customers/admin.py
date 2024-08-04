@@ -1,3 +1,9 @@
+"""
+Module for Customer App Admin Pannel Integration
+"""
+
 from django.contrib import admin
 
-# Register your models here.
+from common.models import Customer
+
+admin.site.register(Customer)
