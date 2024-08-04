@@ -65,7 +65,7 @@ def add_employee(request: HttpRequest):
                     if not request_employee.is_admin:
                         employee.is_admin = False
             employee.save()
-            if request_employee.is_admin or request.user.is_superuser:  # type: ignore
+            if request.user.is_superuser or request_employee.is_admin:  # type: ignore
                 return redirect(f"/employees/{new_user.username}")
             return redirect("/employees")
     else:

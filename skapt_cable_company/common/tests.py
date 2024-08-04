@@ -49,7 +49,8 @@ class BaseTestCase(TestCase):
         Generate n Number of Employees
         """
         employees: List[Employee] = []
-        for i in range(n):
+        initial_user_count = User.objects.count()
+        for i in range(initial_user_count, initial_user_count + n):
             user = User.objects.create_user(
                 username=f"employee_{int(time())}{i}",
                 email=f"employee_{int(time())}@{i}xz.com",
@@ -84,7 +85,8 @@ class BaseTestCase(TestCase):
         if areas is None:
             areas = self.generate_areas()
         customers: List[Customer] = []
-        for i in range(n):
+        initial_user_count = User.objects.count()
+        for i in range(initial_user_count, initial_user_count + n):
             user = User.objects.create_user(
                 username=f"customer_{int(time())}{i}",
                 email=f"customer_{int(time())}@{i}xz.com",
@@ -138,10 +140,14 @@ class BaseTestCase(TestCase):
             )
         return bills
 
-    def login_as_employee(self, employee: Employee, make_admin=False):
+    def login_as_employee(
+        self, employee: Union[Employee, None] = None, make_admin=False
+    ):
         """
         Login Client as an employee
         """
+        if employee is None:
+            employee = self.generate_employees(1)[0]
         if make_admin:
             employee.is_admin = True
             employee.save()
@@ -157,6 +163,14 @@ class BaseTestCase(TestCase):
             username=self.super_user.username, password=self.raw_password
         )
 
+    def login_as_customer(self, customer: Customer):
+        """
+        Login Client as customer
+        """
+        return self.client.login(
+            username=customer.user.username, password=self.raw_password
+        )
+
     def login_as_non_employee(self):
         """
         Login Client as a non employee
@@ -167,6 +181,21 @@ class BaseTestCase(TestCase):
         return self.client.login(
             username=non_employee_user.username, password=self.raw_password
         )
+
+    def helper_non_render_test(
+        self, url: str, non_employee: bool, non_admin_employee: bool
+    ):
+        """
+        Checks page renders for user types
+        """
+        if non_admin_employee:
+            self.login_as_employee()
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 403)
+        if non_employee:
+            self.login_as_non_employee()
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 403)
 
 
 class EmployeeTestCase(BaseTestCase):

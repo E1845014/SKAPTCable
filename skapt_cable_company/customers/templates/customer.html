@@ -1,0 +1,17 @@
+{% extends "base.html" %} {% block content %}
+<div class="block">
+  <h1 class="is-size-1 has-text-centered">{{ customer.user.first_name }}</h1>
+
+  <form action="" method="post">
+    {% with form=user_form %}
+    {% include 'form.html' %}
+    {% endwith %}
+    {% with form=customer_form %}
+    {% include 'form.html' %}
+    {% endwith %}
+  </form>
+  <a href="{% url 'Update Customer' customer.user.pk %}"
+    ><button class="button is-primary">Update</button></a
+  >
+</div>
+{% endblock %}
