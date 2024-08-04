@@ -103,7 +103,7 @@ class AddAreaTestCase(AreaBaseTestCase):
         Test if the page not loads for non employees
         """
         self.login_as_non_employee()
-    response = self.client.get(self.url)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 
     def test_page_renders_form_superuser(self):
