@@ -91,7 +91,7 @@ class AddAreaTestCase(AreaBaseTestCase):
 
     def test_page_not_renders_for_non_admin_employee(self):
         """
-        Test if the page not loads for non employees
+        Test if the Add Area page not loads for non employees
         """
         employee = self.generate_employees(1)[0]
         self.login_as_employee(employee)
@@ -100,7 +100,7 @@ class AddAreaTestCase(AreaBaseTestCase):
 
     def test_page_not_renders_for_non_employee(self):
         """
-        Test if the page not loads for non employees
+        Test if the Add Area page not loads for non employees
         """
         self.login_as_non_employee()
         response = self.client.get(self.url)
@@ -108,7 +108,7 @@ class AddAreaTestCase(AreaBaseTestCase):
 
     def test_page_renders_form_superuser(self):
         """
-        Test if the page loads for super user
+        Test if the Add Area page loads for super user
         """
         self.generate_employees()
         self.login_as_superuser()
