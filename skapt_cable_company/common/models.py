@@ -12,6 +12,16 @@ from django.core.validators import RegexValidator, MinValueValidator
 from django.utils.timezone import now
 
 
+def query_or_logic(*args):
+    if len(args) > 0:
+        first_query = args[0]
+        if len(args) > 1:
+            for arg in args[1:]:
+                first_query = first_query | arg
+        return first_query
+    return True
+
+
 class Employee(models.Model):
     """
     Class For Employee Model

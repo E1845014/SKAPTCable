@@ -13,7 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth.models import User
 
-from common.models import Customer, Area
+from common.models import Customer, Area, query_or_logic
 from common.form import UserBaseForm
 
 from employees.models import get_employee_or_super_admin, get_admin_employee
@@ -54,10 +54,12 @@ def index(request: HttpRequest):
             # pylint: disable=unsupported-binary-operation
             customers = (
                 Customer.objects.filter(
-                    Q(customer_number__icontains=search_text) |
-                    Q(identity_no__icontains=search_text) |
-                    Q(user__first_name__icontains=search_text) |
-                    Q(user__last_name__icontains=search_text)
+                    query_or_logic(
+                        Q(customer_number__icontains=search_text),
+                        Q(identity_no__icontains=search_text),
+                        Q(user__first_name__icontains=search_text),
+                        Q(user__last_name__icontains=search_text),
+                    )
                 )
                 .order_by("connection_start_date")
                 .select_related("user")
