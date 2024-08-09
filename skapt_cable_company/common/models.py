@@ -13,6 +13,9 @@ from django.utils.timezone import now
 
 
 def query_or_logic(*args):
+    """
+    Function to use to apply or condition among Q Objects in Django without Pylint throwing errors
+    """
     first_query = args[0]
     if len(args) > 1:
         for arg in args[1:]:
