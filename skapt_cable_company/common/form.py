@@ -4,9 +4,15 @@ Module for all Common Shared Forms
 
 # pylint: disable=imported-auth-user
 
-from typing import List, Union
+from typing import Any, List, Union
 
-from django.forms import ModelForm
+from django.forms import (
+    ModelForm,
+    Textarea,
+    TextInput,
+    DateInput,
+    Select,
+)
 from django.contrib.auth.models import User
 
 
@@ -20,8 +26,47 @@ def disable_fields(form: ModelForm, fields: Union[None, List[str]] = None):
         if fields == [] or field_name in fields:
             field.widget.attrs["readonly"] = True
             field.widget.attrs["style"] = "cursor: default;"
-            field.disabled = True
     return form.fields
+
+
+class SKAPTTextArea(Textarea):
+    """
+    Text Area Input
+    """
+
+    def __init__(self, attrs: Union[dict[str, Any], None] = None, **kwargs) -> None:
+        super().__init__(attrs, **kwargs)
+        self.attrs["class"] = "textarea is-rounded"
+
+
+class SKAPTTextInput(TextInput):
+    """
+    Text Input
+    """
+
+    def __init__(self, attrs: Union[dict[str, Any], None] = None, **kwargs) -> None:
+        super().__init__(attrs, **kwargs)
+        self.attrs["class"] = "input is-rounded"
+
+
+class SKAPTDateInput(DateInput):
+    """
+    Date Input
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.attrs["class"] = "input is-rounded"
+
+
+class SKAPTChoiceInput(Select):
+    """
+    Choice Input
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.attrs["class"] = "input is-rounded"
 
 
 class UserBaseForm(ModelForm):

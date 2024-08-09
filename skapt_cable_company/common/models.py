@@ -12,6 +12,17 @@ from django.core.validators import RegexValidator, MinValueValidator
 from django.utils.timezone import now
 
 
+def query_or_logic(*args):
+    """
+    Function to use to apply or condition among Q Objects in Django without Pylint throwing errors
+    """
+    first_query = args[0]
+    if len(args) > 1:
+        for arg in args[1:]:
+            first_query = first_query | arg
+    return first_query
+
+
 class Employee(models.Model):
     """
     Class For Employee Model
@@ -166,10 +177,24 @@ class Customer(models.Model):
         Method to check if the Employee can be accessible by the user
         """
         if isinstance(user, User):
-            return self.user == user or user.is_superuser
+            employee_query = Employee.objects.filter(user=user).first()
+            return (
+                self.user == user
+                or user.is_superuser
+                or (employee_query is not None and self.is_accessible(employee_query))
+            )
+        if isinstance(user, Employee):
+            return True
+        return self.is_accessible(user.user)  # type: ignore
+
+    def is_editable(self, user: Union[User, AbstractBaseUser, AnonymousUser, object]):
+        """
+        Method to check if the Employee can be Editable by the user
+        """
         if isinstance(user, Employee):
             return user.is_admin or self.get_agent() == user
-        return self.is_accessible(user.user)  # type: ignore
+        employee_query = Employee.objects.filter(user=user).first()
+        return user.is_superuser or (employee_query is not None and self.is_editable(employee_query))  # type: ignore
 
     @property
     def agent(self):

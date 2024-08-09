@@ -89,30 +89,28 @@ class AddAreaTestCase(AreaBaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 
-    def test_page_not_renders_for_non_admin_employee(self):
+    def test_page_not_renders(self):
         """
-        Test if the page not loads for non employees
+        Test if the Add Area Page not renders for selected user groups
         """
-        employee = self.generate_employees(1)[0]
-        self.login_as_employee(employee)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
-
-    def test_page_not_renders_for_non_employee(self):
-        """
-        Test if the page not loads for non employees
-        """
-        self.login_as_non_employee()
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        self.helper_non_render_test(self.url, True, True)
 
     def test_page_renders_form_superuser(self):
         """
-        Test if the page only loads for super user
+        Test if the Add Area page loads for super user
         """
+        self.generate_employees()
         self.login_as_superuser()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+
+    def test_page_redirects_when_no_employee(self):
+        """
+        Test if the page redirects when there is no employees
+        """
+        self.login_as_superuser()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
 
     def test_form_fields(self):
         """
