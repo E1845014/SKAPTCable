@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% block content %}
+<div class="block">
+  <h1 class="is-size-1 has-text-centered">Add New Payment for {{customer.user.first_name}}</h1>
+  <form action="" method="post">
+    {% with form=payment_form %}
+      {% include 'form.html' %}
+    {% endwith %}
+    <div class="block">
+      <div class="columns">
+        <div class="column is-half is-offset-one-quarter">
+          <input
+            type="submit"
+            value="Submit"
+            class="button is-fullwidth is-primary"
+          />
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
