@@ -32,7 +32,7 @@ def add_customer_payment(request: HttpRequest, username: str):
                 payment.customer = customer
                 payment.employee = employee_query[0]
                 payment.save()
-                return redirect(f"/customers/{customer.pk}")
+                return redirect(f"/customers/{customer.pk}/payments")
             print(payment_form.errors)
         else:
             raise BadRequest
@@ -41,4 +41,21 @@ def add_customer_payment(request: HttpRequest, username: str):
                 {"payment_form": payment_form, "customer": customer}, request
             )
         )
+    raise PermissionDenied
+
+
+@login_required
+def get_customer_payments(request: HttpRequest, username: str):
+    """
+    Get Customers Payments
+    """
+    template = loader.get_template("payments.html")
+    customer = get_object_or_404(Customer, pk=username)
+    if customer.is_accessible(request.user):
+        if request.method == "GET":
+            payments = Payment.objects.filter(customer=customer)
+            return HttpResponse(
+                template.render({"payments": payments, "customer": customer}, request)
+            )
+        raise BadRequest
     raise PermissionDenied

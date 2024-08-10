@@ -1,0 +1,56 @@
+{% extends "base.html" %} {% block content %}
+<div class="block">
+  <h1 class="is-size-1 has-text-centered">Customer Payments Page</h1>
+  <div class="columns">
+    <div class="column is-2 is-offset-10">
+      <a href="/customers/{{ customer.pk}}/addPayment">
+        <button
+          class="button is-fullwidth is-primary"
+          type="button"
+          value="Add Area"
+        >
+          Add Payment
+        </button>
+      </a>
+    </div>
+  </div>
+  <table class="table is-fullwidth is-striped is-hoverable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for payment in payments %}
+      <tr
+        data-url="{% url 'View Customer' customer.pk %}"
+        class="clickable-row"
+      >
+        <td>{{ payment.employee.user.first_name }}</td>
+        <td>{{ payment.date }}</td>
+        <td>{{ payment.amount }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <nav class="pagination" role="navigation" aria-label="pagination">
+    {% if customers.has_previous %}
+      <a class="pagination-previous" href="?page={{ customers.previous_page_number }}">Previous</a>
+    {% endif %}
+  
+    <ul class="pagination-list">
+      {% for page_num in paginator.page_range %}
+        <li style="padding-right: 10px;">
+          <a href="?page={{ page_num }}"  {% if page_num == customers.number %}class="has-text-success"{% endif %}>{{ page_num }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  
+    {% if customers.has_next %}
+      <a class="pagination-next" href="?page={{ customers.next_page_number }}">Next</a>
+    {% endif %}
+  </nav>
+</div>
+{% endblock %}
