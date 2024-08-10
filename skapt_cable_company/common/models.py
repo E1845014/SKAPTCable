@@ -172,7 +172,9 @@ class Customer(models.Model):
         """
         return self.area.agent
 
-    def is_accessible(self, user: Union[User, AbstractBaseUser, AnonymousUser, object]):
+    def is_accessible(
+        self, user: Union[User, AbstractBaseUser, AnonymousUser, Employee, object]
+    ):
         """
         Method to check if the Employee can be accessible by the user
         """
