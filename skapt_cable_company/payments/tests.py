@@ -104,7 +104,7 @@ class AddPaymentTestCase(PaymentBaseTestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 
-    def test_page_Renders_for_non_employee(self):
+    def test_page_renders_for_non_employee(self):
         """
         Test if the page not renders for non-employees
         """

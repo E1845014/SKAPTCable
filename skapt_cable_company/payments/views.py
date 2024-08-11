@@ -2,7 +2,6 @@
 Module to contain all Payment App View Controller Codes
 """
 
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest
 from django.template import loader
