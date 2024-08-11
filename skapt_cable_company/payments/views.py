@@ -22,7 +22,7 @@ def add_customer_payment(request: HttpRequest, username: str):
     employee_query = Employee.objects.filter(user=request.user)
     if not employee_query.exists():
         raise PermissionDenied
-    if customer.is_accessible(request.user):
+    if customer.is_editable(request.user):
         if request.method == "GET":
             payment_form = PaymentForm()
         elif request.method == "POST":
@@ -33,7 +33,6 @@ def add_customer_payment(request: HttpRequest, username: str):
                 payment.employee = employee_query[0]
                 payment.save()
                 return redirect(f"/customers/{customer.pk}/payments")
-            print(payment_form.errors)
         else:
             raise BadRequest
         return HttpResponse(
