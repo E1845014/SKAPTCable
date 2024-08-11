@@ -52,10 +52,8 @@ def get_customer_payments(request: HttpRequest, username: str):
     template = loader.get_template("payments.html")
     customer = get_object_or_404(Customer, pk=username)
     if customer.is_accessible(request.user):
-        if request.method == "GET":
-            payments = Payment.objects.filter(customer=customer)
-            return HttpResponse(
-                template.render({"payments": payments, "customer": customer}, request)
-            )
-        raise BadRequest
+        payments = Payment.objects.filter(customer=customer)
+        return HttpResponse(
+            template.render({"payments": payments, "customer": customer}, request)
+        )
     raise PermissionDenied
