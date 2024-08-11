@@ -441,7 +441,7 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
 
     def test_non_employee_page_not_renders(self):
         """
-        Test if the page not renders for non-employees for any employee
+        Test if the page not renders for non-employees for any customers
         """
         self.login_as_non_employee()
         response = self.client.get(self.url)
