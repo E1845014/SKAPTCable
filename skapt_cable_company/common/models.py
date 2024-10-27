@@ -262,7 +262,12 @@ class Customer(models.Model):
             ] = 1
 
         cell_array = zeros(len(delay_predictor.cell))
-        cell_array[0] = 1
+        if self.phone_number[2] in [6, 7]:
+            cell_array[1] = 1
+        elif self.phone_number[2] in [0, 1]:
+            cell_array[0] = 1
+        else:
+            cell_array[2] = 1
 
         gender = int(self.is_male)
         box = int(self.has_digital_box)
