@@ -10,6 +10,10 @@ from django.db import models
 from django.contrib.auth.models import User, AbstractBaseUser, AnonymousUser
 from django.core.validators import RegexValidator, MinValueValidator
 from django.utils.timezone import now
+from datetime import datetime
+from numpy import zeros, array
+
+from ML.predictors import DelayPredictor
 
 
 def query_or_logic(*args):
@@ -197,6 +201,89 @@ class Customer(models.Model):
             return user.is_admin or self.get_agent() == user
         employee_query = Employee.objects.filter(user=user).first()
         return user.is_superuser or (employee_query is not None and self.is_editable(employee_query))  # type: ignore
+
+    @property
+    def age(self):
+        """
+        Method to get the Age of the customer
+        """
+        if self.identity_no[-1] != "v":
+            return datetime.now().year - int(self.identity_no[:4])
+        return datetime.now().year - (1900 + int(self.identity_no[:2]))
+
+    @property
+    def is_male(self):
+        """
+        Method to get the Gender of the customer
+        """
+        if len(self.identity_no) == 10:
+            gender_code = int(self.identity_no[2:5])
+        elif len(self.identity_no) == 12:
+            gender_code = int(self.identity_no[4:8])
+        else:
+            raise ValueError("Invalid NIC number length")
+
+        if gender_code < 500:
+            return 1
+        return 0
+
+    @property
+    def get_payment_delay(self):
+        """
+        Get Payment Delay
+        """
+        pay_date = 1
+        delay_predictor = DelayPredictor()
+        payments = Payment.objects.filter(customer=self).order_by("date")[
+            : delay_predictor.time_series_offset
+        ]
+        payments_array = (
+            zeros(delay_predictor.time_series_offset)
+            + delay_predictor.time_series_offset
+        )
+        for i, payment in enumerate(payments):
+            payments_array[len(payments) - 1 + i] = payment.date.day - pay_date
+        age = self.age
+        numerical_array = (
+            list(payments_array) + [datetime.now().month] + [age, pay_date]
+        )
+        std_numerical_array = (
+            array(numerical_array) - delay_predictor.mean
+        ) / delay_predictor.var
+
+        area_array = zeros(len(delay_predictor.areas))
+        if self.area.name in delay_predictor.areas:
+            area_array[delay_predictor.areas.index(self.area.name)] = 1
+
+        agent_array = zeros(len(delay_predictor.agent))
+        if self.area.agent.user.first_name in delay_predictor.agent:
+            agent_array[
+                delay_predictor.agent.index(self.area.agent.user.first_name)
+            ] = 1
+
+        cell_array = zeros(len(delay_predictor.cell))
+        cell_array[0] = 1
+
+        gender = int(self.is_male)
+        box = int(self.has_digital_box)
+
+        model = delay_predictor.get_model()
+
+        input_array = array(
+            list(std_numerical_array)
+            + list(area_array)
+            + [gender]
+            + [box]
+            + list(cell_array)
+            + list(agent_array)
+        ).reshape((1, -1))
+        print(
+            [
+                input_array,
+                input_array.shape,
+            ]
+        )
+        return (model.predict(input_array)[0] // 7) * 7 + pay_date
 
     @property
     def agent(self):
