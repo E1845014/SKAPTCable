@@ -8,7 +8,7 @@ from typing import Union
 
 from django.db import models
 from django.contrib.auth.models import User, AbstractBaseUser, AnonymousUser
-from django.core.validators import RegexValidator, MinValueValidator
+from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.utils.timezone import now
 from datetime import datetime, timedelta
 from numpy import zeros, array
@@ -103,6 +103,13 @@ class Area(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     agent = models.ForeignKey(Employee, on_delete=models.RESTRICT)
+    collection_date = models.SmallIntegerField(
+        default=1,
+        validators=[
+            MinValueValidator(0, "Has to be higher than zero"),
+            MaxValueValidator(30, "Has to be less than 30"),
+        ],
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -232,7 +239,7 @@ class Customer(models.Model):
         """
         Get Payment Delay
         """
-        pay_date = 1
+        pay_date = self.area.collection_date
         delay_predictor = DelayPredictor()
         payments = Payment.objects.filter(customer=self).order_by("date")[
             : delay_predictor.time_series_offset
