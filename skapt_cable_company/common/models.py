@@ -10,7 +10,7 @@ from django.db import models
 from django.contrib.auth.models import User, AbstractBaseUser, AnonymousUser
 from django.core.validators import RegexValidator, MinValueValidator
 from django.utils.timezone import now
-from datetime import datetime
+from datetime import datetime, timedelta
 from numpy import zeros, array
 
 from ML.predictors import DelayPredictor
@@ -228,7 +228,7 @@ class Customer(models.Model):
         return 0
 
     @property
-    def get_payment_delay(self):
+    def expected_payment_date(self):
         """
         Get Payment Delay
         """
@@ -277,13 +277,11 @@ class Customer(models.Model):
             + list(cell_array)
             + list(agent_array)
         ).reshape((1, -1))
-        print(
-            [
-                input_array,
-                input_array.shape,
-            ]
-        )
-        return (model.predict(input_array)[0] // 7) * 7 + pay_date
+        delay = (model.predict(input_array)[0] // 7) * 7 + pay_date
+        date = datetime.today()
+        expected_pay_date = datetime(date.year, date.month, pay_date)
+        expected_pay_date += timedelta(days=delay)
+        return expected_pay_date
 
     @property
     def agent(self):
