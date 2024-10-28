@@ -1,3 +1,7 @@
+"""
+Module to contain all the Prediction Models
+"""
+
 from sklearn.ensemble import (
     GradientBoostingRegressor,
 )
@@ -7,8 +11,14 @@ from django.conf import settings
 
 
 class DelayPredictor:
+    """
+    Class for the Delay Prediction Model
+    """
 
     def __init__(self) -> None:
+        """
+        Class Initialization
+        """
         self.time_series_offset = 5
         self.padding_value = 3.8676470588235294
         self.mean = array(
@@ -79,8 +89,8 @@ class DelayPredictor:
         self.agent = ["Jeya", "Sai", "Seera"]
 
     def get_model(self) -> GradientBoostingRegressor:
+        """
+        Function to load the Prediction Model
+        """
         with open(f"{settings.BASE_DIR}//ML//grad_boost_model.pkl", "rb") as f:
             return load(f)
-
-
-
