@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from .models import Employee, Area, Customer, Payment, Bill
+from ML.predictors import DelayPredictor
 
 
 class BaseTestCase(TestCase):
@@ -393,10 +394,10 @@ class CustomerTestCase(BaseTestCase):
         Test Customer Gender Calculation
         """
         customer = self.generate_customers(1)[0]
-        customer.identity_no = "199728402249"
+        customer.identity_no = "199768402249"
         customer.save()
         customer = Customer.objects.get(pk=customer.pk)
-        self.assertTrue(customer.is_male)
+        self.assertFalse(customer.is_male)
         customer.identity_no = "972842249v"
         customer.save()
         customer = Customer.objects.get(pk=customer.pk)
@@ -406,10 +407,31 @@ class CustomerTestCase(BaseTestCase):
         """
         Test if Payment Date is returned
         """
+        delay_predictor = DelayPredictor()
         customer = self.generate_customers(1)[0]
         customer.identity_no = "199728402249"
+        customer.phone_number = "0770068454"
+        customer.save()
+        area = Area.objects.get(pk=customer.area.pk)
+        area.name = delay_predictor.areas[0]
+        area.save()
+        agent = User.objects.get(pk=area.agent.user.pk)
+        agent.first_name = delay_predictor.agent[0]
+        agent.save()
+        customer = Customer.objects.get(pk=customer.pk)
+        self.generate_payments(customers=[customer])
+        self.assertTrue(customer.expected_payment_date is not None)
+        
+        customer.phone_number = "0710068454"
         customer.save()
         customer = Customer.objects.get(pk=customer.pk)
+        self.generate_payments(customers=[customer])
+        self.assertTrue(customer.expected_payment_date is not None)
+
+        customer.phone_number = "0790068454"
+        customer.save()
+        customer = Customer.objects.get(pk=customer.pk)
+        self.generate_payments(customers=[customer])
         self.assertTrue(customer.expected_payment_date is not None)
 
 
