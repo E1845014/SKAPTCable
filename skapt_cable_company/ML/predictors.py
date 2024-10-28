@@ -2,11 +2,13 @@
 Module to contain all the Prediction Models
 """
 
+from pickle import load
+from datetime import datetime
+
 from sklearn.ensemble import (
     GradientBoostingRegressor,
 )
-from numpy import array
-from pickle import load
+from numpy import array, ndarray, zeros
 from django.conf import settings
 
 
@@ -92,5 +94,44 @@ class DelayPredictor:
         """
         Function to load the Prediction Model
         """
-        with open(f"{settings.BASE_DIR}//ML//grad_boost_model.pkl", "rb") as f:
+        with open(f"{settings.BASE_DIR}//ml//grad_boost_model.pkl", "rb") as f:
             return load(f)
+
+    def normalize(self, arr: ndarray, age: int, pay_date: int):
+        """
+        Normalize all the numerical features
+        """
+        return (
+            array(list(arr) + [datetime.now().month] + [age, pay_date]) - self.mean
+        ) / self.var
+
+    def get_area_array(self, area_name: str):
+        """
+        Get One hot Encoder of Area
+        """
+        area_array = zeros(len(self.areas))
+        if area_name in self.areas:
+            area_array[self.areas.index(area_name)] = 1
+        return area_array
+
+    def get_agent_array(self, agent_name: str):
+        """
+        Get One hot Encoder of Agent
+        """
+        agent_array = zeros(len(self.agent))
+        if agent_name in self.agent:
+            agent_array[self.agent.index(agent_name)] = 1
+        return agent_array
+
+    def get_cell_career_array(self, number: str):
+        """
+        Get One hot Encoder of Cell Career
+        """
+        cell_array = zeros(len(self.cell))
+        if number[2] in ["'6'", "7"]:
+            cell_array[1] = 1
+        elif number[2] in ["0", "1"]:
+            cell_array[0] = 1
+        else:
+            cell_array[2] = 1
+        return cell_array

@@ -5,15 +5,15 @@ Module to contain all Common Models
 # pylint: disable=imported-auth-user
 
 from typing import Union
+from datetime import datetime, timedelta
 
 from django.db import models
 from django.contrib.auth.models import User, AbstractBaseUser, AnonymousUser
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.utils.timezone import now
-from datetime import datetime, timedelta
 from numpy import zeros, array
 
-from ML.predictors import DelayPredictor
+from ml.predictors import DelayPredictor
 
 
 def query_or_logic(*args):
@@ -225,7 +225,7 @@ class Customer(models.Model):
         """
         if len(self.identity_no) == 10:
             gender_code = int(self.identity_no[2:5])
-        elif len(self.identity_no) == 12:
+        else:
             gender_code = int(self.identity_no[4:7])
         return gender_code < 500
 
@@ -247,50 +247,32 @@ class Customer(models.Model):
             payments_array[(delay_predictor.time_series_offset - len(payments)) + i] = (
                 payment.date.day - pay_date
             )
-        age = self.age
-        numerical_array = (
-            list(payments_array) + [datetime.now().month] + [age, pay_date]
+        std_numerical_array = delay_predictor.normalize(
+            payments_array, self.age, pay_date
         )
-        std_numerical_array = (
-            array(numerical_array) - delay_predictor.mean
-        ) / delay_predictor.var
-
-        area_array = zeros(len(delay_predictor.areas))
-        if self.area.name in delay_predictor.areas:
-            area_array[delay_predictor.areas.index(self.area.name)] = 1
-
-        agent_array = zeros(len(delay_predictor.agent))
-        if self.area.agent.user.first_name in delay_predictor.agent:
-            agent_array[
-                delay_predictor.agent.index(self.area.agent.user.first_name)
-            ] = 1
-
-        cell_array = zeros(len(delay_predictor.cell))
-        if self.phone_number[2] in ["'6'", "7"]:
-            cell_array[1] = 1
-        elif self.phone_number[2] in ["0", "1"]:
-            cell_array[0] = 1
-        else:
-            cell_array[2] = 1
-
-        gender = int(self.is_male)
-        box = int(self.has_digital_box)
+        area_array = delay_predictor.get_area_array(self.area.name)
+        agent_array = delay_predictor.get_agent_array(self.area.agent.user.first_name)
+        cell_array = delay_predictor.get_cell_career_array(self.phone_number)
 
         model = delay_predictor.get_model()
-
-        input_array = array(
-            list(std_numerical_array)
-            + list(area_array)
-            + [gender]
-            + [box]
-            + list(cell_array)
-            + list(agent_array)
-        ).reshape((1, -1))
-        delay = (model.predict(input_array)[0] // 7) * 7 + pay_date
         date = datetime.today()
-        expected_pay_date = datetime(date.year, date.month, pay_date)
-        expected_pay_date += timedelta(days=delay)
-        return expected_pay_date
+        return datetime(date.year, date.month, pay_date) + timedelta(
+            days=(
+                model.predict(
+                    array(
+                        list(std_numerical_array)
+                        + list(area_array)
+                        + [int(self.is_male)]
+                        + [int(self.has_digital_box)]
+                        + list(cell_array)
+                        + list(agent_array)
+                    ).reshape((1, -1))
+                )[0]
+                // 7
+            )
+            * 7
+            + pay_date
+        )
 
     @property
     def agent(self):

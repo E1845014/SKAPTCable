@@ -13,8 +13,9 @@ from datetime import date, datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
+from ml.predictors import DelayPredictor
+
 from .models import Employee, Area, Customer, Payment, Bill
-from ML.predictors import DelayPredictor
 
 
 class BaseTestCase(TestCase):
@@ -421,7 +422,7 @@ class CustomerTestCase(BaseTestCase):
         customer = Customer.objects.get(pk=customer.pk)
         self.generate_payments(customers=[customer])
         self.assertTrue(customer.expected_payment_date is not None)
-        
+
         customer.phone_number = "0710068454"
         customer.save()
         customer = Customer.objects.get(pk=customer.pk)
