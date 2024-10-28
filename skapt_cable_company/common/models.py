@@ -214,7 +214,7 @@ class Customer(models.Model):
         """
         Method to get the Age of the customer
         """
-        if self.identity_no[-1] != "v":
+        if len(self.identity_no) == 10:
             return datetime.now().year - int(self.identity_no[:4])
         return datetime.now().year - (1900 + int(self.identity_no[:2]))
 
@@ -227,8 +227,6 @@ class Customer(models.Model):
             gender_code = int(self.identity_no[2:5])
         elif len(self.identity_no) == 12:
             gender_code = int(self.identity_no[4:8])
-        else:
-            raise ValueError("Invalid NIC number length")
 
         if gender_code < 500:
             return 1

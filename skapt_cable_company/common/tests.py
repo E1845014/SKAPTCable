@@ -8,7 +8,7 @@ from time import time
 from typing import List, Union
 from random import choices, choice, randint
 from string import ascii_letters
-from datetime import date
+from datetime import date, datetime
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -373,6 +373,35 @@ class CustomerTestCase(BaseTestCase):
         payments = self.generate_payments(customers=[customer])
         for payment in customer.payments:
             self.assertIn(payment, payments)
+
+    def test_age(self):
+        """
+        Test Customer Age Calculation
+        """
+        customer = self.generate_customers(1)[0]
+        customer.identity_no = "199728402249"
+        self.assertEqual(customer.age, datetime.now().year - 1997)
+        customer.identity_no = "972842249v"
+        self.assertEqual(customer.age, datetime.now().year - 1997)
+
+    def test_gender(self):
+        """
+        Test Customer Gender Calculation
+        """
+        customer = self.generate_customers(1)[0]
+        customer.identity_no = "199728402249"
+        self.assertTrue(customer.is_male)
+        customer.identity_no = "972842249v"
+        self.assertTrue(customer.is_male)
+        customer.identity_no = "9728422v"
+        
+
+    def test_payment_date(self):
+        """
+        Test if Payment Date is returned
+        """
+        customer = self.generate_customers(1)[0]
+        self.assertTrue(customer.expected_payment_date is not None)
 
 
 class PaymentTestCase(BaseTestCase):
