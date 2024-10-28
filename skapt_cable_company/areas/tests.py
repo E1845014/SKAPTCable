@@ -23,7 +23,7 @@ class AreaBaseTestCase(BaseTestCase):
         """
         Setup Class for All Area Related Test Cases
         """
-        self.expected_form_fields = ["name", "agent"]
+        self.expected_form_fields = ["name", "agent", "collection_date"]
         return super().setUp()
 
 
@@ -141,6 +141,8 @@ class AddAreaTestCase(AreaBaseTestCase):
         for field in self.expected_form_fields:
             if field == "agent":
                 request_object[field] = list(agent_choices)[1][0]
+            elif field == "collection_date":
+                request_object[field] = 1
             else:
                 request_object[field] = field
         response = self.client.post(self.url, request_object)
@@ -168,6 +170,8 @@ class AddAreaTestCase(AreaBaseTestCase):
         for field in self.expected_form_fields:
             if field == "agent":
                 request_object[field] = list(agent_choices)[1][0]
+            elif field == "collection_date":
+                request_object[field] = 1
             else:
                 request_object[field] = field
         response = self.client.post("/employees/add", request_object)
@@ -195,6 +199,8 @@ class AddAreaTestCase(AreaBaseTestCase):
         for field in self.expected_form_fields:
             if field == "agent":
                 request_object[field] = self.get_random_string(10)
+            elif field == "collection_date":
+                request_object[field] = 1
             else:
                 request_object[field] = field
         response = self.client.post(self.url, request_object)
