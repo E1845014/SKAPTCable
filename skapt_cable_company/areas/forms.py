@@ -21,7 +21,7 @@ class AreaForm(ModelForm):
         """
 
         model = Area
-        fields = ["name", "agent"]
+        fields = ["name", "agent", "collection_date"]
 
     def __init__(self, *args, **kwargs):
         """
@@ -30,6 +30,8 @@ class AreaForm(ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             if field.widget.input_type == "text":
+                field.widget.attrs["class"] = "input is-rounded"
+            elif field.widget.input_type == "number":
                 field.widget.attrs["class"] = "input is-rounded"
             elif field.widget.input_type == "select":
                 field.widget.attrs["class"] = "input is-rounded is-info"

@@ -380,8 +380,10 @@ class CustomerTestCase(BaseTestCase):
         """
         customer = self.generate_customers(1)[0]
         customer.identity_no = "199728402249"
+        customer.save()
         self.assertEqual(customer.age, datetime.now().year - 1997)
         customer.identity_no = "972842249v"
+        customer.save()
         self.assertEqual(customer.age, datetime.now().year - 1997)
 
     def test_gender(self):
@@ -390,11 +392,11 @@ class CustomerTestCase(BaseTestCase):
         """
         customer = self.generate_customers(1)[0]
         customer.identity_no = "199728402249"
+        customer.save()
         self.assertTrue(customer.is_male)
         customer.identity_no = "972842249v"
+        customer.save()
         self.assertTrue(customer.is_male)
-        customer.identity_no = "9728422v"
-        
 
     def test_payment_date(self):
         """
