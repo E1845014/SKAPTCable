@@ -227,9 +227,7 @@ class Customer(models.Model):
             gender_code = int(self.identity_no[2:5])
         elif len(self.identity_no) == 12:
             gender_code = int(self.identity_no[4:7])
-        if gender_code < 500:
-            return 1
-        return 0
+        return gender_code < 500
 
     @property
     def expected_payment_date(self):
@@ -268,9 +266,9 @@ class Customer(models.Model):
             ] = 1
 
         cell_array = zeros(len(delay_predictor.cell))
-        if self.phone_number[2] in [6, 7]:
+        if self.phone_number[2] in ["'6'", "7"]:
             cell_array[1] = 1
-        elif self.phone_number[2] in [0, 1]:
+        elif self.phone_number[2] in ["0", "1"]:
             cell_array[0] = 1
         else:
             cell_array[2] = 1
