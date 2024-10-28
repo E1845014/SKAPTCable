@@ -246,7 +246,9 @@ class Customer(models.Model):
             + delay_predictor.time_series_offset
         )
         for i, payment in enumerate(payments):
-            payments_array[len(payments) - 1 + i] = payment.date.day - pay_date
+            payments_array[(delay_predictor.time_series_offset - len(payments)) + i] = (
+                payment.date.day - pay_date
+            )
         age = self.age
         numerical_array = (
             list(payments_array) + [datetime.now().month] + [age, pay_date]
