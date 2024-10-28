@@ -214,7 +214,7 @@ class Customer(models.Model):
         """
         Method to get the Age of the customer
         """
-        if len(self.identity_no) == 10:
+        if len(self.identity_no) == 12:
             return datetime.now().year - int(self.identity_no[:4])
         return datetime.now().year - (1900 + int(self.identity_no[:2]))
 
@@ -226,8 +226,7 @@ class Customer(models.Model):
         if len(self.identity_no) == 10:
             gender_code = int(self.identity_no[2:5])
         elif len(self.identity_no) == 12:
-            gender_code = int(self.identity_no[4:8])
-
+            gender_code = int(self.identity_no[4:7])
         if gender_code < 500:
             return 1
         return 0

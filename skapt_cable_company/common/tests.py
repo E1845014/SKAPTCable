@@ -97,7 +97,7 @@ class BaseTestCase(TestCase):
                     user=user,
                     phone_number=self.get_random_phone_number(),
                     address=self.get_random_string(20),
-                    identity_no=self.get_random_string(12),
+                    identity_no=f"19{self.get_random_string(10)}",
                     box_ca_number=self.get_random_string(16),
                     customer_number=self.get_random_string(),
                     area=choice(areas),
@@ -381,9 +381,11 @@ class CustomerTestCase(BaseTestCase):
         customer = self.generate_customers(1)[0]
         customer.identity_no = "199728402249"
         customer.save()
+        customer = Customer.objects.get(pk=customer.pk)
         self.assertEqual(customer.age, datetime.now().year - 1997)
         customer.identity_no = "972842249v"
         customer.save()
+        customer = Customer.objects.get(pk=customer.pk)
         self.assertEqual(customer.age, datetime.now().year - 1997)
 
     def test_gender(self):
@@ -393,9 +395,11 @@ class CustomerTestCase(BaseTestCase):
         customer = self.generate_customers(1)[0]
         customer.identity_no = "199728402249"
         customer.save()
+        customer = Customer.objects.get(pk=customer.pk)
         self.assertTrue(customer.is_male)
         customer.identity_no = "972842249v"
         customer.save()
+        customer = Customer.objects.get(pk=customer.pk)
         self.assertTrue(customer.is_male)
 
     def test_payment_date(self):
@@ -403,6 +407,9 @@ class CustomerTestCase(BaseTestCase):
         Test if Payment Date is returned
         """
         customer = self.generate_customers(1)[0]
+        customer.identity_no = "199728402249"
+        customer.save()
+        customer = Customer.objects.get(pk=customer.pk)
         self.assertTrue(customer.expected_payment_date is not None)
 
 
