@@ -5,11 +5,15 @@ Module to contain all Common Models
 # pylint: disable=imported-auth-user
 
 from typing import Union
+from datetime import datetime, timedelta
 
 from django.db import models
 from django.contrib.auth.models import User, AbstractBaseUser, AnonymousUser
-from django.core.validators import RegexValidator, MinValueValidator
+from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.utils.timezone import now
+from numpy import zeros, array
+
+from ml.predictors import DelayPredictor
 
 
 def query_or_logic(*args):
@@ -99,6 +103,13 @@ class Area(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     agent = models.ForeignKey(Employee, on_delete=models.RESTRICT)
+    collection_date = models.SmallIntegerField(
+        default=1,
+        validators=[
+            MinValueValidator(0, "Has to be higher than zero"),
+            MaxValueValidator(30, "Has to be less than 30"),
+        ],
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -197,6 +208,71 @@ class Customer(models.Model):
             return user.is_admin or self.get_agent() == user
         employee_query = Employee.objects.filter(user=user).first()
         return user.is_superuser or (employee_query is not None and self.is_editable(employee_query))  # type: ignore
+
+    @property
+    def age(self):
+        """
+        Method to get the Age of the customer
+        """
+        if len(self.identity_no) == 12:
+            return datetime.now().year - int(self.identity_no[:4])
+        return datetime.now().year - (1900 + int(self.identity_no[:2]))
+
+    @property
+    def is_male(self):
+        """
+        Method to get the Gender of the customer
+        """
+        if len(self.identity_no) == 10:
+            gender_code = int(self.identity_no[2:5])
+        else:
+            gender_code = int(self.identity_no[4:7])
+        return gender_code < 500
+
+    @property
+    def expected_payment_date(self):
+        """
+        Get Payment Delay
+        """
+        pay_date = self.area.collection_date
+        delay_predictor = DelayPredictor()
+        payments = Payment.objects.filter(customer=self).order_by("date")[
+            : delay_predictor.time_series_offset
+        ]
+        payments_array = (
+            zeros(delay_predictor.time_series_offset)
+            + delay_predictor.time_series_offset
+        )
+        for i, payment in enumerate(payments):
+            payments_array[(delay_predictor.time_series_offset - len(payments)) + i] = (
+                payment.date.day - pay_date
+            )
+        std_numerical_array = delay_predictor.normalize(
+            payments_array, self.age, pay_date
+        )
+        area_array = delay_predictor.get_area_array(self.area.name)
+        agent_array = delay_predictor.get_agent_array(self.area.agent.user.first_name)
+        cell_array = delay_predictor.get_cell_career_array(self.phone_number)
+
+        model = delay_predictor.get_model()
+        date = datetime.today()
+        return datetime(date.year, date.month, pay_date) + timedelta(
+            days=(
+                model.predict(
+                    array(
+                        list(std_numerical_array)
+                        + list(area_array)
+                        + [int(self.is_male)]
+                        + [int(self.has_digital_box)]
+                        + list(cell_array)
+                        + list(agent_array)
+                    ).reshape((1, -1))
+                )[0]
+                // 7
+            )
+            * 7
+            + pay_date
+        )
 
     @property
     def agent(self):
