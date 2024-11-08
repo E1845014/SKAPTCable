@@ -10,6 +10,8 @@ from sklearn.ensemble import (
 )
 from numpy import array, ndarray, zeros
 from django.conf import settings
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
 
 
 class DelayPredictor:
@@ -135,3 +137,104 @@ class DelayPredictor:
         else:
             cell_array[2] = 1
         return cell_array
+
+
+class Default_Predictor:
+    """
+    Class for the Default Prediction Model
+    """
+
+    def __init__(self):
+        """
+        Initialize Predictor
+        """
+        self.area_prob = {
+            "2nd Croos Kallady": 1.000000,
+            "3rd Croos Kallady": 0.933333,
+            "4th Croos Kallady - 1": 1.000000,
+            "4th Croos Kallady - 2": 1.000000,
+            "4th Croos Kallady - 3": 1.000000,
+            "4th Croos Kallady - 4": 1.000000,
+            "5th Croos Kallady": 1.000000,
+            "6th Croos Kallady": 1.000000,
+            "7th Croos Kallady": 1.000000,
+            "8th Croos Kallady": 0.870968,
+            "9th Croos Kallady": 1.000000,
+            "Babisingam Rd": 1.000000,
+            "Babisingam Road": 1.000000,
+            "Baugger mavadi Road": 1.000000,
+            "Dharmasena Rd": 1.000000,
+            "Dutch Bar Road": 1.000000,
+            "Govt Quaters Rd": 1.000000,
+            "Iqnasiyas Road": 0.977778,
+            "Kallady 1st Cross": 1.000000,
+            "Krishnankovil Road": 0.941176,
+            "Malaimakal Road": 1.000000,
+            "Mariyamman Kovil": 0.979592,
+            "Music College": 1.000000,
+            "New Dutchbar Rd": 0.980769,
+            "New Kalmunai Road": 0.970588,
+            "Old Kalmunai Road": 0.941176,
+            "Pillayar Kovil Road": 1.000000,
+            "Puvalapillai Road": 1.000000,
+            "Sai Lane": 0.800000,
+            "Saravana Rd": 0.966667,
+            "Thiruchanthur": 1.000000,
+            "Thiruchenthoor Beach road": 0.818182,
+            "Thiruchenthu Road": 1.000000,
+            "Thiruchenthur West": 0.800000,
+            "Thirumakal Road": 1.000000,
+            "Thomas Antony Road": 1.000000,
+            "Varnakulasinam Road": 1.000000,
+            "Velankerney Road": 1.000000,
+        }
+        self.age_prob = {
+            33: 0.000000,
+            35: 0.941176,
+            36: 1.000000,
+            37: 1.000000,
+            38: 0.978261,
+            39: 0.979167,
+            40: 0.934783,
+            41: 0.981481,
+            42: 0.972973,
+            43: 0.956522,
+            44: 0.960784,
+            45: 0.975610,
+            46: 0.923077,
+            47: 0.976744,
+            48: 0.967742,
+            49: 1.000000,
+            50: 0.979167,
+            51: 1.000000,
+            52: 1.000000,
+            53: 1.000000,
+            54: 1.000000,
+            55: 1.000000,
+            56: 1.000000,
+            57: 1.000000,
+            58: 1.000000,
+            59: 1.000000,
+        }
+        self.gender_probs = {"Female": 0.953271, "Male": 0.982869}
+        self.cell_career_probs = {
+            "Airtel": 0.985646,
+            "Dialog": 0.974952,
+            "Mobital": 0.980769,
+        }
+        self.agent_probs = {"Jeya": 0.986784, "Sai": 0.994220, "Seera": 0.966184}
+        self.box_probs = {"analog": 0.933962, "digital": 0.985027}
+
+    def get_model(self) -> SVC:
+        """
+        Function to load the Prediction Model
+        """
+        with open(f"{settings.BASE_DIR}//ml//SVC.pkl", "rb") as f:
+            return load(f)
+
+    def get_preprocessor(self) -> StandardScaler:
+        """
+        Function to load the Standard Scaler
+        """
+        with open(f"{settings.BASE_DIR}//ml//standard_scaler.pkl", "rb") as f:
+            return load(f)

@@ -13,7 +13,7 @@ from django.core.validators import RegexValidator, MinValueValidator, MaxValueVa
 from django.utils.timezone import now
 from numpy import zeros, array
 
-from ml.predictors import DelayPredictor
+from ml.predictors import Default_Predictor, DelayPredictor
 
 
 def query_or_logic(*args):
@@ -275,6 +275,30 @@ class Customer(models.Model):
         )
 
     @property
+    def default_probability(self):
+        """Get Defaulter Probability"""
+        deafult_predictor = Default_Predictor()
+        model = deafult_predictor.get_model()
+        preprocessor = deafult_predictor.get_preprocessor()
+        prob = model.predict(
+            preprocessor.transform(
+                array(
+                    [
+                        deafult_predictor.area_prob.get(self.area.name, 0.5),
+                        deafult_predictor.agent_probs.get(self.area.agent.name, 0.5),
+                        deafult_predictor.cell_career_probs.get(self.phone_number, 0.5),
+                        deafult_predictor.gender_probs.get(self.gender, 0.5),
+                        deafult_predictor.box_probs.get(self.box, 0.5),
+                        0.9752,
+                        self.age,
+                        self.area.collection_date,
+                    ]
+                ).reshape((1, -1))
+            )
+        )[0]
+        return prob
+
+    @property
     def agent(self):
         """
         Get Agent
@@ -287,6 +311,22 @@ class Customer(models.Model):
         Get Payments
         """
         return Payment.objects.filter(customer=self)
+
+    @property
+    def gender(self):
+        """
+        Get Gender
+        """
+        if self.is_male:
+            return "Male"
+        return "False"
+
+    @property
+    def box(self):
+        """Get Box"""
+        if self.has_digital_box:
+            return "digital"
+        return "analog"
 
 
 class Payment(models.Model):
