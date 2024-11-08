@@ -280,22 +280,34 @@ class Customer(models.Model):
         deafult_predictor = Default_Predictor()
         model = deafult_predictor.get_model()
         preprocessor = deafult_predictor.get_preprocessor()
-        prob = model.predict(
-            preprocessor.transform(
-                array(
-                    [
-                        deafult_predictor.area_prob.get(self.area.name, 21/1041),
-                        deafult_predictor.agent_probs.get(self.area.agent.name, 21/1041),
-                        deafult_predictor.cell_career_probs.get(self.phone_number, 21/1041),
-                        deafult_predictor.gender_probs.get(self.gender, 21/1041),
-                        deafult_predictor.box_probs.get(self.box, 21/1041),
-                        0.9752,
-                        self.age,
-                        self.area.collection_date,
-                    ]
-                ).reshape((1, -1))
-            )
-        )[0]
+        prob = (
+            1
+            - model.predict(
+                preprocessor.transform(
+                    array(
+                        [
+                            deafult_predictor.area_prob.get(self.area.name, 21 / 1041),
+                            deafult_predictor.agent_probs.get(
+                                self.area.agent.name, 21 / 1041
+                            ),
+                            deafult_predictor.cell_career_probs.get(
+                                self.phone_number, 21 / 1041
+                            ),
+                            deafult_predictor.gender_probs.get(
+                                "Male" if self.is_male else "Female", 21 / 1041
+                            ),
+                            deafult_predictor.box_probs.get(
+                                "digital" if self.has_digital_box else "analog",
+                                21 / 1041,
+                            ),
+                            0.9752,
+                            self.age,
+                            self.area.collection_date,
+                        ]
+                    ).reshape((1, -1))
+                )
+            )[0]
+        )
         return prob
 
     @property
@@ -311,22 +323,6 @@ class Customer(models.Model):
         Get Payments
         """
         return Payment.objects.filter(customer=self)
-
-    @property
-    def gender(self):
-        """
-        Get Gender
-        """
-        if self.is_male:
-            return "Male"
-        return "False"
-
-    @property
-    def box(self):
-        """Get Box"""
-        if self.has_digital_box:
-            return "digital"
-        return "analog"
 
 
 class Payment(models.Model):
