@@ -13,7 +13,7 @@ from django.core.validators import RegexValidator, MinValueValidator, MaxValueVa
 from django.utils.timezone import now
 from numpy import zeros, array
 
-from ml.predictors import Default_Predictor, DelayPredictor
+from ml.predictors import DefaultPredictor, DelayPredictor
 
 
 def query_or_logic(*args):
@@ -277,7 +277,7 @@ class Customer(models.Model):
     @property
     def default_probability(self):
         """Get Defaulter Probability"""
-        deafult_predictor = Default_Predictor()
+        deafult_predictor = DefaultPredictor()
         model = deafult_predictor.get_model()
         preprocessor = deafult_predictor.get_preprocessor()
         prob = (

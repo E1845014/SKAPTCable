@@ -5,11 +5,12 @@ Module to contain all the Prediction Models
 from pickle import load
 from datetime import datetime
 
+
+from numpy import array, ndarray, zeros
+from django.conf import settings
 from sklearn.ensemble import (
     GradientBoostingRegressor,
 )
-from numpy import array, ndarray, zeros
-from django.conf import settings
 from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 
@@ -139,7 +140,7 @@ class DelayPredictor:
         return cell_array
 
 
-class Default_Predictor:
+class DefaultPredictor:
     """
     Class for the Default Prediction Model
     """

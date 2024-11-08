@@ -13,7 +13,7 @@ from datetime import date, datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from ml.predictors import DelayPredictor, Default_Predictor
+from ml.predictors import DelayPredictor, DefaultPredictor
 
 from .models import Employee, Area, Customer, Payment, Bill
 
@@ -439,7 +439,7 @@ class CustomerTestCase(BaseTestCase):
         """
         Test if Default Probability
         """
-        default_predictor = Default_Predictor()
+        default_predictor = DefaultPredictor()
         customer = self.generate_customers(1)[0]
         customer.identity_no = "199728402249"
         customer.phone_number = "0770068454"
