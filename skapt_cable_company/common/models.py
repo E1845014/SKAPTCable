@@ -284,11 +284,11 @@ class Customer(models.Model):
             preprocessor.transform(
                 array(
                     [
-                        deafult_predictor.area_prob.get(self.area.name, 0.5),
-                        deafult_predictor.agent_probs.get(self.area.agent.name, 0.5),
-                        deafult_predictor.cell_career_probs.get(self.phone_number, 0.5),
-                        deafult_predictor.gender_probs.get(self.gender, 0.5),
-                        deafult_predictor.box_probs.get(self.box, 0.5),
+                        deafult_predictor.area_prob.get(self.area.name, 21/1041),
+                        deafult_predictor.agent_probs.get(self.area.agent.name, 21/1041),
+                        deafult_predictor.cell_career_probs.get(self.phone_number, 21/1041),
+                        deafult_predictor.gender_probs.get(self.gender, 21/1041),
+                        deafult_predictor.box_probs.get(self.box, 21/1041),
                         0.9752,
                         self.age,
                         self.area.collection_date,
