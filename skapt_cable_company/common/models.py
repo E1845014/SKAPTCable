@@ -13,7 +13,7 @@ from django.core.validators import RegexValidator, MinValueValidator, MaxValueVa
 from django.utils.timezone import now
 from numpy import zeros, array
 
-from ml.predictors import DelayPredictor
+from ml.predictors import DefaultPredictor, DelayPredictor
 
 
 def query_or_logic(*args):
@@ -273,6 +273,42 @@ class Customer(models.Model):
             * 7
             + pay_date
         )
+
+    @property
+    def default_probability(self):
+        """Get Defaulter Probability"""
+        deafult_predictor = DefaultPredictor()
+        model = deafult_predictor.get_model()
+        preprocessor = deafult_predictor.get_preprocessor()
+        prob = (
+            1
+            - model.predict(
+                preprocessor.transform(
+                    array(
+                        [
+                            deafult_predictor.area_prob.get(self.area.name, 21 / 1041),
+                            deafult_predictor.agent_probs.get(
+                                self.area.agent.name, 21 / 1041
+                            ),
+                            deafult_predictor.cell_career_probs.get(
+                                self.phone_number, 21 / 1041
+                            ),
+                            deafult_predictor.gender_probs.get(
+                                "Male" if self.is_male else "Female", 21 / 1041
+                            ),
+                            deafult_predictor.box_probs.get(
+                                "digital" if self.has_digital_box else "analog",
+                                21 / 1041,
+                            ),
+                            0.9752,
+                            self.age,
+                            self.area.collection_date,
+                        ]
+                    ).reshape((1, -1))
+                )
+            )[0]
+        )
+        return prob
 
     @property
     def agent(self):
