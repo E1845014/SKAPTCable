@@ -13,7 +13,7 @@ from datetime import date, datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from ml.predictors import DelayPredictor
+from ml.predictors import DelayPredictor, Default_Predictor
 
 from .models import Employee, Area, Customer, Payment, Bill
 
@@ -434,6 +434,37 @@ class CustomerTestCase(BaseTestCase):
         customer = Customer.objects.get(pk=customer.pk)
         self.generate_payments(customers=[customer])
         self.assertTrue(customer.expected_payment_date is not None)
+
+    def test_default_probability(self):
+        """
+        Test if Default Probability
+        """
+        default_predictor = Default_Predictor()
+        customer = self.generate_customers(1)[0]
+        customer.identity_no = "199728402249"
+        customer.phone_number = "0770068454"
+        customer.save()
+        area = Area.objects.get(pk=customer.area.pk)
+        area.name = list(default_predictor.area_prob.keys())[0]
+        area.save()
+        agent = User.objects.get(pk=area.agent.user.pk)
+        agent.first_name = list(default_predictor.agent_probs.keys())[0]
+        agent.save()
+        customer = Customer.objects.get(pk=customer.pk)
+        self.generate_payments(customers=[customer])
+        self.assertTrue(customer.default_probability is not None)
+
+        customer.phone_number = "0710068454"
+        customer.save()
+        customer = Customer.objects.get(pk=customer.pk)
+        self.generate_payments(customers=[customer])
+        self.assertTrue(customer.default_probability is not None)
+
+        customer.phone_number = "0790068454"
+        customer.save()
+        customer = Customer.objects.get(pk=customer.pk)
+        self.generate_payments(customers=[customer])
+        self.assertTrue(customer.default_probability is not None)
 
 
 class PaymentTestCase(BaseTestCase):
