@@ -12,6 +12,11 @@
         <button class="button is-primary">Payments</button>
       </a>
     </div>
+    <div class="column">
+      <a href="{% url 'Add Customer Connection' customer.user.pk %}">
+        <button class="button is-primary">Add Connection</button>
+      </a>
+    </div>
   </div>
   <form action="" method="post">
     {% with form=user_form %}
@@ -21,6 +26,41 @@
     {% include 'form.html' %}
     {% endwith %}
   </form>
+  <h2 class="is-size-2 has-text-centered">Connections</h2>
+  <table class="table is-fullwidth is-striped is-hoverable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Active</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for connection in connections %}
+      <tr
+        data-url="{% url 'View Customer' customer.pk %}"
+        class="clickable-row"
+      >
+        <td>{{ connection.id }}</td>
+        <td>{{ connection.active }}</td>
+        {% if connection.active %}
+        <td>
+          <a href="{% url 'Disable Customer Connection' customer.user.pk connection.id %}">
+            <button class="button is-danger">Disable</button>
+          </a>
+        </td>
+        {% else %}
+        <td>
+          <a href="{% url 'Enable Customer Connection' customer.user.pk connection.id %}">
+            <button class="button is-success">Enable</button>
+          </a>
+        </td>
+        {% endif %}
+        
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
   
 </div>
 {% endblock %}

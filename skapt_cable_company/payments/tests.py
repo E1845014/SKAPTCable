@@ -21,6 +21,7 @@ class PaymentBaseTestCase(BaseTestCase):
         """
         super().setUp()
         self.customer = self.generate_customers()[0]
+        self.connections = self.generate_connection(customers=[self.customer])
 
 
 class PaymentsTestCase(PaymentBaseTestCase):
@@ -69,7 +70,9 @@ class PaymentsTestCase(PaymentBaseTestCase):
         """
         self.login_as_employee()
         response = self.client.get(self.url)
-        payment_count = Payment.objects.filter(customer=self.customer).count()
+        payment_count = Payment.objects.filter(
+            connection__customer=self.customer
+        ).count()
         self.assertEqual(len(response.context["payments"]), payment_count)
 
 
@@ -128,13 +131,17 @@ class AddPaymentTestCase(PaymentBaseTestCase):
         Test employee can add payment
         """
         self.login_as_employee(self.customer.agent)
+
         response = self.client.get(self.url)
         payment_form: Form = response.context["payment_form"]
         amount = 100
         request_object = payment_form.initial
+        request_object["connection"] = self.connections[0].pk
         request_object["amount"] = amount
         response = self.client.post(self.url, request_object)
-        payment_query = Payment.objects.filter(customer=self.customer, amount=amount)
+        payment_query = Payment.objects.filter(
+            connection__customer=self.customer, amount=amount
+        )
         self.assertTrue(payment_query.exists())
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, f"/customers/{self.customer.pk}/payments")
@@ -153,7 +160,9 @@ class AddPaymentTestCase(PaymentBaseTestCase):
         request_object["amount"] = amount
 
         response = self.client.post(self.url, request_object)
-        payment_query = Payment.objects.filter(customer=self.customer, amount=amount)
+        payment_query = Payment.objects.filter(
+            connection__customer=self.customer, amount=amount
+        )
         payment_form: Form = response.context["payment_form"]
 
         self.assertFalse(payment_query.exists())
@@ -171,3 +180,30 @@ class AddPaymentTestCase(PaymentBaseTestCase):
         request_object = payment_form.initial
         response = self.client.put(self.url, request_object)
         self.assertEqual(response.status_code, 400)
+
+
+class ViewPaymentsTestCase(PaymentBaseTestCase):
+    """
+    Test Cases to test View Payments Page
+    """
+
+    url = "/customers/payments"
+
+    def test_show_all_payments(self):
+        """
+        Test if all the payments of the customer are shown
+        """
+        self.login_as_employee()
+        response = self.client.get(self.url)
+        payment_count = Payment.objects.filter(
+            connection__customer=self.customer
+        ).count()
+        self.assertEqual(len(response.context["payments"]), payment_count)
+
+    def test_page_not_renders_for_non_employees(self):
+        """
+        Test if the payments page not renders for non-employees
+        """
+        self.login_as_non_employee()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)

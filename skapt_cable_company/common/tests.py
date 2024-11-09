@@ -12,10 +12,19 @@ from datetime import date, datetime
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.test.client import RequestFactory
 
 from ml.predictors import DelayPredictor, DefaultPredictor
 
-from .models import Employee, Area, Customer, Payment, Bill
+from .models import (
+    CustomerConnection,
+    Employee,
+    Area,
+    Customer,
+    Payment,
+    Bill,
+    pagination_handle,
+)
 
 
 class BaseTestCase(TestCase):
@@ -107,18 +116,32 @@ class BaseTestCase(TestCase):
             )
         return customers
 
+    def generate_connection(self, n=5, customers: Union[List[Customer], None] = None):
+        """
+        Generate n number of connections
+        """
+        if customers is None:
+            customers = self.generate_customers()
+        connections: List[CustomerConnection] = []
+        for _ in range(n):
+            connections.append(
+                CustomerConnection.objects.create(customer=choice(customers))
+            )
+        return connections
+
     def generate_payments(self, n=5, customers: Union[List[Customer], None] = None):
         """
         Generate n number of Payments
         """
-        if customers is None:
-            customers = self.generate_customers()
+        connections = self.generate_connection(n, customers)
         payments: List[Payment] = []
         for _ in range(n):
+            connection = choice(connections)
+            customer = connection.customer
             payments.append(
                 Payment.objects.create(
-                    customer=choice(customers),
-                    employee=choice(customers).get_agent(),
+                    connection=connection,
+                    employee=customer.get_agent(),
                     amount=randint(1, 100),
                 )
             )
@@ -477,9 +500,26 @@ class PaymentTestCase(BaseTestCase):
         Test Payment Model String
         """
         payment = self.generate_payments(1)[0]
+        customer_name = payment.connection.customer.user.get_short_name()
         self.assertEqual(
             str(payment),
-            f"{payment.customer.user.get_short_name()} paid {payment.amount} on {payment.date} to {payment.employee.user.get_short_name()}",
+            f"{customer_name} paid {payment.amount} on {payment.date} to {payment.employee.user.get_short_name()}",
+        )
+
+
+class CustomerConnectionTestCase(BaseTestCase):
+    """
+    Test Cases to test Customer Connection Model
+    """
+
+    def test_str(self):
+        """
+        Test Customer Connection String
+        """
+        connection = self.generate_connection(1)[0]
+        self.assertEqual(
+            str(connection),
+            f"Connection by {connection.customer.user.get_short_name()}",
         )
 
 
@@ -497,3 +537,33 @@ class BillTestCase(BaseTestCase):
             str(bill),
             f"{bill.customer.user.get_short_name()} billed {bill.amount} on {bill.date} for the duration from {bill.from_date} to {bill.to_date}",
         )
+
+
+class PaginationHandleTestCase(BaseTestCase):
+    """
+    Test Cases to test Pagination Handler
+    """
+
+    def test_non_numerical(self):
+        """
+        Test Non Numerical Parameters
+        """
+        rf = RequestFactory()
+        target_page = self.get_random_string()
+        target_size = self.get_random_string()
+        request = rf.get("", {"size": target_size, "page": target_page})
+        size, page = pagination_handle(request)
+        self.assertNotEqual(page, target_page)
+        self.assertNotEqual(size, target_size)
+
+    def test_numerical(self):
+        """
+        Test Numerical Parameters
+        """
+        rf = RequestFactory()
+        target_page = 5
+        target_size = 6
+        request = rf.get("", {"size": target_size, "page": target_page})
+        size, page = pagination_handle(request)
+        self.assertEqual(page, target_page)
+        self.assertEqual(size, target_size)

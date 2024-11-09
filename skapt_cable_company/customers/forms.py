@@ -63,7 +63,6 @@ class CustomerForm(ModelForm):
         else:
             del self.fields["customer_number"]
 
-
     def disable_fields(self, fields: Union[None, List[str]] = None):
         """
         Disable given Fields

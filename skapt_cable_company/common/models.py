@@ -10,11 +10,27 @@ from datetime import datetime, timedelta
 from django.db import models
 from django.contrib.auth.models import User, AbstractBaseUser, AnonymousUser
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
+from django.http import HttpRequest
 from django.utils.timezone import now
 from numpy import zeros, array
 
 from ml.predictors import DefaultPredictor, DelayPredictor
 
+def pagination_handle(request: HttpRequest, default_size=10, default_page_number=1):
+    """
+    Handle Pagination Size and page Number Parameter
+    """
+    size = request.GET.get("size", str(default_size))
+    if size.isnumeric():
+        size = int(size)
+    else:
+        size = default_size
+    page_number = request.GET.get("page", str(default_page_number))
+    if page_number.isnumeric():
+        page_number = int(page_number)
+    else:
+        page_number = default_page_number
+    return size, page_number
 
 def query_or_logic(*args):
     """
@@ -92,7 +108,7 @@ class Employee(models.Model):
         """
         Get Payments of the employee managed area customers
         """
-        return Payment.objects.filter(customer__area__agent=self)
+        return Payment.objects.filter(connection__customer__area__agent=self)
 
 
 class Area(models.Model):
@@ -142,7 +158,7 @@ class Area(models.Model):
         """
         Get Customer Payments in this area
         """
-        return Payment.objects.filter(customer__area=self)
+        return Payment.objects.filter(connection__customer__area=self)
 
 
 class Customer(models.Model):
@@ -236,7 +252,7 @@ class Customer(models.Model):
         """
         pay_date = self.area.collection_date
         delay_predictor = DelayPredictor()
-        payments = Payment.objects.filter(customer=self).order_by("date")[
+        payments = Payment.objects.filter(connection__customer=self).order_by("date")[
             : delay_predictor.time_series_offset
         ]
         payments_array = (
@@ -322,7 +338,20 @@ class Customer(models.Model):
         """
         Get Payments
         """
-        return Payment.objects.filter(customer=self)
+        return Payment.objects.filter(connection__customer=self)
+
+
+class CustomerConnection(models.Model):
+    """
+    Class for Customer Connection Model
+    """
+
+    id = models.AutoField(primary_key=True)
+    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
+    active = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return f"Connection by {self.customer.user.get_short_name()}"
 
 
 class Payment(models.Model):
@@ -331,7 +360,7 @@ class Payment(models.Model):
     """
 
     id = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
+    connection = models.ForeignKey(CustomerConnection, on_delete=models.RESTRICT)
     employee = models.ForeignKey(Employee, on_delete=models.RESTRICT)
     date = models.DateField(auto_now_add=True)
     amount = models.FloatField(
@@ -339,7 +368,7 @@ class Payment(models.Model):
     )
 
     def __str__(self):
-        return f"{self.customer.user.get_short_name()} paid {self.amount} on {self.date} to {self.employee.user.get_short_name()}"
+        return f"{self.connection.customer.user.get_short_name()} paid {self.amount} on {self.date} to {self.employee.user.get_short_name()}"
 
 
 class Bill(models.Model):

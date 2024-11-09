@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.forms import Form
 
 from common.tests import BaseTestCase
-from common.models import Customer, Area
+from common.models import Customer, Area, CustomerConnection
 
 
 class CustomerBaseTestCase(BaseTestCase):
@@ -87,21 +87,6 @@ class CustomersTestCase(CustomerBaseTestCase):
         page_number = 2
         response = self.client.get("/customers/", {"page": page_number})
         self.assertEqual(response.context["customers"].number, page_number)
-
-    def test_non_numeric_params(self):
-        """
-        Test if can filter customers with wrong queries
-        """
-        self.generate_customers()
-        employee = self.generate_employees(1)[0]
-        self.login_as_employee(employee)
-        request_size = self.get_random_string()
-        page_number = self.get_random_string()
-        response = self.client.get(
-            "/customers/", {"page": page_number, "size": request_size}
-        )
-        self.assertNotEqual(len(response.context["customers"]), request_size)
-        self.assertNotEqual(response.context["customers"].number, page_number)
 
     def test_search_text(self):
         """
@@ -638,3 +623,61 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
         request_object = {**user_form.initial, **customer_form.initial}
         response = self.client.put(self.url, request_object)
         self.assertEqual(response.status_code, 400)
+
+
+class ConnectionTestCase(CustomerBaseTestCase):
+    """
+    Test case to check Connections
+    """
+
+    def setUp(self):
+        """
+        Setup View Customer Testings
+        """
+        super().setUp()
+        self.customer = self.generate_customers(1)[0]
+
+    def test_add_connection(self):
+        """
+        Test if new connections can be added
+        """
+        url = f"/customers/{self.customer.user.pk}/addConnection"
+        self.login_as_employee(self.customer.agent)
+        self.client.get(url)
+        self.assertGreater(
+            CustomerConnection.objects.filter(customer=self.customer).count(), 0
+        )
+
+    def test_enable_connection(self):
+        """
+        Test if disabled connection can be enabled
+        """
+        self.login_as_employee(self.customer.agent)
+        connection = CustomerConnection(customer=self.customer, active=False)
+        connection.save()
+        self.assertFalse(connection.active)
+        url = f"/customers/{self.customer.user.pk}/{connection.pk}/enableConnection"
+        self.client.get(url)
+        self.assertTrue(CustomerConnection.objects.get(pk=connection.pk).active)
+        connection.active = False
+        connection.save()
+        self.login_as_non_employee()
+        self.client.get(url)
+        self.assertFalse(CustomerConnection.objects.get(pk=connection.pk).active)
+
+    def test_disable_connection(self):
+        """
+        Test if enable connection can be disabled
+        """
+        self.login_as_employee(self.customer.agent)
+        connection = CustomerConnection(customer=self.customer)
+        connection.save()
+        self.assertTrue(connection.active)
+        url = f"/customers/{self.customer.user.pk}/{connection.pk}/disableConnection"
+        self.client.get(url)
+        self.assertFalse(CustomerConnection.objects.get(pk=connection.pk).active)
+        connection.active = True
+        connection.save()
+        self.login_as_non_employee()
+        self.client.get(url)
+        self.assertTrue(CustomerConnection.objects.get(pk=connection.pk).active)

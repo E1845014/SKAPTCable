@@ -13,7 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth.models import User
 
-from common.models import Customer, Area, query_or_logic
+from common.models import Customer, Area, CustomerConnection, query_or_logic, pagination_handle
 from common.form import UserBaseForm
 
 from employees.models import get_employee_or_super_admin, get_admin_employee
@@ -29,16 +29,7 @@ def index(request: HttpRequest):
     """
     if request.method == "GET":
         template = loader.get_template("customers.html")
-        size = request.GET.get("size", "10")
-        if size.isnumeric():
-            size = int(size)
-        else:
-            size = 10
-        page_number = request.GET.get("page", "1")
-        if page_number.isnumeric():
-            page_number = int(page_number)
-        else:
-            page_number = 1
+        size, page_number = pagination_handle(request)
         search_text = request.GET.get("search_text")
         get_employee_or_super_admin(request)
         if search_text is None:
@@ -132,12 +123,14 @@ def view_customer(request: HttpRequest, username: str):
         customer_form = CustomerForm("VIEW", instance=customer)
         user_form = UserBaseForm(instance=customer.user)
         user_form.disable_fields()
+        connections = CustomerConnection.objects.filter(customer=customer)
         return HttpResponse(
             template.render(
                 {
                     "user_form": user_form,
                     "customer_form": customer_form,
                     "customer": customer,
+                    "connections": connections,
                 },
                 request,
             )
@@ -184,4 +177,44 @@ def update_customer(request: HttpRequest, username: str):
                 request,
             )
         )
+    raise PermissionDenied
+
+
+@login_required
+def add_connection(request: HttpRequest, username: str):
+    """
+    Add Connection to the user
+    """
+    customer = get_object_or_404(Customer, pk=username)
+    if customer.is_editable(request.user):
+        customer_connection = CustomerConnection(customer=customer, active=True)
+        customer_connection.save()
+    return redirect(f"/customers/{customer.pk}")
+
+
+@login_required
+def enable_connection(request: HttpRequest, username: str, connection_id: int):
+    """
+    Enable Connection
+    """
+    customer = get_object_or_404(Customer, pk=username)
+    if customer.is_editable(request.user):
+        connection = CustomerConnection.objects.get(pk=connection_id, customer=customer)
+        connection.active = True
+        connection.save()
+        return redirect(f"/customers/{customer.pk}")
+    raise PermissionDenied
+
+
+@login_required
+def disable_connection(request: HttpRequest, username: str, connection_id: int):
+    """
+    Disable Connection
+    """
+    customer = get_object_or_404(Customer, pk=username)
+    if customer.is_editable(request.user):
+        connection = CustomerConnection.objects.get(pk=connection_id, customer=customer)
+        connection.active = False
+        connection.save()
+        return redirect(f"/customers/{customer.pk}")
     raise PermissionDenied
