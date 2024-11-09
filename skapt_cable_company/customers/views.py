@@ -199,3 +199,31 @@ def add_connection(request: HttpRequest, username: str):
         customerConnection = CustomerConnection(customer=customer, active=True)
         customerConnection.save()
     return redirect(f"/customers/{customer.pk}")
+
+
+@login_required
+def enable_connection(request: HttpRequest, username: str, connectionID: int):
+    """
+    Enable Connection
+    """
+    customer = get_object_or_404(Customer, pk=username)
+    if customer.is_editable(request.user):
+        connection = CustomerConnection.objects.get(pk=connectionID, customer=customer)
+        connection.active = True
+        connection.save()
+        return redirect(f"/customers/{customer.pk}")
+    raise PermissionDenied
+
+
+@login_required
+def disable_connection(request: HttpRequest, username: str, connectionID: int):
+    """
+    Disable Connection
+    """
+    customer = get_object_or_404(Customer, pk=username)
+    if customer.is_editable(request.user):
+        connection = CustomerConnection.objects.get(pk=connectionID, customer=customer)
+        connection.active = False
+        connection.save()
+        return redirect(f"/customers/{customer.pk}")
+    raise PermissionDenied

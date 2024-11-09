@@ -32,6 +32,7 @@
       <tr>
         <th>ID</th>
         <th>Active</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -42,6 +43,20 @@
       >
         <td>{{ connection.id }}</td>
         <td>{{ connection.active }}</td>
+        {% if connection.active %}
+        <td>
+          <a href="{% url 'Disable Customer Connection' customer.user.pk connection.id %}">
+            <button class="button is-danger">Disable</button>
+          </a>
+        </td>
+        {% else %}
+        <td>
+          <a href="{% url 'Enable Customer Connection' customer.user.pk connection.id %}">
+            <button class="button is-success">Enable</button>
+          </a>
+        </td>
+        {% endif %}
+        
       </tr>
       {% endfor %}
     </tbody>

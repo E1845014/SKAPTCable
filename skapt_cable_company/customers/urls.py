@@ -15,5 +15,15 @@ urlpatterns = [
         "<str:username>/addConnection",
         views.add_connection,
         name="Add Customer Connection",
-    )
+    ),
+    path(
+        "<str:username>/<str:connectionID>/enableConnection",
+        views.enable_connection,
+        name="Enable Customer Connection",
+    ),
+    path(
+        "<str:username>/<str:connectionID>/disableConnection",
+        views.disable_connection,
+        name="Disable Customer Connection",
+    ),
 ]
