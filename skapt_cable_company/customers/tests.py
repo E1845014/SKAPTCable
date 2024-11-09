@@ -671,6 +671,11 @@ class ConnectionTestCase(CustomerBaseTestCase):
         url = f"/customers/{self.customer.user.pk}/{connection.pk}/enableConnection"
         self.client.get(url)
         self.assertTrue(CustomerConnection.objects.get(pk=connection.pk).active)
+        connection.active = False
+        connection.save()
+        self.login_as_non_employee()
+        self.client.get(url)
+        self.assertFalse(CustomerConnection.objects.get(pk=connection.pk).active)
 
     def test_disable_connection(self):
         """
@@ -683,3 +688,8 @@ class ConnectionTestCase(CustomerBaseTestCase):
         url = f"/customers/{self.customer.user.pk}/{connection.pk}/disableConnection"
         self.client.get(url)
         self.assertFalse(CustomerConnection.objects.get(pk=connection.pk).active)
+        connection.active = True
+        connection.save()
+        self.login_as_non_employee()
+        self.client.get(url)
+        self.assertTrue(CustomerConnection.objects.get(pk=connection.pk).active)
