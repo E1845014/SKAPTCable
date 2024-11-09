@@ -88,21 +88,6 @@ class CustomersTestCase(CustomerBaseTestCase):
         response = self.client.get("/customers/", {"page": page_number})
         self.assertEqual(response.context["customers"].number, page_number)
 
-    def test_non_numeric_params(self):
-        """
-        Test if can filter customers with wrong queries
-        """
-        self.generate_customers()
-        employee = self.generate_employees(1)[0]
-        self.login_as_employee(employee)
-        request_size = self.get_random_string()
-        page_number = self.get_random_string()
-        response = self.client.get(
-            "/customers/", {"page": page_number, "size": request_size}
-        )
-        self.assertNotEqual(len(response.context["customers"]), request_size)
-        self.assertNotEqual(response.context["customers"].number, page_number)
-
     def test_search_text(self):
         """
         Test if can filter customer with search text

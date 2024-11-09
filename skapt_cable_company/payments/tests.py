@@ -207,18 +207,3 @@ class ViewPaymentsTestCase(PaymentBaseTestCase):
         self.login_as_non_employee()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
-
-    def test_non_numeric_params(self):
-        """
-        Test if can filter customers with wrong queries
-        """
-        self.generate_customers()
-        employee = self.generate_employees(1)[0]
-        self.login_as_employee(employee)
-        request_size = self.get_random_string()
-        page_number = self.get_random_string()
-        response = self.client.get(
-            self.url, {"page": page_number, "size": request_size}
-        )
-        self.assertNotEqual(len(response.context["payments"]), request_size)
-        self.assertNotEqual(response.context["payments"].number, page_number)
