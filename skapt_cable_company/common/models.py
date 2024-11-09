@@ -325,13 +325,26 @@ class Customer(models.Model):
         return Payment.objects.filter(customer=self)
 
 
+class CustomerConnection(models.Model):
+    """
+    Class for Customer Connection Model
+    """
+
+    id = models.AutoField(primary_key=True)
+    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
+    active = models.BooleanField(default=True)
+
+    def __str__(self) -> str:
+        return f"Connection by {self.customer.user.get_short_name()}"
+
+
 class Payment(models.Model):
     """
     Class for Payment Model
     """
 
     id = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
+    connection = models.ForeignKey(CustomerConnection, on_delete=models.RESTRICT)
     employee = models.ForeignKey(Employee, on_delete=models.RESTRICT)
     date = models.DateField(auto_now_add=True)
     amount = models.FloatField(
@@ -339,7 +352,7 @@ class Payment(models.Model):
     )
 
     def __str__(self):
-        return f"{self.customer.user.get_short_name()} paid {self.amount} on {self.date} to {self.employee.user.get_short_name()}"
+        return f"{self.connection.customer.user.get_short_name()} paid {self.amount} on {self.date} to {self.employee.user.get_short_name()}"
 
 
 class Bill(models.Model):

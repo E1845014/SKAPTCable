@@ -5,7 +5,7 @@ Module to contain all Customer View Controller Codes
 # pylint: disable=imported-auth-user
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.template import loader
 from django.core.exceptions import BadRequest, PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
@@ -13,7 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth.models import User
 
-from common.models import Customer, Area, query_or_logic
+from common.models import Customer, Area, CustomerConnection, query_or_logic
 from common.form import UserBaseForm
 
 from employees.models import get_employee_or_super_admin, get_admin_employee
@@ -185,3 +185,14 @@ def update_customer(request: HttpRequest, username: str):
             )
         )
     raise PermissionDenied
+
+
+def add_connection(request: HttpRequest, username: str):
+    """
+    Add Connection to the user
+    """
+    customer = get_object_or_404(Customer, pk=username)
+    if customer.is_editable(request.user):
+        customerConnection = CustomerConnection(customer=customer, active=True)
+        customerConnection.save()
+    return redirect(f"/customers/{customer.pk}")

@@ -27,12 +27,12 @@ def add_customer_payment(request: HttpRequest, username: str):
         raise PermissionDenied
     if customer.is_editable(request.user):
         if request.method == "GET":
-            payment_form = PaymentForm()
+            payment_form = PaymentForm(customer)
         elif request.method == "POST":
-            payment_form = PaymentForm(request.POST)
+            payment_form = PaymentForm(None, request.POST)
             if payment_form.is_valid():
                 payment = payment_form.save(False)
-                payment.customer = customer
+                payment.connection.customer = customer
                 payment.employee = employee_query[0]
                 payment.save()
                 return redirect(f"/customers/{customer.pk}/payments")
@@ -54,7 +54,7 @@ def get_customer_payments(request: HttpRequest, username: str):
     template = loader.get_template("payments.html")
     customer = get_object_or_404(Customer, pk=username)
     if customer.is_accessible(request.user):
-        payments = Payment.objects.filter(customer=customer)
+        payments = Payment.objects.filter(connection__customer=customer)
         return HttpResponse(
             template.render({"payments": payments, "customer": customer}, request)
         )

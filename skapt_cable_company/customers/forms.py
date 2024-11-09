@@ -6,7 +6,7 @@ from typing import List, Union, Literal
 
 from django.forms import ModelForm
 
-from common.models import Customer
+from common.models import Customer, CustomerConnection
 from common.form import (
     disable_fields,
     SKAPTTextArea,
@@ -62,7 +62,6 @@ class CustomerForm(ModelForm):
             self.disable_fields()
         else:
             del self.fields["customer_number"]
-
 
     def disable_fields(self, fields: Union[None, List[str]] = None):
         """

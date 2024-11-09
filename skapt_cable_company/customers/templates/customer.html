@@ -12,6 +12,11 @@
         <button class="button is-primary">Payments</button>
       </a>
     </div>
+    <div class="column">
+      <a href="{% url 'Add Customer Connection' customer.user.pk %}">
+        <button class="button is-primary">Add Connection</button>
+      </a>
+    </div>
   </div>
   <form action="" method="post">
     {% with form=user_form %}
