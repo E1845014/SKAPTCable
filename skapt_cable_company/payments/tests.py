@@ -180,3 +180,16 @@ class AddPaymentTestCase(PaymentBaseTestCase):
         request_object = payment_form.initial
         response = self.client.put(self.url, request_object)
         self.assertEqual(response.status_code, 400)
+
+
+class ViewPaymentsTestCase(PaymentBaseTestCase):
+    def test_show_all_payments(self):
+        """
+        Test if all the payments of the customer are shown
+        """
+        self.login_as_employee()
+        response = self.client.get(f"/customers/payments")
+        payment_count = Payment.objects.filter(
+            connection__customer=self.customer
+        ).count()
+        self.assertEqual(len(response.context["payments"]), payment_count)
