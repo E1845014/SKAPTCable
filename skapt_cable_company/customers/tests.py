@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.forms import Form
 
 from common.tests import BaseTestCase
-from common.models import Customer, Area
+from common.models import Customer, Area, CustomerConnection
 
 
 class CustomerBaseTestCase(BaseTestCase):
@@ -638,3 +638,48 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
         request_object = {**user_form.initial, **customer_form.initial}
         response = self.client.put(self.url, request_object)
         self.assertEqual(response.status_code, 400)
+
+
+class ConnectionTestCase(CustomerBaseTestCase):
+
+    def setUp(self):
+        """
+        Setup View Customer Testings
+        """
+        super().setUp()
+        self.customer = self.generate_customers(1)[0]
+
+    def test_add_connection(self):
+        """
+        Test if new connections can be added
+        """
+        url = f"/customers/{self.customer.user.pk}/addConnection"
+        self.login_as_employee(self.customer.agent)
+        self.client.get(url)
+        self.assertGreater(
+            CustomerConnection.objects.filter(customer=self.customer).count(), 0
+        )
+
+    def test_enable_connection(self):
+        """
+        Test if disabled connection can be enabled
+        """
+        self.login_as_employee(self.customer.agent)
+        connection = CustomerConnection(customer=self.customer, active=False)
+        connection.save()
+        self.assertFalse(connection.active)
+        url = f"/customers/{self.customer.user.pk}/{connection.pk}/enableConnection"
+        self.client.get(url)
+        self.assertTrue(CustomerConnection.objects.get(pk=connection.pk).active)
+
+    def test_disable_connection(self):
+        """
+        Test if enable connection can be disabled
+        """
+        self.login_as_employee(self.customer.agent)
+        connection = CustomerConnection(customer=self.customer)
+        connection.save()
+        self.assertTrue(connection.active)
+        url = f"/customers/{self.customer.user.pk}/{connection.pk}/disableConnection"
+        self.client.get(url)
+        self.assertFalse(CustomerConnection.objects.get(pk=connection.pk).active)

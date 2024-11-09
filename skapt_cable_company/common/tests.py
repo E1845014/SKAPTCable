@@ -15,7 +15,7 @@ from django.test import TestCase
 
 from ml.predictors import DelayPredictor, DefaultPredictor
 
-from .models import Employee, Area, Customer, Payment, Bill
+from .models import CustomerConnection, Employee, Area, Customer, Payment, Bill
 
 
 class BaseTestCase(TestCase):
@@ -107,18 +107,31 @@ class BaseTestCase(TestCase):
             )
         return customers
 
+    def generate_connection(self, n=5, customers: Union[List[Customer], None] = None):
+        """
+        Generate n number of connections
+        """
+        if customers is None:
+            customers = self.generate_customers()
+        connections: List[CustomerConnection] = []
+        for _ in range(n):
+            connections.append(
+                CustomerConnection.objects.create(customer=choice(customers))
+            )
+        return connections
+
     def generate_payments(self, n=5, customers: Union[List[Customer], None] = None):
         """
         Generate n number of Payments
         """
-        if customers is None:
-            customers = self.generate_customers()
+        connections = self.generate_connection(n, customers)
         payments: List[Payment] = []
         for _ in range(n):
+            customer = choice(connections).customer
             payments.append(
                 Payment.objects.create(
-                    customer=choice(customers),
-                    employee=choice(customers).get_agent(),
+                    customer=customer,
+                    employee=customer.get_agent(),
                     amount=randint(1, 100),
                 )
             )
@@ -479,7 +492,23 @@ class PaymentTestCase(BaseTestCase):
         payment = self.generate_payments(1)[0]
         self.assertEqual(
             str(payment),
-            f"{payment.customer.user.get_short_name()} paid {payment.amount} on {payment.date} to {payment.employee.user.get_short_name()}",
+            f"{payment.connection.customer.user.get_short_name()} paid {payment.amount} on {payment.date} to {payment.employee.user.get_short_name()}",
+        )
+
+
+class CustomerConnectionTestCase(BaseTestCase):
+    """
+    Test Cases to test Customer Connection Model
+    """
+
+    def test_str(self):
+        """
+        Test Customer Connection String
+        """
+        connection = self.generate_connection(1)[0]
+        self.assertEqual(
+            str(connection),
+            f"Connection by {connection.customer.user.get_short_name()}",
         )
 
 
