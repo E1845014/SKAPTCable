@@ -183,13 +183,39 @@ class AddPaymentTestCase(PaymentBaseTestCase):
 
 
 class ViewPaymentsTestCase(PaymentBaseTestCase):
+
+    url = "/customers/payments"
+
     def test_show_all_payments(self):
         """
         Test if all the payments of the customer are shown
         """
         self.login_as_employee()
-        response = self.client.get(f"/customers/payments")
+        response = self.client.get(self.url)
         payment_count = Payment.objects.filter(
             connection__customer=self.customer
         ).count()
         self.assertEqual(len(response.context["payments"]), payment_count)
+
+    def test_page_not_renders_for_non_employees(self):
+        """
+        Test if the payments page not renders for non-employees
+        """
+        self.login_as_non_employee()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_non_numeric_params(self):
+        """
+        Test if can filter customers with wrong queries
+        """
+        self.generate_customers()
+        employee = self.generate_employees(1)[0]
+        self.login_as_employee(employee)
+        request_size = self.get_random_string()
+        page_number = self.get_random_string()
+        response = self.client.get(
+            self.url, {"page": page_number, "size": request_size}
+        )
+        self.assertNotEqual(len(response.context["payments"]), request_size)
+        self.assertNotEqual(response.context["payments"].number, page_number)
