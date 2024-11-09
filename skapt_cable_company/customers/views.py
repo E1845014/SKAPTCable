@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 
 from common.models import Customer, Area, CustomerConnection, query_or_logic
 from common.form import UserBaseForm
+from common.utils import pagination_handle
 
 from employees.models import get_employee_or_super_admin, get_admin_employee
 
@@ -29,16 +30,7 @@ def index(request: HttpRequest):
     """
     if request.method == "GET":
         template = loader.get_template("customers.html")
-        size = request.GET.get("size", "10")
-        if size.isnumeric():
-            size = int(size)
-        else:
-            size = 10
-        page_number = request.GET.get("page", "1")
-        if page_number.isnumeric():
-            page_number = int(page_number)
-        else:
-            page_number = 1
+        size, page_number = pagination_handle(request)
         search_text = request.GET.get("search_text")
         get_employee_or_super_admin(request)
         if search_text is None:
