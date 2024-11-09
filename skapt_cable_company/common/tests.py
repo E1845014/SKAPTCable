@@ -12,10 +12,19 @@ from datetime import date, datetime
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from django.test.client import RequestFactory
 
 from ml.predictors import DelayPredictor, DefaultPredictor
 
-from .models import CustomerConnection, Employee, Area, Customer, Payment, Bill
+from .models import (
+    CustomerConnection,
+    Employee,
+    Area,
+    Customer,
+    Payment,
+    Bill,
+    pagination_handle,
+)
 
 
 class BaseTestCase(TestCase):
@@ -528,3 +537,33 @@ class BillTestCase(BaseTestCase):
             str(bill),
             f"{bill.customer.user.get_short_name()} billed {bill.amount} on {bill.date} for the duration from {bill.from_date} to {bill.to_date}",
         )
+
+
+class PaginationHandleTestCase(BaseTestCase):
+    """
+    Test Cases to test Pagination Handler
+    """
+
+    def test_non_numerical(self):
+        """
+        Test Non Numerical Parameters
+        """
+        rf = RequestFactory()
+        target_page = self.get_random_string()
+        target_size = self.get_random_string()
+        request = rf.get("", {"size": target_size, "page": target_page})
+        size, page = pagination_handle(request)
+        self.assertNotEqual(page, target_page)
+        self.assertNotEqual(size, target_size)
+
+    def test_numerical(self):
+        """
+        Test Numerical Parameters
+        """
+        rf = RequestFactory()
+        target_page = 5
+        target_size = 6
+        request = rf.get("", {"size": target_size, "page": target_page})
+        size, page = pagination_handle(request)
+        self.assertEqual(page, target_page)
+        self.assertEqual(size, target_size)

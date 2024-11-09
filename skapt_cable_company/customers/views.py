@@ -13,9 +13,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth.models import User
 
-from common.models import Customer, Area, CustomerConnection, query_or_logic
+from common.models import Customer, Area, CustomerConnection, query_or_logic, pagination_handle
 from common.form import UserBaseForm
-from common.utils import pagination_handle
 
 from employees.models import get_employee_or_super_admin, get_admin_employee
 

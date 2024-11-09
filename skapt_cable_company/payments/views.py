@@ -9,12 +9,9 @@ from django.shortcuts import redirect, get_object_or_404
 from django.core.exceptions import BadRequest, PermissionDenied
 from django.core.paginator import Paginator
 
-from common.models import Customer, Payment, Employee
-from common.utils import pagination_handle
+from common.models import Customer, Payment, Employee, pagination_handle
 
 from .forms import PaymentForm
-
-# Create your views here.
 
 
 @login_required
