@@ -26,6 +26,26 @@
     {% include 'form.html' %}
     {% endwith %}
   </form>
+  <h2 class="is-size-2 has-text-centered">Connections</h2>
+  <table class="table is-fullwidth is-striped is-hoverable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Active</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for connection in connections %}
+      <tr
+        data-url="{% url 'View Customer' customer.pk %}"
+        class="clickable-row"
+      >
+        <td>{{ connection.id }}</td>
+        <td>{{ connection.active }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
   
 </div>
 {% endblock %}

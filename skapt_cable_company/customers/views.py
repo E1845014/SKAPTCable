@@ -132,12 +132,14 @@ def view_customer(request: HttpRequest, username: str):
         customer_form = CustomerForm("VIEW", instance=customer)
         user_form = UserBaseForm(instance=customer.user)
         user_form.disable_fields()
+        connections = CustomerConnection.objects.filter(customer=customer)
         return HttpResponse(
             template.render(
                 {
                     "user_form": user_form,
                     "customer_form": customer_form,
                     "customer": customer,
+                    "connections": connections,
                 },
                 request,
             )
@@ -187,6 +189,7 @@ def update_customer(request: HttpRequest, username: str):
     raise PermissionDenied
 
 
+@login_required
 def add_connection(request: HttpRequest, username: str):
     """
     Add Connection to the user

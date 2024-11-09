@@ -15,5 +15,5 @@ urlpatterns = [
         "<str:username>/addConnection",
         views.add_connection,
         name="Add Customer Connection",
-    ),
+    )
 ]
