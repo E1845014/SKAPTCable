@@ -127,10 +127,11 @@ class BaseTestCase(TestCase):
         connections = self.generate_connection(n, customers)
         payments: List[Payment] = []
         for _ in range(n):
-            customer = choice(connections).customer
+            connection = choice(connections)
+            customer = connection.customer
             payments.append(
                 Payment.objects.create(
-                    customer=customer,
+                    connection=connection,
                     employee=customer.get_agent(),
                     amount=randint(1, 100),
                 )

@@ -92,7 +92,7 @@ class Employee(models.Model):
         """
         Get Payments of the employee managed area customers
         """
-        return Payment.objects.filter(customer__area__agent=self)
+        return Payment.objects.filter(connection__customer__area__agent=self)
 
 
 class Area(models.Model):
@@ -142,7 +142,7 @@ class Area(models.Model):
         """
         Get Customer Payments in this area
         """
-        return Payment.objects.filter(customer__area=self)
+        return Payment.objects.filter(connection__customer__area=self)
 
 
 class Customer(models.Model):
@@ -236,7 +236,7 @@ class Customer(models.Model):
         """
         pay_date = self.area.collection_date
         delay_predictor = DelayPredictor()
-        payments = Payment.objects.filter(customer=self).order_by("date")[
+        payments = Payment.objects.filter(connection__customer=self).order_by("date")[
             : delay_predictor.time_series_offset
         ]
         payments_array = (
@@ -322,7 +322,7 @@ class Customer(models.Model):
         """
         Get Payments
         """
-        return Payment.objects.filter(customer=self)
+        return Payment.objects.filter(connection__customer=self)
 
 
 class CustomerConnection(models.Model):
