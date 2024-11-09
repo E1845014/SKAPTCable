@@ -641,6 +641,9 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
 
 
 class ConnectionTestCase(CustomerBaseTestCase):
+    """
+    Test case to check Connections
+    """
 
     def setUp(self):
         """

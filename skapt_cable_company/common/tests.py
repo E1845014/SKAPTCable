@@ -491,9 +491,10 @@ class PaymentTestCase(BaseTestCase):
         Test Payment Model String
         """
         payment = self.generate_payments(1)[0]
+        customer_name = payment.connection.customer.user.get_short_name()
         self.assertEqual(
             str(payment),
-            f"{payment.connection.customer.user.get_short_name()} paid {payment.amount} on {payment.date} to {payment.employee.user.get_short_name()}",
+            f"{customer_name} paid {payment.amount} on {payment.date} to {payment.employee.user.get_short_name()}",
         )
 
 

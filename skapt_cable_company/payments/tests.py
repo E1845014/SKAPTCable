@@ -183,6 +183,9 @@ class AddPaymentTestCase(PaymentBaseTestCase):
 
 
 class ViewPaymentsTestCase(PaymentBaseTestCase):
+    """
+    Test Cases to test View Payments Page
+    """
 
     url = "/customers/payments"
 

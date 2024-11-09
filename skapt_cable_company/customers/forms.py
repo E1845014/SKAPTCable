@@ -6,7 +6,7 @@ from typing import List, Union, Literal
 
 from django.forms import ModelForm
 
-from common.models import Customer, CustomerConnection
+from common.models import Customer
 from common.form import (
     disable_fields,
     SKAPTTextArea,

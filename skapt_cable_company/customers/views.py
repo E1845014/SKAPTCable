@@ -5,7 +5,7 @@ Module to contain all Customer View Controller Codes
 # pylint: disable=imported-auth-user
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpRequest, JsonResponse
+from django.http import HttpResponse, HttpRequest
 from django.template import loader
 from django.core.exceptions import BadRequest, PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
@@ -196,19 +196,19 @@ def add_connection(request: HttpRequest, username: str):
     """
     customer = get_object_or_404(Customer, pk=username)
     if customer.is_editable(request.user):
-        customerConnection = CustomerConnection(customer=customer, active=True)
-        customerConnection.save()
+        customer_connection = CustomerConnection(customer=customer, active=True)
+        customer_connection.save()
     return redirect(f"/customers/{customer.pk}")
 
 
 @login_required
-def enable_connection(request: HttpRequest, username: str, connectionID: int):
+def enable_connection(request: HttpRequest, username: str, connection_id: int):
     """
     Enable Connection
     """
     customer = get_object_or_404(Customer, pk=username)
     if customer.is_editable(request.user):
-        connection = CustomerConnection.objects.get(pk=connectionID, customer=customer)
+        connection = CustomerConnection.objects.get(pk=connection_id, customer=customer)
         connection.active = True
         connection.save()
         return redirect(f"/customers/{customer.pk}")
@@ -216,13 +216,13 @@ def enable_connection(request: HttpRequest, username: str, connectionID: int):
 
 
 @login_required
-def disable_connection(request: HttpRequest, username: str, connectionID: int):
+def disable_connection(request: HttpRequest, username: str, connection_id: int):
     """
     Disable Connection
     """
     customer = get_object_or_404(Customer, pk=username)
     if customer.is_editable(request.user):
-        connection = CustomerConnection.objects.get(pk=connectionID, customer=customer)
+        connection = CustomerConnection.objects.get(pk=connection_id, customer=customer)
         connection.active = False
         connection.save()
         return redirect(f"/customers/{customer.pk}")
