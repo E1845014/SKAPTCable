@@ -201,6 +201,8 @@ class AddCustomerTestCase(CustomerBaseTestCase):
                 request_object[field] = new_customer_phone_number
             elif field == "connection_start_date":
                 request_object[field] = date.today()
+            elif field == "identity_no":
+                request_object[field] = f"19{self.get_random_N_digit_number(10)}"
             else:
                 request_object[field] = field
         response = self.client.post(self.url, request_object)
