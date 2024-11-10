@@ -55,7 +55,10 @@ class BaseTestCase(TestCase):
         """
         return "".join(choices(ascii_letters, k=n))
 
-    def get_random_N_digit_number(self, n: int):
+    def get_random_n_digit_number(self, n: int):
+        """
+        Generate N legnth random Integer
+        """
         range_start = 10 ** (n - 1)
         range_end = (10**n) - 1
         return randint(range_start, range_end)
@@ -113,7 +116,7 @@ class BaseTestCase(TestCase):
                     user=user,
                     phone_number=self.get_random_phone_number(),
                     address=self.get_random_string(20),
-                    identity_no=f"19{self.get_random_N_digit_number(10)}",
+                    identity_no=f"19{self.get_random_n_digit_number(10)}",
                     box_ca_number=self.get_random_string(16),
                     customer_number=self.get_random_string(),
                     area=choice(areas),
