@@ -2,7 +2,7 @@ name: CI/CD with Django Tests, Pylint, and Coverage
 
 on:
   push:
-    branches: [ main ]  # Run on pushes to non-main branches
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python environment
         uses: actions/setup-python@v3
         with:
-          python-version: '3.9.13'  # Update with your desired Python version
+          python-version: '3.9.13'
 
       - name: Install dependencies
         run: |
@@ -27,18 +27,18 @@ jobs:
 
       - name: Run migrations
         run: |
-          cd skapt_cable_company  # Change directory to your Django project folder
+          cd skapt_cable_company
           python manage.py makemigrations
           python manage.py migrate
 
       - name: Run tests with coverage
         run: |
-          cd skapt_cable_company  # Change directory to your Django project folder
+          cd skapt_cable_company
           coverage run manage.py test
           coverage report -m --fail-under 100
           coverage html -d coverage_html --skip-covered --skip-empty
 
       - name: Run Pylint
         run: |
-          cd skapt_cable_company  # Change directory to your Django project folder
+          cd skapt_cable_company
           pylint **/*.py --django-settings-module=skapt_cable_company.settings --recursive=y --ignore=migrations # Replace with the name of your Django app directory

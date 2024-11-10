@@ -16,6 +16,7 @@ from numpy import zeros, array
 
 from ml.predictors import DefaultPredictor, DelayPredictor
 
+
 def pagination_handle(request: HttpRequest, default_size=10, default_page_number=1):
     """
     Handle Pagination Size and page Number Parameter
@@ -31,6 +32,7 @@ def pagination_handle(request: HttpRequest, default_size=10, default_page_number
     else:
         page_number = default_page_number
     return size, page_number
+
 
 def query_or_logic(*args):
     """
@@ -246,9 +248,9 @@ class Customer(models.Model):
         return gender_code < 500
 
     @property
-    def expected_payment_date(self):
+    def expected_delay(self) -> int:
         """
-        Get Payment Delay
+        Get Payment Delay in Days
         """
         pay_date = self.area.collection_date
         delay_predictor = DelayPredictor()
@@ -271,23 +273,29 @@ class Customer(models.Model):
         cell_array = delay_predictor.get_cell_career_array(self.phone_number)
 
         model = delay_predictor.get_model()
+        return (
+            model.predict(
+                array(
+                    list(std_numerical_array)
+                    + list(area_array)
+                    + [int(self.is_male)]
+                    + [int(self.has_digital_box)]
+                    + list(cell_array)
+                    + list(agent_array)
+                ).reshape((1, -1))
+            )[0]
+            // 7
+        ) * 7
+
+    @property
+    def expected_payment_date(self):
+        """
+        Get Most probable Payment Date
+        """
+        pay_date = self.area.collection_date
         date = datetime.today()
         return datetime(date.year, date.month, pay_date) + timedelta(
-            days=(
-                model.predict(
-                    array(
-                        list(std_numerical_array)
-                        + list(area_array)
-                        + [int(self.is_male)]
-                        + [int(self.has_digital_box)]
-                        + list(cell_array)
-                        + list(agent_array)
-                    ).reshape((1, -1))
-                )[0]
-                // 7
-            )
-            * 7
-            + pay_date
+            days=self.expected_delay + pay_date
         )
 
     @property
