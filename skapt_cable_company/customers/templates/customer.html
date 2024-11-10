@@ -25,7 +25,15 @@
     {% with form=customer_form %}
     {% include 'form.html' %}
     {% endwith %}
+    
   </form>
+  <div class="block">
+    Predicted Payment Delay In Days from Original Payment Date
+    <input value={{ customer.expected_delay }} class="input is-rounded"/>
+    <br>
+    Probability of Defaulting 
+    <input value={{ customer.default_probability }} class="input is-rounded"/>
+  </div>
   <h2 class="is-size-2 has-text-centered">Connections</h2>
   <table class="table is-fullwidth is-striped is-hoverable">
     <thead>
