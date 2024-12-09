@@ -317,7 +317,7 @@ class AreaTestCase(BaseTestCase):
 
     def test_accessibility_by_agent(self):
         """
-        Test Area Accessibility
+        Test Area Accessibility by it's Agent
         """
         area = self.generate_areas(1)[0]
         self.assertTrue(area.is_accessible(area.agent))
@@ -339,14 +339,14 @@ class AreaTestCase(BaseTestCase):
 
     def test_editable_by_customer(self):
         """
-        Test Area editability by customer
+        Test Area is not editability by customer
         """
         customer = self.generate_customers(1)[0]
         self.assertFalse(customer.area.is_editable(customer))
 
     def test_customers(self):
         """
-        Test Area Customers Populated
+        Test Area's Customers are Populated
         """
         area = self.generate_areas(1)[0]
         customers = self.generate_customers(areas=[area])
@@ -371,28 +371,28 @@ class CustomerTestCase(BaseTestCase):
 
     def test_str(self):
         """
-        Test Customer Model String
+        Test Customer Model's String
         """
         customer = self.generate_customers(1)[0]
         self.assertEqual(str(customer), str(customer.user))
 
     def test_accessibility_by_themself(self):
         """
-        Test Customer Accessibility
+        Test Customer Accessibility by themself
         """
         customer = self.generate_customers(1)[0]
         self.assertTrue(customer.is_accessible(customer))
 
     def test_accessibility_by_agent(self):
         """
-        Test Customer Accessibility by Admin
+        Test Customer Accessibility by their Agent
         """
         customer = self.generate_customers(1)[0]
         self.assertTrue(customer.is_accessible(customer.get_agent()))
 
     def test_agent(self):
         """
-        Test Customer Agent Populated
+        Test Customer's Agent is Populated
         """
         area = self.generate_areas(1)[0]
         customer = self.generate_customers(1, [area])[0]
@@ -400,7 +400,7 @@ class CustomerTestCase(BaseTestCase):
 
     def test_payments(self):
         """
-        Test Customer Payments Populated
+        Test Customer's Payments Populated
         """
         customer = self.generate_customers(1)[0]
         payments = self.generate_payments(customers=[customer])
@@ -409,7 +409,7 @@ class CustomerTestCase(BaseTestCase):
 
     def test_age(self):
         """
-        Test Customer Age Calculation
+        Test Customer's Age Calculation
         """
         customer = self.generate_customers(1)[0]
         customer.identity_no = "199728402249"
@@ -423,7 +423,7 @@ class CustomerTestCase(BaseTestCase):
 
     def test_gender(self):
         """
-        Test Customer Gender Calculation
+        Test Customer's Gender
         """
         customer = self.generate_customers(1)[0]
         customer.identity_no = "199768402249"
@@ -437,7 +437,7 @@ class CustomerTestCase(BaseTestCase):
 
     def test_payment_date(self):
         """
-        Test if Payment Date is returned
+        Test if Expected Payment Date is returned
         """
         delay_predictor = DelayPredictor()
         customer = self.generate_customers(1)[0]
@@ -522,7 +522,7 @@ class CustomerConnectionTestCase(BaseTestCase):
 
     def test_str(self):
         """
-        Test Customer Connection String
+        Test Customer Connection's String
         """
         connection = self.generate_connection(1)[0]
         self.assertEqual(

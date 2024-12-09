@@ -50,7 +50,7 @@ class CustomersTestCase(CustomerBaseTestCase):
 
     def test_shows_all_customers(self):
         """
-        Test if all the employees are shown
+        Test if all the customers are shown
         """
         customers = self.generate_customers()
         self.login_as_employee(customers[0].area.agent)
@@ -160,7 +160,7 @@ class AddCustomerTestCase(CustomerBaseTestCase):
 
     def test_form_fields(self):
         """
-        Test the fields pased in the form
+        Test the fields passed in the form
         """
         employee = self.areas[0].agent
         self.login_as_employee(employee, True)
@@ -216,7 +216,7 @@ class AddCustomerTestCase(CustomerBaseTestCase):
 
     def test_form_submission_as_non_employee(self):
         """
-        Test the form submission on correct variables
+        Test the form submission on correct variables without employee Authentication
         """
         area = self.areas[0]
         employee = area.agent
@@ -365,7 +365,7 @@ class ViewCustomerTestCase(CustomerBaseTestCase):
 
     def test_data_fields(self):
         """
-        Test whether expected datas are passed
+        Test whether expected data are passed
         """
         self.login_as_superuser()
         response = self.client.get(self.url)
@@ -501,7 +501,7 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
 
     def test_update_customer_as_admin(self):
         """
-        Test whether Employee can update customer
+        Test whether Admin Employee can update customer
         """
         self.login_as_employee(self.generate_employees(1)[0], True)
         response = self.client.get(self.url)
@@ -547,7 +547,7 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
 
     def test_update_customer_by_not_agent(self):
         """
-        Test whether Employee cannot update customer
+        Test whether Employee who is not the correct agent cannot update customer
         """
         self.login_as_superuser()
         response = self.client.get(self.url)
@@ -591,7 +591,7 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
 
     def test_invalid_data(self):
         """
-        Test whether invalid data is handled
+            
         """
         self.login_as_employee(self.customer.agent)
         response = self.client.get(self.url)

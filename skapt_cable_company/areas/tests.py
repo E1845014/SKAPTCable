@@ -58,7 +58,7 @@ class AreasTestCase(AreaBaseTestCase):
 
     def test_shows_all_areas(self):
         """
-        Test if all the employees are shown
+        Test if all the areas are shown
         """
         employees = self.generate_employees()
         areas = self.generate_areas(employees=employees)
@@ -82,7 +82,7 @@ class AddAreaTestCase(AreaBaseTestCase):
 
     def test_page_renders_for_admin_employees(self):
         """
-        Test if the page only loads for employees and super admins
+        Test if the page only loads for admin employees
         """
         employee = self.generate_employees(1)[0]
         self.login_as_employee(employee, True)
@@ -129,7 +129,7 @@ class AddAreaTestCase(AreaBaseTestCase):
 
     def test_form_submission(self):
         """
-        Test the form submission on correct variables by employee
+        Test the form submission on correct variables by admin employee
         """
         employees = self.generate_employees()
         employee = employees[0]
@@ -155,7 +155,7 @@ class AddAreaTestCase(AreaBaseTestCase):
 
     def test_form_submission_as_non_employee(self):
         """
-        Test the form submission on correct variables by non employee
+        Test the form submission on correct variables without employee Authentication
         """
 
         ## Get Choices first
@@ -238,7 +238,7 @@ class ViewAreaTestCase(AreaBaseTestCase):
 
     def test_admin_can_see_any_area(self):
         """
-        Test if an employee can view the area under their service
+        Test if an Admin can view any Area
         """
         employees = self.generate_employees()
         area = self.generate_areas(1, employees=employees[1:])[
@@ -252,7 +252,7 @@ class ViewAreaTestCase(AreaBaseTestCase):
 
     def test_non_admin_employee_cannot_see_other_areas(self):
         """
-        Test if a non admin employee cannot see areas under their control
+        Test if a non admin employee cannot see areas not under their control
         """
         employees = self.generate_employees()
         area = self.generate_areas(1, employees=employees[1:])[
@@ -266,7 +266,7 @@ class ViewAreaTestCase(AreaBaseTestCase):
 
     def test_non_employee_cannot_see_any_area(self):
         """
-        Test if a non admin employee cannot see areas under their control
+        Test if a non employee cannot see any areas
         """
         employees = self.generate_employees()
         area = self.generate_areas(1, employees=employees)[0]
@@ -280,7 +280,7 @@ class ViewAreaTestCase(AreaBaseTestCase):
 
     def test_data_fields(self):
         """
-        Test whether expected datas are passed
+        Test whether expected data are passed
         """
         employees = self.generate_employees()
         area = self.generate_areas(1, employees=employees)[0]

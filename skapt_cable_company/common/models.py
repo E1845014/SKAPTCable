@@ -299,7 +299,7 @@ class Customer(models.Model):
         )
 
     @property
-    def default_probability(self):
+    def default_probability(self) -> float:
         """Get Defaulter Probability"""
         deafult_predictor = DefaultPredictor()
         model = deafult_predictor.get_model()

@@ -91,7 +91,7 @@ class AddPaymentTestCase(PaymentBaseTestCase):
 
     def test_page_renders_for_correct_employee(self):
         """
-        Test if the page renders for employees
+        Test if the page renders for Agent
         """
         self.login_as_employee(self.customer.agent)
         response = self.client.get(self.url)
@@ -128,7 +128,7 @@ class AddPaymentTestCase(PaymentBaseTestCase):
 
     def test_add_payment_as_employee(self):
         """
-        Test employee can add payment
+        Test Agent can add payment
         """
         self.login_as_employee(self.customer.agent)
 
@@ -148,7 +148,7 @@ class AddPaymentTestCase(PaymentBaseTestCase):
 
     def test_add_invalid_payment(self):
         """
-        Test employee can add payment
+        Test whether system can handle invalid payments
         """
         self.login_as_employee(self.customer.agent)
         amount = -100
@@ -172,7 +172,7 @@ class AddPaymentTestCase(PaymentBaseTestCase):
 
     def test_wrong_request_type(self):
         """
-        Test whether other request types are supported
+        Test whether other request types are not supported
         """
         self.login_as_employee(self.customer.agent)
         response = self.client.get(self.url)

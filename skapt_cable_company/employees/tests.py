@@ -38,7 +38,7 @@ class EmployeesTestCase(EmployeeBaseTestCase):
 
     def test_page_not_renders_for_non_employees(self):
         """
-        Test if the employee page not renders for non-employees
+        Test if the employees page not renders for non-employees
         """
         user = User.objects.create_user(
             "username", "email@email.email", self.raw_password
@@ -146,7 +146,7 @@ class AddEmployeeTestCase(EmployeeBaseTestCase):
 
     def test_form_submission_as_non_employee(self):
         """
-        Test the form submission on correct variables
+        Test the form submission on correct variables without employee authorization
         """
         user = User.objects.create_user(
             "username", "email@email.email", self.raw_password
@@ -393,7 +393,7 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
 
     def test_update_employee_as_admin(self):
         """
-        Test whether Admin Employee can update employee
+        Test whether Admin Employee can update any employee
         """
         employees = self.generate_employees()
         employee = employees[0]
@@ -468,9 +468,9 @@ class UpdateEmployeeTestCase(EmployeeBaseTestCase):
         )
         self.assertTrue(len(new_employee_query) == 0)
 
-    def test_for_non_employee(self):
+    def test_non_employee_cannot_update_employee(self):
         """
-        Test the form submission as non employee failing
+        Test the form submission without employee authorization
         """
         user = User.objects.create_user(
             "username", "email@email.email", self.raw_password
