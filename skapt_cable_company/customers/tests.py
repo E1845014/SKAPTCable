@@ -591,7 +591,7 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
 
     def test_invalid_data(self):
         """
-            
+        Test for invalid data entry in Update Customer Form
         """
         self.login_as_employee(self.customer.agent)
         response = self.client.get(self.url)
