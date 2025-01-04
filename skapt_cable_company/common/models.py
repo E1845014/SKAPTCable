@@ -308,8 +308,8 @@ class Customer(models.Model):
             [
                 deafult_predictor.area_prob.get(self.area.name, 21 / 1041),
                 deafult_predictor.agent_probs.get(self.area.agent.name, 21 / 1041),
-                deafult_predictor.get_cell_career_probs_from_cellphone(
-                    self.phone_number
+                deafult_predictor.cell_number_probs.get(
+                    int(self.phone_number[2]), deafult_predictor.cell_number_probs[-1]
                 ),
                 deafult_predictor.gender_probs.get(
                     "Male" if self.is_male else "Female", 21 / 1041

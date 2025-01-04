@@ -218,10 +218,18 @@ class DefaultPredictor:
             59: 1.000000,
         }
         self.gender_probs = {"Female": 0.953271, "Male": 0.982869}
-        self.cell_career_probs = {
+        cell_career_probs = {
             "Airtel": 0.985646,
             "Dialog": 0.974952,
             "Mobital": 0.980769,
+        }
+        self.cell_number_probs = {
+            0: cell_career_probs["Mobital"],
+            1: cell_career_probs["Mobital"],
+            5: cell_career_probs["Airtel"],
+            6: cell_career_probs["Dialog"],
+            7: cell_career_probs["Dialog"],
+            -1: 21 / 1041,
         }
         self.agent_probs = {"Jeya": 0.986784, "Sai": 0.994220, "Seera": 0.966184}
         self.box_probs = {"analog": 0.933962, "digital": 0.985027}
@@ -239,15 +247,3 @@ class DefaultPredictor:
         """
         with open(f"{settings.BASE_DIR}//ml//standard_scaler.pkl", "rb") as f:
             return load(f)
-
-    def get_cell_career_probs_from_cellphone(self, number: str):
-        """
-        Get Cell Career Probability from Cell Phone Number
-        """
-        if number[2] in ["'6'", "7"]:
-            return self.cell_career_probs["Dialog"]
-        elif number[2] in ["0", "1"]:
-            return self.cell_career_probs["Mobital"]
-        elif number[2] in ["5"]:
-            return self.cell_career_probs["Airtel"]
-        return 21 / 1041
