@@ -187,7 +187,7 @@ class ViewPaymentsTestCase(PaymentBaseTestCase):
     Test Cases to test View Payments Page
     """
 
-    url = "/customers/payments"
+    url = "/payments"
 
     def test_show_all_payments(self):
         """
