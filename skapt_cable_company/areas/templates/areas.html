@@ -31,8 +31,8 @@
       >
         <td>{{ area.name }}</td>
         <td>{{ area.agent.name }}</td>
-        <td>0</td>
-        <td>0</td>
+        <td>{{ area.customers.count }}</td>
+        <td>{{ area.payment_collection }} LKR</td>
       </tr>
       {% endfor %}
     </tbody>
