@@ -527,7 +527,7 @@ class CustomerConnectionTestCase(BaseTestCase):
         connection = self.generate_connection(1)[0]
         self.assertEqual(
             str(connection),
-            f"Connection by {connection.customer.user.get_short_name()}",
+            f"Connection {connection.id} by {connection.customer.user.get_short_name()}",
         )
 
 
