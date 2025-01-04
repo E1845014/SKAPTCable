@@ -359,7 +359,7 @@ class CustomerConnection(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self) -> str:
-        return f"Connection by {self.customer.user.get_short_name()}"
+        return f"Connection {self.id} by {self.customer.user.get_short_name()}"
 
 
 class Payment(models.Model):
