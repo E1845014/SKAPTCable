@@ -8,6 +8,7 @@ from typing import Union
 from datetime import datetime, timedelta
 
 from django.db import models
+from django.db.models import Sum
 from django.contrib.auth.models import User, AbstractBaseUser, AnonymousUser
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.http import HttpRequest
@@ -161,6 +162,13 @@ class Area(models.Model):
         Get Customer Payments in this area
         """
         return Payment.objects.filter(connection__customer__area=self)
+
+    @property
+    def payment_collection(self) -> float:
+        """
+        Get Total Payment Collection
+        """
+        return self.customer_payments.aggregate(Sum("amount")).get("amount__sum", 0)
 
 
 class Customer(models.Model):
