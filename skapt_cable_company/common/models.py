@@ -304,34 +304,26 @@ class Customer(models.Model):
         deafult_predictor = DefaultPredictor()
         model = deafult_predictor.get_model()
         preprocessor = deafult_predictor.get_preprocessor()
-        prob = (
-            1
-            - model.predict(
-                preprocessor.transform(
-                    array(
-                        [
-                            deafult_predictor.area_prob.get(self.area.name, 21 / 1041),
-                            deafult_predictor.agent_probs.get(
-                                self.area.agent.name, 21 / 1041
-                            ),
-                            deafult_predictor.cell_career_probs.get(
-                                self.phone_number, 21 / 1041
-                            ),
-                            deafult_predictor.gender_probs.get(
-                                "Male" if self.is_male else "Female", 21 / 1041
-                            ),
-                            deafult_predictor.box_probs.get(
-                                "digital" if self.has_digital_box else "analog",
-                                21 / 1041,
-                            ),
-                            0.9752,
-                            self.age,
-                            self.area.collection_date,
-                        ]
-                    ).reshape((1, -1))
-                )
-            )[0]
-        )
+        input_arr = array(
+            [
+                deafult_predictor.area_prob.get(self.area.name, 21 / 1041),
+                deafult_predictor.agent_probs.get(self.area.agent.name, 21 / 1041),
+                deafult_predictor.get_cell_career_probs_from_cellphone(
+                    self.phone_number
+                ),
+                deafult_predictor.gender_probs.get(
+                    "Male" if self.is_male else "Female", 21 / 1041
+                ),
+                deafult_predictor.box_probs.get(
+                    "digital" if self.has_digital_box else "analog",
+                    21 / 1041,
+                ),
+                1 if self.offer_power_intake else 0.979452,
+                self.age,
+                self.area.collection_date,
+            ]
+        ).reshape((1, -1))
+        prob = 1 - model.predict(preprocessor.transform(input_arr))[0]
         return prob
 
     @property

@@ -239,3 +239,15 @@ class DefaultPredictor:
         """
         with open(f"{settings.BASE_DIR}//ml//standard_scaler.pkl", "rb") as f:
             return load(f)
+
+    def get_cell_career_probs_from_cellphone(self, number: str):
+        """
+        Get Cell Career Probability from Cell Phone Number
+        """
+        if number[2] in ["'6'", "7"]:
+            return self.cell_career_probs["Dialog"]
+        elif number[2] in ["0", "1"]:
+            return self.cell_career_probs["Mobital"]
+        elif number[2] in ["5"]:
+            return self.cell_career_probs["Airtel"]
+        return 21 / 1041
