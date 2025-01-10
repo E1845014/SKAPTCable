@@ -376,6 +376,36 @@ class CustomerConnection(models.Model):
     def __str__(self) -> str:
         return f"Connection {self.id} by {self.customer.user.get_short_name()}"
 
+    def generate_bill(
+        self,
+        end_date: Union[datetime, None] = None,
+        billing_amount: Union[float, None] = None,
+    ):
+        """
+        Generate Bill for the customer with the given optinal end date or with default gap
+        """
+        bills = Bill.objects.filter(connection=self).order_by("-to_date")
+        latest_bill = bills.first()
+        last_bill_date = latest_bill.to_date if latest_bill else self.start_date
+        from_date = last_bill_date + timedelta(days=1)
+        if billing_amount:
+            amount = billing_amount
+        else:
+            amount = digital_fee if self.customer.has_digital_box else analog_fee
+        if end_date:
+            to_date = end_date
+            amount = amount * ((end_date.date() - from_date).days + 1) // 30
+        else:
+            to_date = from_date + timedelta(days=29)
+        latest_bill = Bill.objects.create(
+            connection=self,
+            from_date=from_date,
+            to_date=to_date,
+            amount=amount,
+        )
+        latest_bill.save()
+        return latest_bill
+
     @property
     def bills(self):
         """
@@ -387,16 +417,8 @@ class CustomerConnection(models.Model):
             latest_bill = bills.first()
             last_bill_date = latest_bill.to_date if latest_bill else self.start_date
             while (datetime.now().date() - last_bill_date) > timedelta(days=30):
-                from_date = last_bill_date + timedelta(days=1)
-                to_date = from_date + timedelta(days=29)
-                latest_bill = Bill.objects.create(
-                    connection=self,
-                    from_date=from_date,
-                    to_date=to_date,
-                    amount=digital_fee if self.customer.has_digital_box else analog_fee,
-                )
-                latest_bill.save()
-                last_bill_date = to_date
+                latest_bill = self.generate_bill()
+                last_bill_date = latest_bill.to_date
             bills = Bill.objects.filter(connection=self).order_by("-to_date")
         return bills
 
