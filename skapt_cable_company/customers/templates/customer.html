@@ -12,11 +12,7 @@
         <button class="button is-primary">Payments</button>
       </a>
     </div>
-    <div class="column">
-      <a href="{% url 'Add Customer Connection' customer.user.pk %}">
-        <button class="button is-primary">Add Connection</button>
-      </a>
-    </div>
+    
   </div>
   <form action="" method="post">
     {% with form=user_form %}
@@ -35,11 +31,30 @@
     <input value={{ customer.default_probability }} class="input is-rounded"/>
   </div>
   <h2 class="is-size-2 has-text-centered">Connections</h2>
+  <div class="columns">
+    <div class="column is-half is-offset-one-quarter">
+      <form action="{% url 'Add Customer Connection' customer.user.pk %}" method="get">
+        
+        <div class="columns">
+          <div class="column">
+            <input class="input is-rounded" type="text" name="box_ca_number" placeholder="Enter new Box CA Number"/>
+          </div>
+          <div class="column">
+            <button class="button is-primary" type="submit">Add Connection</button>
+          </div>
+        </div>
+      </form>
+      
+      
+    </div>
+  </div>
   <table class="table is-fullwidth is-striped is-hoverable">
     <thead>
       <tr>
         <th>ID</th>
         <th>Active</th>
+        <th>Card ID</th>
+        <th>Start Date</th>
         <th></th>
       </tr>
     </thead>
@@ -51,6 +66,8 @@
       >
         <td>{{ connection.id }}</td>
         <td>{{ connection.active }}</td>
+        <td>{{ connection.box_ca_number }}</td>
+        <td>{{ connection.start_date }}</td>
         {% if connection.active %}
         <td>
           <a href="{% url 'Disable Customer Connection' customer.user.pk connection.id %}">

@@ -185,9 +185,10 @@ def add_connection(request: HttpRequest, username: str):
     """
     Add Connection to the user
     """
+    print(request.GET)
     customer = get_object_or_404(Customer, pk=username)
     if customer.is_editable(request.user):
-        customer_connection = CustomerConnection(customer=customer, active=True)
+        customer_connection = CustomerConnection(customer=customer, active=True, box_ca_number=request.GET["box_ca_number"])
         customer_connection.save()
     return redirect(f"/customers/{customer.pk}")
 
