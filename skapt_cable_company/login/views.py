@@ -9,9 +9,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import BadRequest
 from django.shortcuts import redirect
 from django.db.models.functions import TruncMonth
-from django.db.models import Sum
+from django.db.models import Sum, Count
 
-from common.models import Payment
+from common.models import CustomerConnection, Payment
 from .forms import EmployeePasswordChangeForm, LoginForm
 
 
@@ -66,6 +66,12 @@ def home(request: HttpRequest):
             .annotate(total=Sum("amount"))
             .order_by("month")
         )
+        monthly_connections = (
+            CustomerConnection.objects.annotate(month=TruncMonth("start_date"))
+            .values("month")
+            .annotate(total=Count("id"))
+            .order_by("month")
+        )
 
         top_paid_customers = (
             payments.values("connection__customer__user__first_name")
@@ -78,13 +84,14 @@ def home(request: HttpRequest):
             .annotate(total_paid=Sum("amount"))
             .order_by("-total_paid")[:10]
         )
-
+        print(monthly_connections)
         return HttpResponse(
             template.render(
                 {
                     "monthly_payments": monthly_payments,
                     "top_paid_customers": top_paid_customers,
                     "top_paid_areas": top_paid_areas,
+                    "monthly_connections": monthly_connections,
                 },
                 request,
             )
