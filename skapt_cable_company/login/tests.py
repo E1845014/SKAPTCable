@@ -155,9 +155,7 @@ class ChangePasswordTestCase(BaseTestCase):
         Contains Base Data needed for testing
         """
         self.raw_password = self.get_random_string(10)
-        self.new_password = self.get_random_string(10)
-        while self.new_password == self.raw_password:
-            self.new_password = self.get_random_string(10)
+        self.new_password = self.get_random_string(12)
         self.user = User.objects.create_user(
             username=self.get_random_string(10),
             email=f"{self.get_random_string()}@{self.get_random_string()}.com",
