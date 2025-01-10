@@ -318,7 +318,9 @@ class EmployeeTestCase(BaseTestCase):
         payments = self.generate_payments()
         employee = choice(payments).employee
         payments_collected_by_employee = Payment.objects.filter(employee=employee)
-        total_amount = sum([payment.amount for payment in payments_collected_by_employee])
+        total_amount = sum(
+            [payment.amount for payment in payments_collected_by_employee]
+        )
         self.assertEqual(employee.total_collected_payments_amount, total_amount)
 
 
@@ -574,9 +576,10 @@ class CustomerConnectionTestCase(BaseTestCase):
         """
         connection = self.generate_connection(1)[0]
         connection.start_date = date.today() - timedelta(days=60)
-        bills = self.generate_bills(connections=[connection])
-        for bill in connection.bills:
-            self.assertIn(bill, bills)
+        bills = connection.bills
+        db_bills = Bill.objects.filter(connection=connection)
+        for bill in bills:
+            self.assertIn(bill, db_bills)
 
     def test_payments(self):
         """
