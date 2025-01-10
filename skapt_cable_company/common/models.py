@@ -429,7 +429,7 @@ class CustomerConnection(models.Model):
         from_date = last_bill_date + timedelta(days=1)
         if description is None:
             description = Bill.DescriptionChoices.monthly
-        if billing_amount:
+        if billing_amount is not None:
             amount = billing_amount
         else:
             amount = (
