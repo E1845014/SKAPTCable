@@ -86,7 +86,7 @@ if userDomain == "GHOSTMACHINE":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "BITFYPSKAPT",
+            "NAME": "BITFYPSKAPT2",
             "USER": "postgres",
             "PASSWORD": "abc123456;",
             "HOST": "localhost",

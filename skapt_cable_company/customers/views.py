@@ -4,6 +4,7 @@ Module to contain all Customer View Controller Codes
 
 # pylint: disable=imported-auth-user
 
+from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest
 from django.template import loader
@@ -13,7 +14,14 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib.auth.models import User
 
-from common.models import Customer, Area, CustomerConnection, query_or_logic, pagination_handle
+from common.models import (
+    Bill,
+    Customer,
+    Area,
+    CustomerConnection,
+    query_or_logic,
+    pagination_handle,
+)
 from common.form import UserBaseForm
 
 from employees.models import get_employee_or_super_admin, get_admin_employee
@@ -131,6 +139,7 @@ def view_customer(request: HttpRequest, username: str):
                     "customer_form": customer_form,
                     "customer": customer,
                     "connections": connections,
+                    "bills": customer.bills,
                 },
                 request,
             )
@@ -186,9 +195,17 @@ def add_connection(request: HttpRequest, username: str):
     Add Connection to the user
     """
     customer = get_object_or_404(Customer, pk=username)
-    if customer.is_editable(request.user):
-        customer_connection = CustomerConnection(customer=customer, active=True)
-        customer_connection.save()
+    if customer.is_editable(request.user) and request.GET["box_ca_number"] != "":
+        customer_connection_exist = CustomerConnection.objects.filter(
+            box_ca_number=request.GET["box_ca_number"]
+        ).exists()
+        if not customer_connection_exist:
+            customer_connection = CustomerConnection(
+                customer=customer,
+                active=True,
+                box_ca_number=request.GET["box_ca_number"],
+            )
+            customer_connection.save()
     return redirect(f"/customers/{customer.pk}")
 
 
@@ -202,6 +219,11 @@ def enable_connection(request: HttpRequest, username: str, connection_id: int):
         connection = CustomerConnection.objects.get(pk=connection_id, customer=customer)
         connection.active = True
         connection.save()
+        connection.generate_bill(
+            end_date=datetime.now(),
+            billing_amount=0,
+            description=Bill.DescriptionChoices.ZeroReconnection,
+        )
         return redirect(f"/customers/{customer.pk}")
     raise PermissionDenied
 
@@ -216,5 +238,9 @@ def disable_connection(request: HttpRequest, username: str, connection_id: int):
         connection = CustomerConnection.objects.get(pk=connection_id, customer=customer)
         connection.active = False
         connection.save()
+        connection.generate_bill(
+            end_date=datetime.now(),
+            description=Bill.DescriptionChoices.ZeroDisconnection,
+        )
         return redirect(f"/customers/{customer.pk}")
     raise PermissionDenied

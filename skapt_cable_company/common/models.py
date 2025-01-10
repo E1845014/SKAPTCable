@@ -100,6 +100,15 @@ class Employee(models.Model):
         return Payment.objects.filter(employee=self)
 
     @property
+    def total_collected_payments_amount(self):
+        """
+        Get Total Collected Payments Amount
+        """
+        return (
+            self.collected_payments.aggregate(Sum("amount")).get("amount__sum", 0) or 0
+        )
+
+    @property
     def customers(self):
         """
         Get Customers managed by this employee
@@ -112,6 +121,22 @@ class Employee(models.Model):
         Get Payments of the employee managed area customers
         """
         return Payment.objects.filter(connection__customer__area__agent=self)
+
+    @property
+    def total_customer_payments_amount(self):
+        """
+        Get Total Customer Payments Amount
+        """
+        return (
+            self.customer_payments.aggregate(Sum("amount")).get("amount__sum", 0) or 0
+        )
+
+    @property
+    def customers_count(self):
+        """
+        Get Customers Count
+        """
+        return self.customers.count()
 
 
 class Area(models.Model):
@@ -168,7 +193,9 @@ class Area(models.Model):
         """
         Get Total Payment Collection
         """
-        return self.customer_payments.aggregate(Sum("amount")).get("amount__sum", 0)
+        return (
+            self.customer_payments.aggregate(Sum("amount")).get("amount__sum", 0) or 0
+        )
 
 
 class Customer(models.Model):
@@ -191,7 +218,6 @@ class Customer(models.Model):
     )
     address = models.TextField()
     identity_no = models.CharField(max_length=12)
-    box_ca_number = models.CharField(max_length=16, unique=True)
     customer_number = models.CharField(max_length=5, unique=True)
     active_connection = models.BooleanField(default=True)
     has_digital_box = models.BooleanField(default=True)
@@ -348,6 +374,31 @@ class Customer(models.Model):
         """
         return Payment.objects.filter(connection__customer=self)
 
+    @property
+    def bills(self):
+        """
+        Get Bills
+        """
+        connections = CustomerConnection.objects.filter(customer=self)
+        bills = []
+        for connection in connections:
+            bills += connection.bills
+        return bills
+
+    @property
+    def total_payment(self):
+        """
+        Get Total Payment
+        """
+        return self.payments.aggregate(Sum("amount")).get("amount__sum", 0) or 0
+
+    @property
+    def total_unpaid(self):
+        """
+        Get Total Unpaid
+        """
+        return sum(bill.amount for bill in self.bills) - self.total_payment
+
 
 class CustomerConnection(models.Model):
     """
@@ -357,9 +408,79 @@ class CustomerConnection(models.Model):
     id = models.AutoField(primary_key=True)
     customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
     active = models.BooleanField(default=True)
+    start_date = models.DateField(auto_now_add=True)
+    box_ca_number = models.CharField(max_length=16, unique=True)
 
     def __str__(self) -> str:
         return f"Connection {self.id} by {self.customer.user.get_short_name()}"
+
+    def generate_bill(
+        self,
+        end_date: Union[datetime, None] = None,
+        billing_amount: Union[float, None] = None,
+        description: Union[str, None] = None,
+    ):
+        """
+        Generate Bill for the customer with the given optinal end date or with default gap
+        """
+        bills = Bill.objects.filter(connection=self).order_by("-to_date")
+        latest_bill = bills.first()
+        last_bill_date = latest_bill.to_date if latest_bill else self.start_date
+        from_date = last_bill_date + timedelta(days=1)
+        if description is None:
+            description = Bill.DescriptionChoices.Monthly
+        if billing_amount is not None:
+            amount = billing_amount
+        else:
+            amount = (
+                Bill.DIGITAL_FEE if self.customer.has_digital_box else Bill.ANALOG_FEE
+            )
+        if end_date:
+            to_date = end_date
+            amount = amount * ((end_date.date() - from_date).days + 1) // 30
+        else:
+            to_date = from_date + timedelta(days=29)
+        latest_bill = Bill.objects.create(
+            connection=self,
+            from_date=from_date,
+            to_date=to_date,
+            amount=amount,
+            description=description,
+        )
+        latest_bill.save()
+        return latest_bill
+
+    @property
+    def bills(self):
+        """
+        Get Bills and generate bills for missing months
+        """
+
+        bills = Bill.objects.filter(connection=self).order_by("-to_date")
+        if self.active:
+            latest_bill = bills.first()
+            last_bill_date = latest_bill.to_date if latest_bill else self.start_date
+            while (datetime.now().date() - last_bill_date) > timedelta(days=30):
+                latest_bill = self.generate_bill()
+                last_bill_date = latest_bill.to_date
+            bills = Bill.objects.filter(connection=self).order_by("-to_date")
+        return bills
+
+    @property
+    def payments(self):
+        """
+        Get Payments
+        """
+        return Payment.objects.filter(connection=self)
+
+    @property
+    def balance(self):
+        """
+        Get Payment Due Balance of the Customer
+        """
+        return sum(bill.amount for bill in self.bills) - sum(
+            payment.amount for payment in self.payments
+        )
 
 
 class Payment(models.Model):
@@ -384,8 +505,23 @@ class Bill(models.Model):
     Class for Bill Model
     """
 
+    DIGITAL_FEE = 1000
+    ANALOG_FEE = 800
+
+    class DescriptionChoices(models.TextChoices):
+        """
+        Class for Description Choices
+        """
+
+        Monthly = "Monthly Bill"
+        ZeroDisconnection = "Zero value Bill while Disconnection"
+        ZeroReconnection = "Zero value Bill while reconnection"
+
     id = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
+    connection = models.ForeignKey(CustomerConnection, on_delete=models.RESTRICT)
+    description = models.TextField(
+        choices=DescriptionChoices.choices, default=DescriptionChoices.Monthly
+    )
     date = models.DateField(auto_now_add=True)
     from_date = models.DateField()
     to_date = models.DateField()
@@ -394,4 +530,4 @@ class Bill(models.Model):
     )
 
     def __str__(self):
-        return f"{self.customer.user.get_short_name()} billed {self.amount} on {self.date} for the duration from {self.from_date} to {self.to_date}"
+        return f"{self.connection.customer.user.get_short_name()} billed {self.amount} on {self.date} for the duration from {self.from_date} to {self.to_date}"  # pylint: disable=line-too-long
