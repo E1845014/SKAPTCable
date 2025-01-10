@@ -642,7 +642,7 @@ class ConnectionTestCase(CustomerBaseTestCase):
         """
         url = f"/customers/{self.customer.user.pk}/addConnection"
         self.login_as_employee(self.customer.agent)
-        self.client.get(url)
+        self.client.get(url, {"box_ca_number": self.get_random_string()})
         self.assertGreater(
             CustomerConnection.objects.filter(customer=self.customer).count(), 0
         )

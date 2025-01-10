@@ -132,7 +132,9 @@ class BaseTestCase(TestCase):
         connections: List[CustomerConnection] = []
         for _ in range(n):
             connections.append(
-                CustomerConnection.objects.create(customer=choice(customers))
+                CustomerConnection.objects.create(
+                    customer=choice(customers), box_ca_number=self.get_random_string(10)
+                )
             )
         return connections
 
@@ -154,17 +156,18 @@ class BaseTestCase(TestCase):
             )
         return payments
 
-    def generate_bills(self, n=5, customers: Union[List[Customer], None] = None):
+    def generate_bills(
+        self, n=5, connections: Union[List[CustomerConnection], None] = None
+    ):
         """
         Generate n number of Bills
         """
-        if customers is None:
-            customers = self.generate_customers()
+        connections = self.generate_connection(n)
         bills: List[Bill] = []
         for _ in range(n):
             bills.append(
                 Bill.objects.create(
-                    customer=choice(customers),
+                    connection=choice(connections),
                     from_date=date.today(),
                     to_date=date.today(),
                     amount=randint(1, 100),
