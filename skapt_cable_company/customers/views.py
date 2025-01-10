@@ -131,6 +131,7 @@ def view_customer(request: HttpRequest, username: str):
                     "customer_form": customer_form,
                     "customer": customer,
                     "connections": connections,
+                    "bills": customer.bills
                 },
                 request,
             )

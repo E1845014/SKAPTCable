@@ -86,6 +86,30 @@
       {% endfor %}
     </tbody>
   </table>
-  
+  <table class="table is-fullwidth is-striped is-hoverable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>box CA Number</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for bill in bills %}
+      <tr
+        data-url="{% url 'View Customer' customer.pk %}"
+        class="clickable-row"
+      >
+        <td>{{ bill.id }}</td>
+        <td>{{ bill.connection.box_ca_number }}</td>
+        <td>{{ bill.from_date }}</td>
+        <td>{{ bill.to_date }}</td>
+        <td>{{ bill.amount }}</td> 
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}
