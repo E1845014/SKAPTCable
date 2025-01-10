@@ -168,7 +168,8 @@ class BaseTestCase(TestCase):
         """
         Generate n number of Bills
         """
-        connections = self.generate_connection(n)
+        if connections is None:
+            connections = self.generate_connection(n)
         bills: List[Bill] = []
         for _ in range(n):
             bills.append(
@@ -572,6 +573,7 @@ class CustomerConnectionTestCase(BaseTestCase):
         Test Connection's Bills Populated
         """
         connection = self.generate_connection(1)[0]
+        connection.start_date = date.today() - timedelta(days=60)
         bills = self.generate_bills(connections=[connection])
         for bill in connection.bills:
             self.assertIn(bill, bills)

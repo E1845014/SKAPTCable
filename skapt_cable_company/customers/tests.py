@@ -692,11 +692,7 @@ class ConnectionTestCase(CustomerBaseTestCase):
             customer=self.customer, box_ca_number=self.get_random_string()
         )
         connection.save()
-        try:
-            with transaction.atomic():
-                self.client.get(url, {"box_ca_number": connection.box_ca_number})
-        except IntegrityError:
-            pass
+        self.client.get(url, {"box_ca_number": connection.box_ca_number})
         self.assertEqual(
             CustomerConnection.objects.filter(customer=self.customer).count(), 1
         )
