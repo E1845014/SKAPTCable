@@ -44,24 +44,5 @@
       {% endif %}
     </nav>
   </div>
-  <div>
-    <h2 class="is-size-2 has-text-centered">Monthly Payment Report</h2>
-    <table class="table is-fullwidth is-striped is-hoverable">
-      <thead>
-        <tr>
-          <th>Month</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for payment in monthly_payments %}
-        <tr>
-          <td>{{ payment.month|date:"F Y" }}</td>
-          <td>{{ payment.total }} Rs</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
 </div>
 {% endblock %}
