@@ -117,7 +117,6 @@ class BaseTestCase(TestCase):
                     phone_number=self.get_random_phone_number(),
                     address=self.get_random_string(20),
                     identity_no=f"19{self.get_random_n_digit_number(10)}",
-                    box_ca_number=self.get_random_string(16),
                     customer_number=self.get_random_string(),
                     area=choice(areas),
                 )
@@ -543,7 +542,7 @@ class BillTestCase(BaseTestCase):
         bill = self.generate_bills(1)[0]
         self.assertEqual(
             str(bill),
-            f"{bill.customer.user.get_short_name()} billed {bill.amount} on {bill.date} for the duration from {bill.from_date} to {bill.to_date}",
+            f"{bill.connection.customer.user.get_short_name()} billed {bill.amount} on {bill.date} for the duration from {bill.from_date} to {bill.to_date}",
         )
 
 
