@@ -4,11 +4,11 @@ Module to contain all Login App View Controller Codes
 
 from django.http import HttpResponse, HttpRequest
 from django.template import loader
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import BadRequest
 from django.shortcuts import redirect
-from .forms import LoginForm
+from .forms import EmployeePasswordChangeForm, LoginForm
 
 
 def index(request: HttpRequest):
@@ -68,4 +68,30 @@ def logout_user(request: HttpRequest):
     return redirect("/")
 
 
-# Create your views here.
+@login_required
+def update_password(request: HttpRequest):
+    """
+    Update Password Controller
+    """
+    template = loader.get_template("update_password.html")
+    if request.method == "POST":
+        form = EmployeePasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            return redirect("/home")
+        errors = form.errors
+    else:
+        form = EmployeePasswordChangeForm(request.user)
+        errors = []
+    return HttpResponse(
+        template.render(
+            {
+                "form": form,
+                "notifications": [
+                    {"message": error, "class_name": "is_danger"} for error in errors
+                ],
+            },
+            request,
+        )
+    )
