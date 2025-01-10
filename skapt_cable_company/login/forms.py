@@ -4,7 +4,6 @@ Module for all Login App Related Forms
 
 from typing import Any
 from django import forms
-from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.forms import PasswordChangeForm
 
 
