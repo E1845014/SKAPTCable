@@ -12,6 +12,11 @@
         <button class="button is-primary">Payments</button>
       </a>
     </div>
+    <div class="column">
+      <h2 class="is-size-3 has-text-centered has-text-{% if customer.total_unpaid > 0 %}danger{% else %}primary{% endif %}">
+        Total Unpaid is {{ customer.total_unpaid }}
+      </h2>
+    </div>
     
   </div>
   <form action="" method="post">
@@ -59,6 +64,7 @@
         <th>Active</th>
         <th>Card ID</th>
         <th>Start Date</th>
+        <th>Unpaid Amount Total</th>
         <th></th>
       </tr>
     </thead>
@@ -72,6 +78,7 @@
         <td>{{ connection.active }}</td>
         <td>{{ connection.box_ca_number }}</td>
         <td>{{ connection.start_date }}</td>
+        <td>{{ connection.balance }} Rs</td>
         {% if connection.active %}
         <td>
           <a href="{% url 'Disable Customer Connection' customer.user.pk connection.id %}">
@@ -100,7 +107,7 @@
           <th>From</th>
           <th>To</th>
           <th>Description</th>
-          <th>Amount</th>
+          <th>Paid Amount Total</th>
         </tr>
       </thead>
       <tbody>
@@ -114,7 +121,7 @@
           <td>{{ bill.from_date }}</td>
           <td>{{ bill.to_date }}</td>
           <td>{{ bill.description }}</td>
-          <td>{{ bill.amount }}</td> 
+          <td>{{ bill.amount }} Rs</td> 
         </tr>
         {% endfor %}
       </tbody>
