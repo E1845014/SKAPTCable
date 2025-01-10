@@ -8,8 +8,6 @@ from django.template import loader
 from django.shortcuts import redirect, get_object_or_404
 from django.core.exceptions import BadRequest, PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Sum
-from django.db.models.functions import TruncMonth
 
 
 from common.models import Customer, Payment, Employee, pagination_handle
