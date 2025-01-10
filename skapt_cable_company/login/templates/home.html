@@ -1,40 +1,63 @@
 {% extends "base.html" %}
 {% block content %}
-<div>
-    <h2 class="is-size-2 has-text-centered">Monthly Payment Report</h2>
-    <table class="table is-fullwidth is-striped is-hoverable">
-        <thead>
-        <tr>
-            <th>Month</th>
-            <th>Total</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for payment in monthly_payments %}
-        <tr>
-            <td>{{ payment.month|date:"F Y" }}</td>
-            <td>{{ payment.total }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <h2 class="is-size-2 has-text-centered">Top 10 Customers</h2>
-    <table class="table is-fullwidth is-striped is-hoverable">
-        <thead>
-        <tr>
-            <th>name</th>
-            <th>Total</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for customer in top_paid_customers %}
-        <tr>
-            <td>{{ customer.connection__customer__user__first_name }}</td>
-            <td>{{ customer.total_paid }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+<div class="columns">
+    <div class = "column">
+        <h2 class="is-size-2 has-text-centered">Monthly Payment Report</h2>
+        <table class="table is-fullwidth is-striped is-hoverable">
+            <thead>
+            <tr>
+                <th>Month</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for payment in monthly_payments %}
+            <tr>
+                <td>{{ payment.month|date:"F Y" }}</td>
+                <td>{{ payment.total }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class = "column">
+        <h2 class="is-size-2 has-text-centered">Top 10 Customers</h2>
+        <table class="table is-fullwidth is-striped is-hoverable">
+            <thead>
+            <tr>
+                <th>name</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for customer in top_paid_customers %}
+            <tr>
+                <td>{{ customer.connection__customer__user__first_name }}</td>
+                <td>{{ customer.total_paid }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class = "column">
+        <h2 class="is-size-2 has-text-centered">Top 10 Areas</h2>
+        <table class="table is-fullwidth is-striped is-hoverable">
+            <thead>
+            <tr>
+                <th>name</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for area in top_paid_areas %}
+            <tr>
+                <td>{{ area.connection__customer__area__name }}</td>
+                <td>{{ area.total_paid }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {% endblock %}

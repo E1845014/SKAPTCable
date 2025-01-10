@@ -72,13 +72,19 @@ def home(request: HttpRequest):
             .annotate(total_paid=Sum("amount"))
             .order_by("-total_paid")[:10]
         )
-        print(top_paid_customers)
+
+        top_paid_areas = (
+            payments.values("connection__customer__area__name")
+            .annotate(total_paid=Sum("amount"))
+            .order_by("-total_paid")[:10]
+        )
 
         return HttpResponse(
             template.render(
                 {
                     "monthly_payments": monthly_payments,
                     "top_paid_customers": top_paid_customers,
+                    "top_paid_areas": top_paid_areas,
                 },
                 request,
             )
