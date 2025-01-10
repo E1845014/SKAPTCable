@@ -13,6 +13,11 @@
   <a href="{% url 'Update Employee' employee.user.username %}"
     ><button class="button is-primary">Update</button></a
   >
+  {% if request.user == employee.user %}
+  <a href="{% url 'update_password' %}">
+    <button class="button is-warning">Update Password</button>
+  </a>
+  {% endif %}
   <div class="block" style="padding-top: 20px;">
     <div class="panel is-info">
       <p class="panel-heading">Areas</p>
