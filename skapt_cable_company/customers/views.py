@@ -196,15 +196,16 @@ def add_connection(request: HttpRequest, username: str):
     """
     customer = get_object_or_404(Customer, pk=username)
     if customer.is_editable(request.user) and request.GET["box_ca_number"] != "":
-        try:
+        customer_connection_exist = CustomerConnection.objects.filter(
+            box_ca_number=request.GET["box_ca_number"]
+        ).exists()
+        if (not customer_connection_exist):
             customer_connection = CustomerConnection(
                 customer=customer,
                 active=True,
                 box_ca_number=request.GET["box_ca_number"],
             )
             customer_connection.save()
-        except:
-            pass
     return redirect(f"/customers/{customer.pk}")
 
 
