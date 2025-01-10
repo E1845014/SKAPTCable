@@ -17,9 +17,6 @@ from numpy import zeros, array
 
 from ml.predictors import DefaultPredictor, DelayPredictor
 
-digital_fee = 1000
-analog_fee = 800
-
 
 def pagination_handle(request: HttpRequest, default_size=10, default_page_number=1):
     """
@@ -380,6 +377,7 @@ class CustomerConnection(models.Model):
         self,
         end_date: Union[datetime, None] = None,
         billing_amount: Union[float, None] = None,
+        description: Union[str, None] = None,
     ):
         """
         Generate Bill for the customer with the given optinal end date or with default gap
@@ -388,10 +386,14 @@ class CustomerConnection(models.Model):
         latest_bill = bills.first()
         last_bill_date = latest_bill.to_date if latest_bill else self.start_date
         from_date = last_bill_date + timedelta(days=1)
+        if description is None:
+            description = Bill.DescriptionChoices.monthly
         if billing_amount:
             amount = billing_amount
         else:
-            amount = digital_fee if self.customer.has_digital_box else analog_fee
+            amount = (
+                Bill.DIGITAL_FEE if self.customer.has_digital_box else Bill.ANALOG_FEE
+            )
         if end_date:
             to_date = end_date
             amount = amount * ((end_date.date() - from_date).days + 1) // 30
@@ -402,6 +404,7 @@ class CustomerConnection(models.Model):
             from_date=from_date,
             to_date=to_date,
             amount=amount,
+            description=description,
         )
         latest_bill.save()
         return latest_bill
@@ -445,8 +448,23 @@ class Bill(models.Model):
     Class for Bill Model
     """
 
+    DIGITAL_FEE = 1000
+    ANALOG_FEE = 800
+
+    class DescriptionChoices(models.TextChoices):
+        """
+        Class for Description Choices
+        """
+
+        monthly = "Monthly Bill"
+        zero_disconnection = "Zero value Bill while Disconnection"
+        zero_reconnection = "Zero value Bill while reconnection"
+
     id = models.AutoField(primary_key=True)
     connection = models.ForeignKey(CustomerConnection, on_delete=models.RESTRICT)
+    description = models.TextField(
+        choices=DescriptionChoices.choices, default=DescriptionChoices.monthly
+    )
     date = models.DateField(auto_now_add=True)
     from_date = models.DateField()
     to_date = models.DateField()
