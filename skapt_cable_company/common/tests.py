@@ -316,7 +316,8 @@ class EmployeeTestCase(BaseTestCase):
         """
         payments = self.generate_payments()
         employee = choice(payments).employee
-        total_amount = sum([payment.amount for payment in payments])
+        payments_collected_by_employee = Payment.objects.filter(employee=employee)
+        total_amount = sum([payment.amount for payment in payments_collected_by_employee])
         self.assertEqual(employee.total_collected_payments_amount, total_amount)
 
 
