@@ -8,6 +8,7 @@ from datetime import date
 
 from django.contrib.auth.models import User
 from django.forms import Form
+from django.db import transaction, IntegrityError
 
 from common.tests import BaseTestCase
 from common.models import Customer, Area, CustomerConnection
@@ -680,3 +681,22 @@ class ConnectionTestCase(CustomerBaseTestCase):
         self.login_as_non_employee()
         self.client.get(url)
         self.assertTrue(CustomerConnection.objects.get(pk=connection.pk).active)
+
+    def test_duplicate_card_connection(self):
+        """
+        Test if system gracefully fails duplicate card connection register request
+        """
+        url = f"/customers/{self.customer.user.pk}/addConnection"
+        self.login_as_employee(self.customer.agent)
+        connection = CustomerConnection.objects.create(
+            customer=self.customer, box_ca_number=self.get_random_string()
+        )
+        connection.save()
+        try:
+            with transaction.atomic():
+                self.client.get(url, {"box_ca_number": connection.box_ca_number})
+        except IntegrityError:
+            pass
+        self.assertEqual(
+            CustomerConnection.objects.filter(customer=self.customer).count(), 1
+        )
