@@ -5,9 +5,15 @@
       {{ field.label_tag }} {{ field }} {% if field.errors %}
       <ul class="errorlist">
         {% for error in field.errors %}
-        <li class="has-text-weight-bold has-text-danger">{{ error }}</li>
+          <li class="has-text-weight-bold has-text-danger">{{ error }}</li>
         {% endfor %}
       </ul>
+      {% endif %}
+      
+      {% if field.help_text %}
+        <div class="block" style="padding-top: 10px;">
+          <p class="help">{{ field.help_text }}</p>
+        </div>
       {% endif %}
     </div>
   </div>

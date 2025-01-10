@@ -113,22 +113,26 @@ def update_password(request: HttpRequest):
     Update Password Controller
     """
     template = loader.get_template("update_password.html")
+    errors = []
     if request.method == "POST":
         form = EmployeePasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)
             return redirect("/home")
-        errors = form.errors
+        else:
+            if request.POST["new_password1"] != request.POST["new_password2"]:
+                errors.append("Passwords do not match")
+            if request.user.check_password(request.POST["old_password"]) is False:
+                errors.append("Old Password is incorrect")
     else:
         form = EmployeePasswordChangeForm(request.user)
-        errors = []
     return HttpResponse(
         template.render(
             {
                 "form": form,
                 "notifications": [
-                    {"message": error, "class_name": "is_danger"} for error in errors
+                    {"message": error, "class_name": "is-danger"} for error in errors
                 ],
             },
             request,
