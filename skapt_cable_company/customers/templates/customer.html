@@ -30,22 +30,26 @@
     Probability of Defaulting 
     <input value={{ customer.default_probability }} class="input is-rounded"/>
   </div>
-  <h2 class="is-size-2 has-text-centered">Connections</h2>
-  <div class="columns">
-    <div class="column is-half is-offset-one-quarter">
-      <form action="{% url 'Add Customer Connection' customer.user.pk %}" method="get">
-        
-        <div class="columns">
-          <div class="column">
-            <input class="input is-rounded" type="text" name="box_ca_number" placeholder="Enter new Box CA Number"/>
-          </div>
-          <div class="column">
-            <button class="button is-primary" type="submit">Add Connection</button>
-          </div>
+  
+  <div class="block">
+    <h2 class="is-size-2 has-text-centered">Connections</h2>
+    <div class="block">
+      <div class="columns">
+        <div class="column is-half is-offset-one-quarter">
+          <form action="{% url 'Add Customer Connection' customer.user.pk %}" method="get">     
+            <div class="columns">
+              <div class="column">
+                <input class="input is-rounded" type="text" name="box_ca_number" placeholder="Enter new Box CA Number"/>
+              </div>
+              <div class="column">
+                <button class="button is-primary" type="submit">Add Connection</button>
+              </div>
+            </div>
+          </form>
+          
+          
         </div>
-      </form>
-      
-      
+      </div>
     </div>
   </div>
   <table class="table is-fullwidth is-striped is-hoverable">
@@ -86,30 +90,33 @@
       {% endfor %}
     </tbody>
   </table>
-  <table class="table is-fullwidth is-striped is-hoverable">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>box CA Number</th>
-        <th>From</th>
-        <th>To</th>
-        <th>Amount</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for bill in bills %}
-      <tr
-        data-url="{% url 'View Customer' customer.pk %}"
-        class="clickable-row"
-      >
-        <td>{{ bill.id }}</td>
-        <td>{{ bill.connection.box_ca_number }}</td>
-        <td>{{ bill.from_date }}</td>
-        <td>{{ bill.to_date }}</td>
-        <td>{{ bill.amount }}</td> 
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="block">
+    <h2 class="is-size-2 has-text-centered">Bills</h2>
+    <table class="table is-fullwidth is-striped is-hoverable">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>box CA Number</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bill in bills %}
+        <tr
+          data-url="{% url 'View Customer' customer.pk %}"
+          class="clickable-row"
+        >
+          <td>{{ bill.id }}</td>
+          <td>{{ bill.connection.box_ca_number }}</td>
+          <td>{{ bill.from_date }}</td>
+          <td>{{ bill.to_date }}</td>
+          <td>{{ bill.amount }}</td> 
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 {% endblock %}
