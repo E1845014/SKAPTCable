@@ -98,13 +98,15 @@ class Employee(models.Model):
         Get Payments collected by this employee
         """
         return Payment.objects.filter(employee=self)
-    
+
     @property
     def total_collected_payments_amount(self):
         """
         Get Total Collected Payments Amount
         """
-        return self.collected_payments.aggregate(Sum("amount")).get("amount__sum", 0) or 0
+        return (
+            self.collected_payments.aggregate(Sum("amount")).get("amount__sum", 0) or 0
+        )
 
     @property
     def customers(self):
@@ -119,14 +121,16 @@ class Employee(models.Model):
         Get Payments of the employee managed area customers
         """
         return Payment.objects.filter(connection__customer__area__agent=self)
-    
+
     @property
     def total_customer_payments_amount(self):
         """
         Get Total Customer Payments Amount
         """
-        return self.customer_payments.aggregate(Sum("amount")).get("amount__sum", 0) or 0
-    
+        return (
+            self.customer_payments.aggregate(Sum("amount")).get("amount__sum", 0) or 0
+        )
+
     @property
     def customers_count(self):
         """
@@ -380,14 +384,14 @@ class Customer(models.Model):
         for connection in connections:
             bills += connection.bills
         return bills
-    
+
     @property
     def total_payment(self):
         """
         Get Total Payment
         """
         return sum([payment.amount for payment in self.payments])
-    
+
     @property
     def total_unpaid(self):
         """
@@ -472,7 +476,7 @@ class CustomerConnection(models.Model):
     @property
     def balance(self):
         """
-        Get Balance of the Customer
+        Get Payment Due Balance of the Customer
         """
         return sum([bill.amount for bill in self.bills]) - sum(
             payment.amount for payment in self.payments
