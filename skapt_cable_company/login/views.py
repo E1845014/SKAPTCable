@@ -84,7 +84,6 @@ def home(request: HttpRequest):
             .annotate(total_paid=Sum("amount"))
             .order_by("-total_paid")[:10]
         )
-        print(monthly_connections)
         return HttpResponse(
             template.render(
                 {
