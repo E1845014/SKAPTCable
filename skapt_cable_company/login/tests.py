@@ -7,6 +7,8 @@ Module for all the Login Related Test Cases
 from django.test import TestCase
 from django.contrib.auth.models import User
 
+from common.tests import BaseTestCase
+
 
 class LoginTestCase(TestCase):
     """
@@ -141,4 +143,83 @@ class HomeTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
 
 
-# Create your tests here.
+class ChangePasswordTestCase(BaseTestCase):
+    """
+    Test Cases for testing the Change Password functionality
+    """
+
+    def setUp(self):
+        """
+        Runs on Test Case Start up
+
+        Contains Base Data needed for testing
+        """
+        self.raw_password = self.get_random_string(10)
+        self.new_password = self.get_random_string(10)
+        while self.new_password == self.raw_password:
+            self.new_password = self.get_random_string(10)
+        self.user = User.objects.create_user(
+            username=self.get_random_string(10),
+            email=f"{self.get_random_string()}@{self.get_random_string()}.com",
+            password=self.raw_password,
+        )
+        self.client.login(username=self.user.username, password=self.raw_password)
+        self.url = "/password"
+
+    def test_change_password_renders(self):
+        """
+        Test whether Change Password Page Renders Correctly
+        """
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed("update_password.html")
+
+    def test_change_password_success(self):
+        """
+        Test whether user can successfully change password
+        """
+        response = self.client.post(
+            self.url,
+            {
+                "old_password": self.raw_password,
+                "new_password1": self.new_password,
+                "new_password2": self.new_password,
+            },
+        )
+        self.assertEqual(response.status_code, 302)  # Redirects to home
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(self.new_password))
+
+    def test_change_password_wrong_old_password(self):
+        """
+        Test whether wrong old password prevents changing password
+        """
+        response = self.client.post(
+            self.url,
+            {
+                "old_password": "wrong_password",
+                "new_password1": self.new_password,
+                "new_password2": self.new_password,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed("update_password.html")
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.check_password(self.new_password))
+
+    def test_change_password_mismatch_new_passwords(self):
+        """
+        Test whether mismatched new passwords prevent changing password
+        """
+        response = self.client.post(
+            self.url,
+            {
+                "old_password": self.raw_password,
+                "new_password1": self.new_password,
+                "new_password2": "different_new_password",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed("update_password.html")
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.check_password(self.new_password))
