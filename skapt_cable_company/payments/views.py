@@ -30,20 +30,9 @@ def get_all_payments(request: HttpRequest):
     payments = Payment.objects.all()
     paginator = Paginator(payments, size)
 
-    monthly_payments = (
-        payments.annotate(month=TruncMonth("date"))
-        .values("month")
-        .annotate(total=Sum("amount"))
-        .order_by("month")
-    )
-
     return HttpResponse(
         template.render(
-            {
-                "paginator": paginator,
-                "payments": paginator.page(page_number),
-                "monthly_payments": monthly_payments,
-            },
+            {"paginator": paginator, "payments": paginator.page(page_number)},
             request,
         )
     )
