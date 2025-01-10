@@ -514,8 +514,8 @@ class Bill(models.Model):
         """
 
         Monthly = "Monthly Bill"
-        Zero_disconnection = "Zero value Bill while Disconnection"
-        Zero_reconnection = "Zero value Bill while reconnection"
+        ZeroDisconnection = "Zero value Bill while Disconnection"
+        ZeroReconnection = "Zero value Bill while reconnection"
 
     id = models.AutoField(primary_key=True)
     connection = models.ForeignKey(CustomerConnection, on_delete=models.RESTRICT)

@@ -222,7 +222,7 @@ def enable_connection(request: HttpRequest, username: str, connection_id: int):
         connection.generate_bill(
             end_date=datetime.now(),
             billing_amount=0,
-            description=Bill.DescriptionChoices.Zero_reconnection,
+            description=Bill.DescriptionChoices.ZeroReconnection,
         )
         return redirect(f"/customers/{customer.pk}")
     raise PermissionDenied
@@ -240,7 +240,7 @@ def disable_connection(request: HttpRequest, username: str, connection_id: int):
         connection.save()
         connection.generate_bill(
             end_date=datetime.now(),
-            description=Bill.DescriptionChoices.Zero_disconnection,
+            description=Bill.DescriptionChoices.ZeroDisconnection,
         )
         return redirect(f"/customers/{customer.pk}")
     raise PermissionDenied
