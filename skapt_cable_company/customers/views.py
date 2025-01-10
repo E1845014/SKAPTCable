@@ -4,7 +4,7 @@ Module to contain all Customer View Controller Codes
 
 # pylint: disable=imported-auth-user
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest
 from django.template import loader
@@ -199,7 +199,7 @@ def add_connection(request: HttpRequest, username: str):
         customer_connection_exist = CustomerConnection.objects.filter(
             box_ca_number=request.GET["box_ca_number"]
         ).exists()
-        if (not customer_connection_exist):
+        if not customer_connection_exist:
             customer_connection = CustomerConnection(
                 customer=customer,
                 active=True,
@@ -222,7 +222,7 @@ def enable_connection(request: HttpRequest, username: str, connection_id: int):
         connection.generate_bill(
             end_date=datetime.now(),
             billing_amount=0,
-            description=Bill.DescriptionChoices.zero_reconnection,
+            description=Bill.DescriptionChoices.Zero_reconnection,
         )
         return redirect(f"/customers/{customer.pk}")
     raise PermissionDenied
@@ -240,7 +240,7 @@ def disable_connection(request: HttpRequest, username: str, connection_id: int):
         connection.save()
         connection.generate_bill(
             end_date=datetime.now(),
-            description=Bill.DescriptionChoices.zero_disconnection,
+            description=Bill.DescriptionChoices.Zero_disconnection,
         )
         return redirect(f"/customers/{customer.pk}")
     raise PermissionDenied

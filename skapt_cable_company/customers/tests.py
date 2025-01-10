@@ -8,7 +8,6 @@ from datetime import date
 
 from django.contrib.auth.models import User
 from django.forms import Form
-from django.db import transaction, IntegrityError
 
 from common.tests import BaseTestCase
 from common.models import Customer, Area, CustomerConnection

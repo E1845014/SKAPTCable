@@ -390,14 +390,14 @@ class Customer(models.Model):
         """
         Get Total Payment
         """
-        return sum([payment.amount for payment in self.payments])
+        return self.payments.aggregate(Sum("amount")).get("amount__sum", 0) or 0
 
     @property
     def total_unpaid(self):
         """
         Get Total Unpaid
         """
-        return sum([bill.amount for bill in self.bills]) - self.total_payment
+        return sum(bill.amount for bill in self.bills) - self.total_payment
 
 
 class CustomerConnection(models.Model):
@@ -428,7 +428,7 @@ class CustomerConnection(models.Model):
         last_bill_date = latest_bill.to_date if latest_bill else self.start_date
         from_date = last_bill_date + timedelta(days=1)
         if description is None:
-            description = Bill.DescriptionChoices.monthly
+            description = Bill.DescriptionChoices.Monthly
         if billing_amount is not None:
             amount = billing_amount
         else:
@@ -478,7 +478,7 @@ class CustomerConnection(models.Model):
         """
         Get Payment Due Balance of the Customer
         """
-        return sum([bill.amount for bill in self.bills]) - sum(
+        return sum(bill.amount for bill in self.bills) - sum(
             payment.amount for payment in self.payments
         )
 
@@ -513,14 +513,14 @@ class Bill(models.Model):
         Class for Description Choices
         """
 
-        monthly = "Monthly Bill"
-        zero_disconnection = "Zero value Bill while Disconnection"
-        zero_reconnection = "Zero value Bill while reconnection"
+        Monthly = "Monthly Bill"
+        Zero_disconnection = "Zero value Bill while Disconnection"
+        Zero_reconnection = "Zero value Bill while reconnection"
 
     id = models.AutoField(primary_key=True)
     connection = models.ForeignKey(CustomerConnection, on_delete=models.RESTRICT)
     description = models.TextField(
-        choices=DescriptionChoices.choices, default=DescriptionChoices.monthly
+        choices=DescriptionChoices.choices, default=DescriptionChoices.Monthly
     )
     date = models.DateField(auto_now_add=True)
     from_date = models.DateField()
@@ -530,4 +530,4 @@ class Bill(models.Model):
     )
 
     def __str__(self):
-        return f"{self.connection.customer.user.get_short_name()} billed {self.amount} on {self.date} for the duration from {self.from_date} to {self.to_date}"
+        return f"{self.connection.customer.user.get_short_name()} billed {self.amount} on {self.date} for the duration from {self.from_date} to {self.to_date}"  # pylint: disable=line-too-long

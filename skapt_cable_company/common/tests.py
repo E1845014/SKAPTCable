@@ -318,9 +318,7 @@ class EmployeeTestCase(BaseTestCase):
         payments = self.generate_payments()
         employee = choice(payments).employee
         payments_collected_by_employee = Payment.objects.filter(employee=employee)
-        total_amount = sum(
-            [payment.amount for payment in payments_collected_by_employee]
-        )
+        total_amount = sum(payment.amount for payment in payments_collected_by_employee)
         self.assertEqual(employee.total_collected_payments_amount, total_amount)
 
 
@@ -596,8 +594,8 @@ class CustomerConnectionTestCase(BaseTestCase):
         """
         connection = self.generate_connection(1)[0]
         payments = self.generate_payments(connections=[connection])
-        total_payment = sum([payment.amount for payment in payments])
-        total_bill = sum([bill.amount for bill in connection.bills])
+        total_payment = sum(payment.amount for payment in payments)
+        total_bill = sum(bill.amount for bill in connection.bills)
         self.assertEqual(connection.balance, total_bill - total_payment)
 
 
@@ -613,7 +611,7 @@ class BillTestCase(BaseTestCase):
         bill = self.generate_bills(1)[0]
         self.assertEqual(
             str(bill),
-            f"{bill.connection.customer.user.get_short_name()} billed {bill.amount} on {bill.date} for the duration from {bill.from_date} to {bill.to_date}",
+            f"{bill.connection.customer.user.get_short_name()} billed {bill.amount} on {bill.date} for the duration from {bill.from_date} to {bill.to_date}",  # pylint: disable=line-too-long
         )
 
 
