@@ -8,7 +8,7 @@ from time import time
 from typing import List, Union
 from random import choices, choice, randint
 from string import ascii_letters
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -117,7 +117,6 @@ class BaseTestCase(TestCase):
                     phone_number=self.get_random_phone_number(),
                     address=self.get_random_string(20),
                     identity_no=f"19{self.get_random_n_digit_number(10)}",
-                    box_ca_number=self.get_random_string(16),
                     customer_number=self.get_random_string(),
                     area=choice(areas),
                 )
@@ -133,15 +132,23 @@ class BaseTestCase(TestCase):
         connections: List[CustomerConnection] = []
         for _ in range(n):
             connections.append(
-                CustomerConnection.objects.create(customer=choice(customers))
+                CustomerConnection.objects.create(
+                    customer=choice(customers), box_ca_number=self.get_random_string(10)
+                )
             )
         return connections
 
-    def generate_payments(self, n=5, customers: Union[List[Customer], None] = None):
+    def generate_payments(
+        self,
+        n=5,
+        customers: Union[List[Customer], None] = None,
+        connections: Union[List[CustomerConnection], None] = None,
+    ):
         """
         Generate n number of Payments
         """
-        connections = self.generate_connection(n, customers)
+        if connections is None:
+            connections = self.generate_connection(n, customers)
         payments: List[Payment] = []
         for _ in range(n):
             connection = choice(connections)
@@ -155,17 +162,19 @@ class BaseTestCase(TestCase):
             )
         return payments
 
-    def generate_bills(self, n=5, customers: Union[List[Customer], None] = None):
+    def generate_bills(
+        self, n=5, connections: Union[List[CustomerConnection], None] = None
+    ):
         """
         Generate n number of Bills
         """
-        if customers is None:
-            customers = self.generate_customers()
+        if connections is None:
+            connections = self.generate_connection(n)
         bills: List[Bill] = []
         for _ in range(n):
             bills.append(
                 Bill.objects.create(
-                    customer=choice(customers),
+                    connection=choice(connections),
                     from_date=date.today(),
                     to_date=date.today(),
                     amount=randint(1, 100),
@@ -301,6 +310,16 @@ class EmployeeTestCase(BaseTestCase):
         payments = self.generate_payments(customers=customers)
         for payment in area.agent.customer_payments:
             self.assertIn(payment, payments)
+
+    def test_total_collected_payments_amount(self):
+        """
+        Test Total Collected Payments Amount
+        """
+        payments = self.generate_payments()
+        employee = choice(payments).employee
+        payments_collected_by_employee = Payment.objects.filter(employee=employee)
+        total_amount = sum(payment.amount for payment in payments_collected_by_employee)
+        self.assertEqual(employee.total_collected_payments_amount, total_amount)
 
 
 class AreaTestCase(BaseTestCase):
@@ -497,6 +516,16 @@ class CustomerTestCase(BaseTestCase):
         self.generate_payments(customers=[customer])
         self.assertTrue(customer.default_probability is not None)
 
+    def test_bills(self):
+        """
+        Test Customer's Bills Populated
+        """
+        customer = self.generate_customers(1)[0]
+        connections = self.generate_connection(customers=[customer])
+        bills = self.generate_bills(connections=connections)
+        for bill in customer.bills:
+            self.assertIn(bill, bills)
+
 
 class PaymentTestCase(BaseTestCase):
     """
@@ -530,6 +559,45 @@ class CustomerConnectionTestCase(BaseTestCase):
             f"Connection {connection.id} by {connection.customer.user.get_short_name()}",
         )
 
+    def test_monthly_bill_generation(self):
+        """
+        Test Bill Generation for monthly bill
+        """
+        connection = self.generate_connection(1)[0]
+        connection.start_date = date.today() - timedelta(days=60)
+        connection.generate_bill()
+        self.assertTrue(connection.bills.exists())
+
+    def test_bills(self):
+        """
+        Test Connection's Bills Populated
+        """
+        connection = self.generate_connection(1)[0]
+        connection.start_date = date.today() - timedelta(days=60)
+        bills = connection.bills
+        db_bills = Bill.objects.filter(connection=connection)
+        for bill in bills:
+            self.assertIn(bill, db_bills)
+
+    def test_payments(self):
+        """
+        Test Connection's Payments Populated
+        """
+        connection = self.generate_connection(1)[0]
+        payments = self.generate_payments(connections=[connection])
+        for payment in connection.payments:
+            self.assertIn(payment, payments)
+
+    def test_balance(self):
+        """
+        Test Connection's Balance Calculation
+        """
+        connection = self.generate_connection(1)[0]
+        payments = self.generate_payments(connections=[connection])
+        total_payment = sum(payment.amount for payment in payments)
+        total_bill = sum(bill.amount for bill in connection.bills)
+        self.assertEqual(connection.balance, total_bill - total_payment)
+
 
 class BillTestCase(BaseTestCase):
     """
@@ -543,7 +611,7 @@ class BillTestCase(BaseTestCase):
         bill = self.generate_bills(1)[0]
         self.assertEqual(
             str(bill),
-            f"{bill.customer.user.get_short_name()} billed {bill.amount} on {bill.date} for the duration from {bill.from_date} to {bill.to_date}",
+            f"{bill.connection.customer.user.get_short_name()} billed {bill.amount} on {bill.date} for the duration from {bill.from_date} to {bill.to_date}",  # pylint: disable=line-too-long
         )
 
 

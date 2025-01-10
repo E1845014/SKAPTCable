@@ -117,7 +117,6 @@ class AddCustomerTestCase(CustomerBaseTestCase):
             "phone_number",
             "address",
             "identity_no",
-            "box_ca_number",
             "active_connection",
             "has_digital_box",
             "offer_power_intake",
@@ -314,7 +313,6 @@ class ViewCustomerTestCase(CustomerBaseTestCase):
             "phone_number",
             "address",
             "identity_no",
-            "box_ca_number",
             "active_connection",
             "has_digital_box",
             "offer_power_intake",
@@ -409,7 +407,6 @@ class UpdateCustomerTestCase(CustomerBaseTestCase):
             "phone_number",
             "address",
             "identity_no",
-            "box_ca_number",
             "active_connection",
             "has_digital_box",
             "offer_power_intake",
@@ -645,7 +642,7 @@ class ConnectionTestCase(CustomerBaseTestCase):
         """
         url = f"/customers/{self.customer.user.pk}/addConnection"
         self.login_as_employee(self.customer.agent)
-        self.client.get(url)
+        self.client.get(url, {"box_ca_number": self.get_random_string()})
         self.assertGreater(
             CustomerConnection.objects.filter(customer=self.customer).count(), 0
         )
@@ -683,3 +680,18 @@ class ConnectionTestCase(CustomerBaseTestCase):
         self.login_as_non_employee()
         self.client.get(url)
         self.assertTrue(CustomerConnection.objects.get(pk=connection.pk).active)
+
+    def test_duplicate_card_connection(self):
+        """
+        Test if system gracefully fails duplicate card connection register request
+        """
+        url = f"/customers/{self.customer.user.pk}/addConnection"
+        self.login_as_employee(self.customer.agent)
+        connection = CustomerConnection.objects.create(
+            customer=self.customer, box_ca_number=self.get_random_string()
+        )
+        connection.save()
+        self.client.get(url, {"box_ca_number": connection.box_ca_number})
+        self.assertEqual(
+            CustomerConnection.objects.filter(customer=self.customer).count(), 1
+        )

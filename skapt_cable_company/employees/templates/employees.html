@@ -22,7 +22,6 @@
         <th>Phone Number</th>
         <th>Customers</th>
         <th>Areas</th>
-        <th>Collected Payment Counts</th>
         <th>Generated Payment Counts</th>
       </tr>
     </thead>
@@ -39,10 +38,9 @@
         <td>Employee</td>
         {% endif %}
         <td>{{ employee.phone_number}}</td>
-        <td>0</td>
+        <td>{{ employee.customers_count }}</td>
         <td>{{ employee.area_count}}</td>
-        <td>0</td>
-        <td>0</td>
+        <td>{{ employee.total_customer_payments_amount }}</td>
       </tr>
       {% endfor %}
     </tbody>
