@@ -191,7 +191,6 @@ class Customer(models.Model):
     )
     address = models.TextField()
     identity_no = models.CharField(max_length=12)
-    box_ca_number = models.CharField(max_length=16, unique=True)
     customer_number = models.CharField(max_length=5, unique=True)
     active_connection = models.BooleanField(default=True)
     has_digital_box = models.BooleanField(default=True)
@@ -357,6 +356,8 @@ class CustomerConnection(models.Model):
     id = models.AutoField(primary_key=True)
     customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
     active = models.BooleanField(default=True)
+    start_date = models.DateField(auto_now_add=True)
+    box_ca_number = models.CharField(max_length=16, unique=True)
 
     def __str__(self) -> str:
         return f"Connection {self.id} by {self.customer.user.get_short_name()}"
@@ -385,7 +386,7 @@ class Bill(models.Model):
     """
 
     id = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(Customer, on_delete=models.RESTRICT)
+    connection = models.ForeignKey(CustomerConnection, on_delete=models.RESTRICT)
     date = models.DateField(auto_now_add=True)
     from_date = models.DateField()
     to_date = models.DateField()
@@ -394,4 +395,4 @@ class Bill(models.Model):
     )
 
     def __str__(self):
-        return f"{self.customer.user.get_short_name()} billed {self.amount} on {self.date} for the duration from {self.from_date} to {self.to_date}"
+        return f"{self.connection.customer.user.get_short_name()} billed {self.amount} on {self.date} for the duration from {self.from_date} to {self.to_date}"
