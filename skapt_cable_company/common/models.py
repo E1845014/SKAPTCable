@@ -17,6 +17,9 @@ from numpy import zeros, array
 
 from ml.predictors import DefaultPredictor, DelayPredictor
 
+digital_fee = 1000
+analog_fee = 800
+
 
 def pagination_handle(request: HttpRequest, default_size=10, default_page_number=1):
     """
@@ -347,6 +350,17 @@ class Customer(models.Model):
         """
         return Payment.objects.filter(connection__customer=self)
 
+    @property
+    def bills(self):
+        """
+        Get Bills
+        """
+        connections = CustomerConnection.objects.filter(customer=self)
+        bills = []
+        for connection in connections:
+            bills += connection.bills
+        return bills
+
 
 class CustomerConnection(models.Model):
     """
@@ -361,6 +375,30 @@ class CustomerConnection(models.Model):
 
     def __str__(self) -> str:
         return f"Connection {self.id} by {self.customer.user.get_short_name()}"
+
+    @property
+    def bills(self):
+        """
+        Get Bills and generate bills for missing months
+        """
+
+        bills = Bill.objects.filter(connection=self).order_by("-to_date")
+        if self.active:
+            latest_bill = bills.first()
+            last_bill_date = latest_bill.to_date if latest_bill else self.start_date
+            while (datetime.now().date() - last_bill_date) > timedelta(days=30):
+                from_date = last_bill_date + timedelta(days=1)
+                to_date = from_date + timedelta(days=29)
+                latest_bill = Bill.objects.create(
+                    connection=self,
+                    from_date=from_date,
+                    to_date=to_date,
+                    amount=digital_fee if self.customer.has_digital_box else analog_fee,
+                )
+                latest_bill.save()
+                last_bill_date = to_date
+            bills = Bill.objects.filter(connection=self).order_by("-to_date")
+        return bills
 
 
 class Payment(models.Model):
