@@ -19,6 +19,7 @@ To get started with SKAPTCable, follow these steps:
    ```sh
    git clone https://github.com/E1845014/SKAPTCable.git
    cd skaptcable
+   cd skapt_cable_company
    ```
 
 2. Create and activate a virtual environment:
